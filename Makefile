@@ -14,7 +14,7 @@ obj-y+= slog.o panic.o utils.o
 obj-y+= transport.o aura.o export.o serdes.o queue.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
-obj-y+= transport-usb.o usb-helpers.o
+obj-y+= transport-usb.o transport-susb.o usb-helpers.o
 
 define PKG_CONFIG
 CFLAGS  += $$(shell pkg-config --cflags  $(1))
