@@ -366,8 +366,10 @@ err:
 int usb_open(struct aura_node *node, va_list ap)
 {
 	struct libusb_context *ctx;
-	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
 	int ret; 
+	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
+	if (!inf)
+		return -ENOMEM;
 
 	slog(0, SLOG_INFO, "usb: Opening usb transport");
 	ret = libusb_init(&ctx);
