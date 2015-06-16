@@ -428,12 +428,26 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	if (0 != check_control(transfer))
 		return; /* Ooops, will try later */
 
+	inf->pending--;
+	if ((transfer->actual_length - LIBUSB_CONTROL_SETUP_SIZE) < 
+	    sizeof(struct usb_event_packet))
+		return;
+
 	evt = (struct usb_event_packet *) libusb_control_transfer_get_data(transfer);
 	o = aura_etable_find_id(node->tbl, evt->id); 
 	if (!o) {
-		slog(0, SLOG_ERROR, "Got bigus event id from device %d, resetting", evt->id);
+		slog(0, SLOG_ERROR, "usb: got bogus event id from device %d, resetting", evt->id);
 		goto panic;
 	}
+	
+	if ((transfer->actual_length - LIBUSB_CONTROL_SETUP_SIZE) < 
+	    (sizeof(struct usb_event_packet) + o->retlen)) {
+		slog(0, SLOG_ERROR, "usb: short read for evt %d: %d bytes expected %d got",
+		     evt->id, o->retlen + sizeof(struct usb_event_packet), 
+		     transfer->actual_length);
+		goto panic;
+	}
+		
 	slog(4, SLOG_DEBUG, "Event readout completed, %d bytes", transfer->actual_length);
 	return; 
 panic: 
