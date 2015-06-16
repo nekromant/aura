@@ -56,6 +56,7 @@ static uint8_t num_evt_pending;
 uchar   usbFunctionSetup(uchar data[8])
 {
 	usbRequest_t    *rq = (void *)data;
+	usbMsgPtr = iobuf;
 	switch(rq->bRequest) 
 	{
 	case RQ_GET_DEV_INFO: {
@@ -80,8 +81,14 @@ uchar   usbFunctionSetup(uchar data[8])
 			}
 			break;
 	case RQ_GET_EVENT:
-		
+	{
+		uint16_t *id = iobuf; 
+		uint8_t *ret = &iobuf[2];
+		*id=0;
+		*ret=7;
+		return 3;
 		break;
+	}
 	case RQ_PUT_CALL:
 		return USB_NO_MSG;
 		break;

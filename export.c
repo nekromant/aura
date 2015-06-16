@@ -55,7 +55,7 @@ void aura_etable_add(struct aura_export_table *tbl,
 		target->arg_pprinted = aura_fmt_pretty_print(argfmt, &arg_valid, &target->num_args);
 
 	if (retfmt)
-		target->ret_pprinted = aura_fmt_pretty_print(argfmt, &arg_valid, &target->num_args);
+		target->ret_pprinted = aura_fmt_pretty_print(retfmt, &ret_valid, &target->num_rets);
 	
 	target->valid = arg_valid && ret_valid;
 	if (!target->valid) { 

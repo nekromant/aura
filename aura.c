@@ -85,47 +85,12 @@ void aura_close(struct aura_node *node)
 	slog(6, SLOG_LIVE, "Transport closed");
 }
 
-void aura_set_status(struct aura_node *node, int status)
-{
-	slog(4, SLOG_DEBUG, "Node %s status change: %d -> %d", 
-	     node->tr->name,
-	     node->status,
-	     status);
-	node->status = status;
-	if (status == AURA_STATUS_ONLINE) { 
-		/* Dump etable */
-		int i; 
-		slog(1, SLOG_INFO, "--- Dumping export table ---");
-		for (i=0; i< node->tbl->next; i++) { 
-			slog(1, SLOG_INFO, "%d. %s %s(%s )  [out %d bytes] | [in %d bytes] ", 
-			     node->tbl->objects[i].id, 
-			     node->tbl->objects[i].ret_pprinted,
-			     node->tbl->objects[i].name,
-			     node->tbl->objects[i].arg_pprinted,
-			     node->tbl->objects[i].arglen,
-			     node->tbl->objects[i].retlen);
-		}
-		slog(1, SLOG_INFO, "-------------8<-------------");
-	}
-}
-
-void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
-{
-	if (aura_get_host_endianness() != en) 
-		node->need_endian_swap = true;
-}
-
-void aura_loop_once(struct aura_node *node)
+static void aura_handle_inbound(struct aura_node *node)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;	
 
-	/* Process transport stuff */
-	if (node->tr->loop) 
-		node->tr->loop(node);
-
-	/* Now grab all we got from the inbound queue and fire the callbacks */ 
-	while(1) { 
+	while(1) {
 		buf = aura_dequeue_buffer(&node->inbound_buffers); 
 		if (!buf)
 			break;
@@ -149,7 +114,70 @@ void aura_loop_once(struct aura_node *node)
 		/* Don't free buffer for synchronos calls */
 		if (!node->sync_call_running)
 			aura_buffer_release(node, buf);
+	}	
+}
+
+void aura_set_status(struct aura_node *node, int status)
+{
+	int oldstatus = node->status;
+	node->status = status;
+	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) { 
+		/* Dump etable */
+		int i; 
+		slog(2, SLOG_INFO, "Node %s is now going online", node->tr->name); 
+		slog(2, SLOG_INFO, "--- Dumping export table ---");
+		for (i=0; i< node->tbl->next; i++) { 
+			slog(2, SLOG_INFO, "%d. %s %s %s(%s )  [out %d bytes] | [in %d bytes] ", 
+			     node->tbl->objects[i].id,
+			     object_is_method((&node->tbl->objects[i])) ? "METHOD" : "EVENT ",
+			     node->tbl->objects[i].ret_pprinted,
+			     node->tbl->objects[i].name,
+			     node->tbl->objects[i].arg_pprinted,
+			     node->tbl->objects[i].arglen,
+			     node->tbl->objects[i].retlen);
+		}
+		slog(1, SLOG_INFO, "-------------8<-------------");
+		/* TODO: Call status notification callback here */
 	}
+	if ((oldstatus == AURA_STATUS_ONLINE) && (status == AURA_STATUS_OFFLINE)) {
+		int i; 
+		
+		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
+		     node->tr->name); 
+
+		cleanup_buffer_queue(&node->outbound_buffers);
+		/* Handle any remaining inbound messages */ 
+		aura_handle_inbound(node); 
+		/* Cancel any pending calls */
+		struct aura_object *o;
+		for (i=0; i < node->tbl->next; i++) { 
+			o=&node->tbl->objects[i];
+			if (o->pending && o->calldonecb) { 
+				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
+				o->pending--;
+			}
+		}
+		/* If any of the synchronos calls are running - inform them */
+		node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;
+		node->sync_ret_buf = NULL; 
+	}
+}
+
+void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
+{
+	if (aura_get_host_endianness() != en) 
+		node->need_endian_swap = true;
+}
+
+
+void aura_loop_once(struct aura_node *node)
+{
+	/* Process transport stuff */
+	if (node->tr->loop) 
+		node->tr->loop(node);
+
+	/* Now grab all we got from the inbound queue and fire the callbacks */ 
+	aura_handle_inbound(node);
 }
 
 int aura_queue_call(struct aura_node *node, 

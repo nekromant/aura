@@ -151,22 +151,12 @@ void aura_set_status(struct aura_node *node, int status);
 	}
 
 enum aura_endianness aura_get_host_endianness();
+void aura_hexdump (char *desc, void *addr, int len);
 void aura_set_node_endian(struct aura_node *node, enum aura_endianness en);
 
-static inline void aura_queue_buffer(struct list_head *list, struct aura_buffer *buf) { 
-	list_add_tail(&buf->qentry, list);
-}
-
-static inline struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
-{
-	struct aura_buffer *ret;
-	
-	if (list_empty(head))
-		return NULL;
-	ret = list_entry(head->next, struct aura_buffer, qentry);
-	list_del(head->next);
-	return ret;
-}
+void aura_queue_buffer(struct list_head *list, struct aura_buffer *buf);
+struct aura_buffer *aura_dequeue_buffer(struct list_head *head);
+void aura_requeue_buffer(struct list_head *head, struct aura_buffer *buf);
 
 
 /* AURA export table API */ 
@@ -199,6 +189,11 @@ static inline void aura_wait_status(struct aura_node *node, int status)
 		aura_loop_once(node);
 }
 
+int aura_queue_call(struct aura_node *node, 
+		    int id,
+		    void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+		    void *arg,
+		    struct aura_buffer *buf);
 
 int aura_start_call_raw(
 	struct aura_node *dev, 

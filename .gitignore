@@ -1,4 +1,8 @@
-*.o 
-*.c
+antares
+build
 *~
-*#
+#*#
+*.o
+*.d
+tmp
+

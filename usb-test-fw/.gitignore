@@ -1,8 +1,0 @@
-antares
-build
-*~
-#*#
-*.o
-*.d
-tmp
-
