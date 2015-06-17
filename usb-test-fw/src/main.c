@@ -92,9 +92,7 @@ uchar   usbFunctionSetup(uchar data[8])
 	case RQ_PUT_CALL:
 		return USB_NO_MSG;
 		break;
-
 	}
-
 	return 0;
 }
 

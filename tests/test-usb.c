@@ -1,6 +1,5 @@
 #include <aura/aura.h>
 
-
 int main() {
 	int ret; 
 	init_slog(NULL, 88);
@@ -11,6 +10,12 @@ int main() {
 	struct aura_buffer *retbuf; 
 	ret = aura_call(n, "turnTheLedOn", &retbuf, 0x1);
 	slog(0, SLOG_DEBUG, "call ret %d", ret);
+	if (0 == ret) {
+		printf("====> buf pos %d len %d\n", retbuf->pos, retbuf->size);
+		ret = aura_buffer_get_u8(retbuf);
+	}
+	printf("====> GOT %d from device\n", ret);
+	
 //	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
 	while(1) {
 		aura_loop_once(n);

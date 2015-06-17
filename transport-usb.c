@@ -449,8 +449,13 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 		     transfer->actual_length);
 		goto panic;
 	}
-		
+	
 	slog(4, SLOG_DEBUG, "Event readout completed, %d bytes", transfer->actual_length);
+	buf->userdata = o; 
+	/* Position the buffer at the start of the responses */
+	buf->pos = LIBUSB_CONTROL_SETUP_SIZE + sizeof(struct usb_event_packet);
+	aura_queue_buffer(&node->inbound_buffers, buf);
+	
 	return; 
 panic: 
 	usb_panic_and_reset_state(node);
@@ -464,7 +469,6 @@ static void submit_event_readout(struct aura_node *node)
 	struct aura_buffer *buf = aura_buffer_request(node, inf->io_buf_size);
 	if (!buf) 
 		return; /* Nothing bad, we'll try again later */
-
 
 	slog(0, SLOG_DEBUG, "Event readout, max %d bytes", inf->io_buf_size);	
 	libusb_fill_control_setup((unsigned char *)buf->data,

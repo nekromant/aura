@@ -233,5 +233,20 @@ static inline void aura_buffer_rewind(struct aura_node *node, struct aura_buffer
 
 void aura_panic(struct aura_node *node); 
 
+
+/* retparse */ 
+uint8_t  aura_buffer_get_u8 (struct aura_buffer *buf);
+uint16_t aura_buffer_get_u16(struct aura_buffer *buf);
+uint32_t aura_buffer_get_u32(struct aura_buffer *buf);
+uint64_t aura_buffer_get_u64(struct aura_buffer *buf);
+
+int8_t  aura_buffer_get_s8 (struct aura_buffer *buf);
+int16_t aura_buffer_get_s16(struct aura_buffer *buf);
+int32_t aura_buffer_get_s32(struct aura_buffer *buf);
+int64_t aura_buffer_get_s64(struct aura_buffer *buf);
+
+void *aura_buffer_get_bin(struct aura_buffer *buf, int len);
+
+
 #endif
 

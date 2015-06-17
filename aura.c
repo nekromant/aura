@@ -95,6 +95,11 @@ static void aura_handle_inbound(struct aura_node *node)
 		if (!buf)
 			break;
 		o = buf->userdata;
+		/* 
+		 * userdata will now contain pointer to node, to make
+		 * aura_buffer_get calls simpler 
+		 */
+		buf->userdata = node; 
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
 		     object_is_method(o) ? "response" : "event", 
 		     o->id, o->name);
