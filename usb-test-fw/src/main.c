@@ -51,7 +51,7 @@ int put_object(unsigned char *dest, int dlen, const void *name, const void* afmt
 }
 
 unsigned char iobuf[512];
-static uint8_t num_evt_pending;
+static uint8_t num_evt_pending=0;
 
 uchar   usbFunctionSetup(uchar data[8])
 {
@@ -69,7 +69,6 @@ uchar   usbFunctionSetup(uchar data[8])
 		break;
 	};
 	case RQ_GET_OBJ_INFO:
-			usbMsgPtr = iobuf;
 			iobuf[0]=1; /*isMethod ? */
 			if (rq->wIndex.word == 0)
 				return put_object(iobuf+1, 512, "turnTheLedOn", "1", "1");
@@ -82,14 +81,19 @@ uchar   usbFunctionSetup(uchar data[8])
 			break;
 	case RQ_GET_EVENT:
 	{
+		if (!num_evt_pending)
+			return 0;
 		uint16_t *id = iobuf; 
 		uint8_t *ret = &iobuf[2];
 		*id=0;
 		*ret=7;
+		PORTC^=(1<<2);
+		num_evt_pending--;
 		return 3;
 		break;
 	}
 	case RQ_PUT_CALL:
+		num_evt_pending++;
 		return USB_NO_MSG;
 		break;
 	}
@@ -98,8 +102,7 @@ uchar   usbFunctionSetup(uchar data[8])
 
 uchar usbFunctionWrite(uchar *data, uchar len)
 {
-	num_evt_pending++;
-	PORTC&=(1<<2);
+
 }
 
 inline void usbReconnect()

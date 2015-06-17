@@ -430,11 +430,9 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	if (0 != check_control(transfer))
 		return; /* Ooops, will try later */
 
-	inf->pending--;
-	if ((transfer->actual_length - LIBUSB_CONTROL_SETUP_SIZE) < 
-	    sizeof(struct usb_event_packet))
+	if (transfer->actual_length < sizeof(struct usb_event_packet))
 		return;
-
+	
 	evt = (struct usb_event_packet *) libusb_control_transfer_get_data(transfer);
 	o = aura_etable_find_id(node->tbl, evt->id); 
 	if (!o) {
@@ -450,11 +448,14 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 		goto panic;
 	}
 	
-	slog(4, SLOG_DEBUG, "Event readout completed, %d bytes", transfer->actual_length);
+	inf->pending--;
+	slog(4, SLOG_DEBUG, "Event readout completed, %d bytes, %d evt left", 
+	     transfer->actual_length, inf->pending);
 	buf->userdata = o; 
 	/* Position the buffer at the start of the responses */
 	buf->pos = LIBUSB_CONTROL_SETUP_SIZE + sizeof(struct usb_event_packet);
 	aura_queue_buffer(&node->inbound_buffers, buf);
+
 	
 	return; 
 panic: 
