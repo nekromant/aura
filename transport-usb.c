@@ -36,7 +36,6 @@ enum device_state {
 	AUSB_DEVICE_RESTART,
 };
 
-
 /* 
 
   OFFLINE                    |  ONLINE  
@@ -56,22 +55,20 @@ enum device_state {
 struct usb_dev_info { 
 	uint8_t  flags;
 	struct aura_export_table *etbl;
-
+	
 	int state; 
 	int current_object; 
 	uint16_t num_objects;
 	uint16_t io_buf_size;
 	int pending;
 
-	struct libusb_context *ctx; 
-	struct libusb_device *dev;
+	struct libusb_context *ctx;
 	libusb_device_handle *handle;
 	
 	struct aura_buffer *current_buffer;
 	unsigned char *ctrlbuf;
 	struct libusb_transfer* ctransfer;
 	bool cbusy; 
-	bool itransfer_enable;
 	bool ibusy;
 	bool itransfer_enabled;
 	struct libusb_transfer* itransfer;
@@ -100,7 +97,6 @@ static void usb_panic_and_reset_state(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);	
 
-	slog(4, SLOG_DEBUG, "usb: executing emergency handler");
 	slog(4, SLOG_DEBUG, "usb: pending transfers: %s %s", 
 	     inf->ibusy ? "interrupt " : "",
 	     inf->cbusy ? "control" : "" );
@@ -328,18 +324,13 @@ static void usb_try_open_device(struct aura_node *node)
 	 */
 	int ret;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	inf->dev = ncusb_find_dev(inf->ctx, inf->vid, inf->pid,
-				  inf->vendor,
-				  inf->product,
-				  inf->serial);
-	if (!inf->dev) {
-		return; /* Not this time */
-	}
-	ret = libusb_open(inf->dev, &inf->handle);
-	if (ret != 0) {
-		inf->dev = NULL;
-		return; /* Screw it! */
-	}
+
+	inf->handle = ncusb_find_and_open(inf->ctx, inf->vid, inf->pid,
+					  inf->vendor,
+					  inf->product,
+					  inf->serial);
+	if (!inf->handle) 
+		return;
 	
 	libusb_fill_interrupt_transfer(inf->itransfer, inf->handle, 0x81,
 				       inf->ibuffer, 8, 
@@ -350,35 +341,34 @@ static void usb_try_open_device(struct aura_node *node)
 				  RQ_GET_DEV_INFO,
 				  0, 0, inf->io_buf_size);
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, inf->ctrlbuf, cb_got_dev_info, node, 1500);
+
 	ret = libusb_submit_transfer(inf->ctransfer);
-	if (ret!= 0) 
-		goto err; 
+	if (ret!= 0) {
+		libusb_close(inf->handle);
+		return;
+	}
+
 	inf->state = AUSB_DEVICE_INIT; /* Change our state */
 	inf->cbusy = true;
 
 	slog(4, SLOG_DEBUG, "usb: Device opened, info packet requested");
 	return;
-err:
-	libusb_close(inf->handle);
-	return;
 };
 
 int usb_open(struct aura_node *node, va_list ap)
 {
-	struct libusb_context *ctx;
 	int ret; 
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
+
 	if (!inf)
 		return -ENOMEM;
 
-	slog(0, SLOG_INFO, "usb: Opening usb transport");
-	ret = libusb_init(&ctx);
+	ret = libusb_init(&inf->ctx);
 	if (ret != 0) 
-		return -ENODEV;
-	if (!inf)
-		return -ENOMEM;
+		return -EIO;
 
-	inf->ctx = ctx;
+	slog(4, SLOG_INFO, "usb: Opening usb transport");
+
 	inf->io_buf_size = 256;
 	inf->vid = va_arg(ap, int);
 	inf->pid = va_arg(ap, int);
@@ -406,17 +396,30 @@ int usb_open(struct aura_node *node, va_list ap)
 	
 err_free_int:
 	libusb_free_transfer(inf->itransfer);
+err_free_cbuf:
+	free(inf->ctrlbuf);
 err_free_inf:
 	free(inf);
-err_free_cbuf:
+	libusb_exit(inf->ctx);
 	return -ENOMEM;
 }
 
 void usb_close(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);
+	inf->itransfer_enabled = false;
+	/* Waiting for pending transfers */
+	slog(4, SLOG_INFO, "usb: Waiting for transport to close...");
+	usb_panic_and_reset_state(node);
+	while (inf->state != AUSB_DEVICE_RESTART) 
+		libusb_handle_events(inf->ctx);
+	slog(4, SLOG_INFO, "usb: Cleaning up...");
+	libusb_free_transfer(inf->ctransfer); 
+	libusb_free_transfer(inf->itransfer); 
+	free(inf->ctrlbuf);
+	libusb_close(inf->handle); 
 	libusb_exit(inf->ctx);
-	slog(0, SLOG_INFO, "usb: Closing transport");
+	free(inf);
 }
 
 static void cb_event_readout_done(struct libusb_transfer *transfer)
@@ -428,10 +431,10 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	struct aura_object *o; 
  
 	if (0 != check_control(transfer))
-		return; /* Ooops, will try later */
+		goto ignore;
 
 	if (transfer->actual_length < sizeof(struct usb_event_packet))
-		return;
+		goto ignore;
 	
 	evt = (struct usb_event_packet *) libusb_control_transfer_get_data(transfer);
 	o = aura_etable_find_id(node->tbl, evt->id); 
@@ -455,13 +458,14 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	/* Position the buffer at the start of the responses */
 	buf->pos = LIBUSB_CONTROL_SETUP_SIZE + sizeof(struct usb_event_packet);
 	aura_queue_buffer(&node->inbound_buffers, buf);
-
-	
 	return; 
+
 panic: 
 	usb_panic_and_reset_state(node);
+ignore:
 	aura_buffer_release(node, buf);
 	inf->current_buffer = NULL;
+	return;
 }
 
 static void submit_event_readout(struct aura_node *node)
@@ -471,7 +475,8 @@ static void submit_event_readout(struct aura_node *node)
 	if (!buf) 
 		return; /* Nothing bad, we'll try again later */
 
-	slog(0, SLOG_DEBUG, "Event readout, max %d bytes", inf->io_buf_size);	
+	slog(0, SLOG_DEBUG, "Starting evt readout, max %d bytes, pending %d", 
+	     inf->io_buf_size, inf->pending);	
 	libusb_fill_control_setup((unsigned char *)buf->data,
 				  LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
 				  RQ_GET_EVENT,
@@ -548,6 +553,7 @@ void usb_loop(struct aura_node *node)
 		return;
 	}
 
+	/* TODO: Make use of libusb hotplug notification here */
 	/* Else, see what we can do now */
 	if (inf->state == AUSB_DEVICE_SEARCHING) {
 		usb_try_open_device(node);

@@ -2,9 +2,9 @@
 
 int main() {
 	int ret; 
+	int i = 1632; 
 	init_slog(NULL, 88);
 	struct aura_node *n = aura_open("usb", 0x1d50, 0x6032, "www.ncrmnt.org", NULL, NULL);
-	struct aura_buffer *buf = aura_buffer_request(n, 23); 
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
 	struct aura_buffer *retbuf; 
@@ -15,14 +15,11 @@ int main() {
 		ret = aura_buffer_get_u8(retbuf);
 	}
 	printf("====> GOT %d from device\n", ret);
-	
-//	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
-	while(1) {
+	aura_buffer_release(n, retbuf); 
+	while(i--) {
 		aura_loop_once(n);
-		sleep(1);
+		usleep(10000);
 	}
 	aura_close(n);
 	return 0;
 }
-
-

@@ -13,7 +13,6 @@ struct usb_dev_info {
 	int pending;
 
 	struct libusb_context *ctx; 
-	struct libusb_device *dev;
 	libusb_device_handle *handle;
 	
 	struct aura_buffer *current_buffer;
@@ -38,19 +37,14 @@ static void usb_try_open_device(struct aura_node *node)
 	 */
 	int ret;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	inf->dev = ncusb_find_dev(inf->ctx, inf->vid, inf->pid,
-				  inf->vendor,
-				  inf->product,
-				  inf->serial);
-	if (!inf->dev) {
+	inf->handle = ncusb_find_and_open(inf->ctx, inf->vid, inf->pid,
+					  inf->vendor,
+					  inf->product,
+					  inf->serial);
+
+	if (!inf->handle)
 		return; /* Not this time */
-	}
-	ret = libusb_open(inf->dev, &inf->handle);
-	if (ret != 0) {
-		inf->dev = NULL;
-		return; /* Screw it! */
-	}
-	
+		
 	slog(4, SLOG_DEBUG, "susb: Device opened, ready to accept calls");
 	return;
 };

@@ -14,8 +14,7 @@ int main() {
 	ret = aura_call(n, "echo_u16", &retbuf, 0x0102);
 	slog(0, SLOG_DEBUG, "call ret %d", ret);
 	aura_panic(n);
-	aura_close(n);
-	
+	aura_close(n);	
 	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
 	return 0;
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <libusb.h>
-
+#include <aura/usb_helpers.h>
 
 
 void ncusb_print_libusb_transfer(struct libusb_transfer *p_t)
@@ -39,14 +39,15 @@ int ncusb_match_string(libusb_device_handle *dev, int index, const char* string)
 }
 
 
-struct libusb_device *ncusb_find_dev(struct libusb_context *ctx, 
-				     int vendor, int product, 
-				     const char *vendor_name, 
-				     const char *product_name, 
-				     const char *serial)
-{	libusb_device **list;
-	libusb_device *found = NULL;
-	
+
+struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx, 
+					  int vendor, int product, 
+					  const char *vendor_name, 
+					  const char *product_name, 
+					  const char *serial)
+{
+	libusb_device_handle *found = NULL;
+	libusb_device **list;
 	ssize_t cnt = libusb_get_device_list(ctx, &list);
 	ssize_t i = 0;
 	int err = 0;
@@ -65,24 +66,25 @@ struct libusb_device *ncusb_find_dev(struct libusb_context *ctx,
 			continue;
 		
 		int r = libusb_get_device_descriptor( device, &desc );	
-		if (r)
+		if (r) {
+			libusb_close(handle);
 			continue;
+		}
 
 		if ( desc.idVendor == vendor && desc.idProduct == product &&
 		     ncusb_match_string(handle, desc.iManufacturer, vendor_name) &&
 		     ncusb_match_string(handle, desc.iProduct,      product_name) &&
 		     ncusb_match_string(handle, desc.iSerialNumber, serial)
 			) 
-		{ 
-			found = device;
+		{
+			found = handle;
 		}
-		libusb_close(handle);
 
 		if (found) 
 			break;
 		
 	}
-	
+	libusb_free_device_list(list, 1);
 	return found;
 }
 

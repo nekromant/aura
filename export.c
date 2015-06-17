@@ -127,5 +127,6 @@ void aura_etable_destroy(struct aura_export_table *tbl)
 			free(tmp->ret_pprinted);
 	}
 	/* Get rid of the table itself */
+	hdestroy_r(&tbl->index);
 	free(tbl);	
 }
