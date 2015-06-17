@@ -399,8 +399,8 @@ err_free_int:
 err_free_cbuf:
 	free(inf->ctrlbuf);
 err_free_inf:
-	free(inf);
 	libusb_exit(inf->ctx);
+	free(inf);
 	return -ENOMEM;
 }
 

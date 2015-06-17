@@ -38,10 +38,12 @@ void aura_etable_add(struct aura_export_table *tbl,
 
 	target = &tbl->objects[tbl->next];
 	target->id      = tbl->next++;
-	if (!name) 
+	if (!name) {
 		BUG(tbl->owner, "Internal BUG: object name can't be nil");
-	
-	target->name    = strdup(name);
+	} else {  
+		target->name    = strdup(name);
+	}
+
 	if (argfmt)
 		target->arg_fmt = strdup(argfmt);
 	if (retfmt)
@@ -82,6 +84,7 @@ struct aura_object *aura_etable_find(struct aura_export_table *tbl,
 	ENTRY e, *ep;
 	struct aura_object *target = NULL;
 	e.key  = (char *) name;
+	e.data = NULL; 
 	ret = hsearch_r(e, FIND, &ep, &tbl->index);
 	if (ret) 
 		target = (struct aura_object *) ep->data;

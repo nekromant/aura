@@ -1,6 +1,9 @@
 .SUFFIXES:
 -include blackjack.mk
 
+#CC=clang --analyze -Xanalyzer -analyzer-output=text
+CC=clang
+
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
 CROSS_COMPILE?=$(GNU_TARGET_NAME)-
@@ -18,23 +21,38 @@ obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o
 
 define PKG_CONFIG
-CFLAGS  += $$(shell pkg-config --cflags  $(1))
-LDFLAGS += $$(shell pkg-config --libs $(1))
+CFLAGS   += $$(shell pkg-config --cflags  $(1))
+LDFLAGS  += $$(shell pkg-config --libs $(1))
+INCFLAGS += $$(shell pkg-config --cflags-only-I $(1)) 
 endef
 
 $(eval $(call PKG_CONFIG,libusb-1.0))
+
+cppcheck:
+	cppcheck --enable=all \
+	-Iinclude/ \
+	-I/usr/lib/gcc/x86_64-linux-gnu/4.9/include \
+	-I/usr/local/include \
+	-I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed \
+	-I/usr/include/x86_64-linux-gnu \
+	-I/usr/include \
+	$(INCFLAGS) $(obj-y:.o=.c) > /dev/null
+
+
+checkpatch:
+	./checkpatch.pl --no-tree -f $(obj-y:.o=.c) include/aura/*.h
 
 test: test.dummy test.usb
 	./test.usb
 
 test.usb: tests/test-usb.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)gcc -o $(@) $(LDFLAGS) $(^)
+	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
 test.dummy: tests/dummy-testcases.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)gcc -o $(@) $(LDFLAGS) $(^)
+	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
 %.o: %.c 
-	$(SILENT_CC)$(CROSS_COMPILE)gcc $(CFLAGS) -c -o $(@) $(<)
+	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
 	rm *.o test.dummy-
