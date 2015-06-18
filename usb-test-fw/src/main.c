@@ -7,6 +7,21 @@
 #include <generated/usbconfig.h>
 #include <arch/vusb/usbportability.h>
 #include <arch/vusb/usbdrv.h>
+#include <lib/urpc.h>
+
+URPC_METHOD(setLed, 
+	    URPC_U8,
+	    URPC_U8)
+{
+	
+};
+
+URPC_METHOD(getButton, 
+	    URPC_U8,
+	    URPC_NONE)
+{
+	
+};
 
 enum usb_requests { 
 	RQ_GET_DEV_INFO,
@@ -51,34 +66,38 @@ int put_object(unsigned char *dest, int dlen, const void *name, const void* afmt
 }
 
 unsigned char iobuf[512];
+unsigned char *bpos; 
+int rq_len;
 static uint8_t num_evt_pending=0;
 
 uchar   usbFunctionSetup(uchar data[8])
 {
 	usbRequest_t    *rq = (void *)data;
+	struct urpc_object **reg;
+	int ocount = urpc_get_registry(&reg);
+
 	usbMsgPtr = iobuf;
 	switch(rq->bRequest) 
 	{
 	case RQ_GET_DEV_INFO: {
 		struct usb_info_packet *p = (struct usb_info_packet *) iobuf;
 		p->flags = 0;
-		p->num_objs = 3;
+		p->num_objs = ocount;
 		p->io_buf_size = 512;
 		usbMsgPtr = iobuf;
 		return sizeof(*p);
 		break;
 	};
 	case RQ_GET_OBJ_INFO:
-			iobuf[0]=1; /*isMethod ? */
-			if (rq->wIndex.word == 0)
-				return put_object(iobuf+1, 512, "turnTheLedOn", "1", "1");
-			else if (rq->wIndex.word == 1)
-				return put_object(iobuf+1, 512, "turnTheLedOff", "", "1");
-			else {
-				iobuf[0] = 0x0;
-				return put_object(iobuf+1, 512, "buttonPressed", "", "1");
-			}
-			break;
+	{
+		struct urpc_object *o;
+		if (rq->wIndex.word >= ocount)
+			return;
+		o = reg[rq->wIndex.word];
+		
+		iobuf[0]=urpc_object_is_method(o) ? 1 : 0; /*isMethod ? */
+		return put_object(iobuf+1, 512, o->name, o->arg, o->ret);
+	}		
 	case RQ_GET_EVENT:
 	{
 		if (!num_evt_pending)
@@ -93,7 +112,8 @@ uchar   usbFunctionSetup(uchar data[8])
 		break;
 	}
 	case RQ_PUT_CALL:
-		num_evt_pending++;
+		rq_len = rq->wLength;
+		bpos=iobuf;
 		return USB_NO_MSG;
 		break;
 	}
@@ -102,7 +122,11 @@ uchar   usbFunctionSetup(uchar data[8])
 
 uchar usbFunctionWrite(uchar *data, uchar len)
 {
-
+	rq_len -= len;
+	if (!rq_len)
+		return 1;
+	else
+		return 0;
 }
 
 inline void usbReconnect()
