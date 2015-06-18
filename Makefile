@@ -9,7 +9,7 @@ ifneq ($(GNU_TARGET_NAME),)
 CROSS_COMPILE?=$(GNU_TARGET_NAME)-
 endif
 
-CFLAGS+=-Iinclude/ -g -Wall -D_FORTIFY_SOURCE=2
+CFLAGS+=-Iinclude/ -g -Wall -fPIC -D_FORTIFY_SOURCE=2
 LDFLAGS+=-rdynamic -g
 
 obj-y+= buffer.o buffer-dummy.o 
@@ -27,6 +27,10 @@ INCFLAGS += $$(shell pkg-config --cflags-only-I $(1))
 endef
 
 $(eval $(call PKG_CONFIG,libusb-1.0))
+$(eval $(call PKG_CONFIG,lua5.1))
+
+libauracore.so: bindings-lua.o $(obj-y)
+	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
 cppcheck:
 	cppcheck --enable=all \
