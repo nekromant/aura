@@ -35,6 +35,10 @@ void aura_etable_add(struct aura_export_table *tbl,
 	if (tbl->next >= tbl->size) 
 		BUG(tbl->owner, "Internal BUG: Insufficient export table storage");
 
+	target = aura_etable_find(tbl, name); 
+	if (target != NULL) 
+		BUG(tbl->owner, "Internal BUG: Duplicate export table entry: %s", name);
+
 	target = &tbl->objects[tbl->next];
 	target->id      = tbl->next++;
 	if (!name) {
