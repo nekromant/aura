@@ -4,7 +4,7 @@ int main() {
         int ret; 
         int i = 1632; 
         init_slog(NULL, 88);
-        struct aura_node *n = aura_open("simpleusb", "loader.conf");
+        struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/pw-ctl.conf");
         if (!n) { 
                 printf("err\n");
                 return -1;

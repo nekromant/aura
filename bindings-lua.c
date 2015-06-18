@@ -1,4 +1,5 @@
 #define LUA_LIB
+
 #include <aura/aura.h>
 #include <search.h>
 #include <lua.h>
@@ -104,4 +105,3 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 	luaL_register(L, "auracore", libfuncs);
 	return 0;
 }
-

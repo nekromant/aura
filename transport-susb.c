@@ -3,6 +3,8 @@
 #include <libusb.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <lualib.h>
+
 
 
 struct usb_dev_info { 
@@ -74,6 +76,17 @@ static void stack_dump (lua_State *L) {
 	printf("--------------- Stack Dump Finished ---------------\n" );
 }
 
+
+static void lua_settoken(lua_State *L, const char* name, char t) {
+	char tmp[2]; 
+	tmp[1]=0x0;
+	tmp[0]=t;
+	lua_pushstring(L, tmp);
+	lua_setglobal(L, name);
+}
+
+
+int luaopen_auracore (lua_State *L);
 int susb_open(struct aura_node *node, va_list ap)
 {
 
@@ -82,6 +95,9 @@ int susb_open(struct aura_node *node, va_list ap)
 	const char *conf = va_arg(ap, const char *);
 	lua_State* L=lua_open();
 	luaL_openlibs(L);
+	luaopen_auracore(L);
+	lua_pop(L, 1);
+
 	int ret; 
 	ret = libusb_init(&ctx);
 	if (ret != 0) 
@@ -95,36 +111,53 @@ int susb_open(struct aura_node *node, va_list ap)
 	inf->io_buf_size = 256;
 	
 
-	int status = luaL_loadfile(L, conf);
+	int status = luaL_loadfile(L, "lua/conf-loader.lua");
 	if (status) {
 		slog(2, SLOG_INFO, "usbsimple: config file load error");
 		return -ENODEV;
 	}
-	/* TODO: proper error handling */
 
-	lua_pushstring(L, "hello");
+
+	lua_pushstring(L, conf);
+	lua_setglobal(L, "simpleconf");
+
+	lua_pushlightuserdata(L, node);
+	lua_setglobal(L, "node");
+
+	/*  We need to push all format tokens to lua. 
+	 *  We do it here to be always in sync with format.h
+	 */
+
+	lua_settoken(L, "UINT8",  URPC_U8);
+	lua_settoken(L, "UINT16", URPC_U16);
+	lua_settoken(L, "UINT32", URPC_U32);
+	lua_settoken(L, "UINT64", URPC_U64);
+
+	lua_settoken(L, "SINT8",   URPC_S8);
+	lua_settoken(L, "SINT16",  URPC_S16);
+	lua_settoken(L, "SINT32",  URPC_S32);
+	lua_settoken(L, "SINT64",  URPC_S64);
+
 	/* Ask Lua to run our little script */
-	status = lua_pcall(L, 1, 5, 0);
+	status = lua_pcall(L, 0, 5, 0);
 	if (status) { 
-		slog(2, SLOG_INFO, "usbsimple: config file exec error");
+		const char* err = lua_tostring(L, -1);
+		slog(0, SLOG_FATAL, "usbsimple: %s", err);
 		return -EIO;
 	}
 
-	stack_dump(L);	
-
 	dbg("config file loaded, syntax ok!");
 
-	
-/*
-	inf->vid = va_arg(ap, int);
-	inf->pid = va_arg(ap, int);
-	inf->conf    = va_arg(ap, const char *);
-	inf->vendor  = va_arg(ap, const char *);
-	inf->product = va_arg(ap, const char *);
-	inf->serial  = va_arg(ap, const char *);
-*/
+	inf->vid = lua_tonumber(L, 1);
+	inf->pid = lua_tonumber(L, 2);
+	inf->vendor  = strdup(lua_tostring(L, 3));
+	inf->product = strdup(lua_tostring(L, 4));
+	inf->serial  = strdup(lua_tostring(L, 5));
+	/* We no not need this state anymore */
+	lua_close(L); 
 	aura_set_transportdata(node, inf);	
-
+	usb_try_open_device(node);
+	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
 }
 

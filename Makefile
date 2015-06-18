@@ -18,7 +18,7 @@ obj-y+= transport.o aura.o export.o serdes.o retparse.o queue.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
 obj-y+= transport-usb.o usb-helpers.o
-obj-y+= transport-susb.o
+obj-y+= transport-susb.o bindings-lua.o 
 
 define PKG_CONFIG
 CFLAGS   += $$(shell pkg-config --cflags  $(1))
@@ -31,7 +31,7 @@ $(eval $(call PKG_CONFIG,lua5.1))
 
 all: libauracore.so test.usb test.dummy test.susb
 
-libauracore.so: bindings-lua.o $(obj-y)
+libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
 cppcheck:
@@ -61,4 +61,4 @@ test.dummy: tests/dummy-testcases.o $(obj-y)
 	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
-	rm *.o test.dummy test.usb libauracore.so-
+	rm *.o test.dummy test.usb libauracore.som
