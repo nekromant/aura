@@ -28,6 +28,7 @@ struct aura_node *aura_open(const char* name, ...)
 	slog(6, SLOG_LIVE, "Created a node using transport: %s", name); 
 	return node;
 err_free_node:
+	slog(0, SLOG_FATAL, "Error opening transport: %s", name);
 	free(node);
 	return NULL;
 }
@@ -57,9 +58,10 @@ int aura_chain(struct aura_node *node, const char* name, ...)
 static void cleanup_buffer_queue(struct list_head *q)
 {
 	int i = 0;
-	struct aura_buffer *b; 
+
 	struct list_head *pos, *tmp;
 	list_for_each_safe(pos, tmp, q) {
+		struct aura_buffer *b; 
 		b = list_entry(pos, struct aura_buffer, qentry); 
 		list_del(pos);
 		aura_buffer_release(NULL, b);
@@ -87,10 +89,10 @@ void aura_close(struct aura_node *node)
 
 static void aura_handle_inbound(struct aura_node *node)
 {
-	struct aura_buffer *buf;
-	struct aura_object *o;	
-
 	while(1) {
+		struct aura_buffer *buf;
+		struct aura_object *o;	
+
 		buf = aura_dequeue_buffer(&node->inbound_buffers); 
 		if (!buf)
 			break;
@@ -149,13 +151,12 @@ void aura_set_status(struct aura_node *node, int status)
 		
 		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
 		     node->tr->name); 
-
 		cleanup_buffer_queue(&node->outbound_buffers);
 		/* Handle any remaining inbound messages */ 
 		aura_handle_inbound(node); 
 		/* Cancel any pending calls */
-		struct aura_object *o;
 		for (i=0; i < node->tbl->next; i++) { 
+			struct aura_object *o;
 			o=&node->tbl->objects[i];
 			if (o->pending && o->calldonecb) { 
 				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);

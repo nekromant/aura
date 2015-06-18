@@ -3,8 +3,7 @@
 
 struct aura_export_table *aura_etable_create(struct aura_node *owner, int n)
 {
-	/* Take in account one terminating element */
-	/* man hsearch: recommens 25% more */
+	/* man hsearch: recommends at least 25% more to avoid collisions */
 	int nel = n + (n / 4);
 	dbg("etable: Creating etable for %d elements, %d hash entries", n, nel);
 	struct aura_export_table *tbl = calloc(1, 
@@ -115,9 +114,9 @@ void aura_etable_destroy(struct aura_export_table *tbl)
 {
 	/* Iterate over the table and free all the strings */
 	int i; 
-	struct aura_object *tmp;
 
 	for (i=0; i < tbl->next; i++) { 
+		struct aura_object *tmp;
 		tmp=&tbl->objects[i];
 		free(tmp->name);
 		if (tmp->arg_fmt)

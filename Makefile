@@ -29,6 +29,8 @@ endef
 $(eval $(call PKG_CONFIG,libusb-1.0))
 $(eval $(call PKG_CONFIG,lua5.1))
 
+all: libauracore.so test.usb test.dummy test.susb
+
 libauracore.so: bindings-lua.o $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
@@ -46,10 +48,10 @@ cppcheck:
 checkpatch:
 	./checkpatch.pl --no-tree -f $(obj-y:.o=.c) include/aura/*.h
 
-test: test.dummy test.usb
-	./test.usb
-
 test.usb: tests/test-usb.o $(obj-y)
+	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
+
+test.susb: tests/test-susb.o $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
 test.dummy: tests/dummy-testcases.o $(obj-y)
@@ -59,4 +61,4 @@ test.dummy: tests/dummy-testcases.o $(obj-y)
 	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
-	rm *.o test.dummy-
+	rm *.o test.dummy test.usb libauracore.so-

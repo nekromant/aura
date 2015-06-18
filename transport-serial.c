@@ -5,7 +5,7 @@ struct serialdata {
 	uint16_t curmagic; 
 };
 
-__attribute__((packed)) struct serpacket  { 
+struct __attribute__((packed)) serpacket  { 
 	uint16_t magic;
 	uint16_t datalen; 
 	uint16_t invdatalen; 

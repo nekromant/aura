@@ -1,6 +1,9 @@
 #include <aura/aura.h>
 #include <aura/usb_helpers.h>
 #include <libusb.h>
+#include <lua.h>
+#include <lauxlib.h>
+
 
 struct usb_dev_info { 
 	uint8_t  flags;
@@ -44,16 +47,41 @@ static void usb_try_open_device(struct aura_node *node)
 
 	if (!inf->handle)
 		return; /* Not this time */
-		
+	
 	slog(4, SLOG_DEBUG, "susb: Device opened, ready to accept calls");
 	return;
 };
+
+static void stack_dump (lua_State *L) {
+	int i=lua_gettop(L);
+	printf(" ----------------  Stack Dump ----------------\n" );
+	while(  i   ) {
+		int t = lua_type(L, i);
+		switch (t) {
+		case LUA_TSTRING:
+			printf("%d:`%s'\n", i, lua_tostring(L, i));
+			break;
+		case LUA_TBOOLEAN:
+			printf("%d: %s\n",i,lua_toboolean(L, i) ? "true" : "false");
+			break;
+		case LUA_TNUMBER:
+			printf("%d: %g\n",  i, lua_tonumber(L, i));
+			break;
+		default: printf("%d: %s\n", i, lua_typename(L, t)); break;
+		}
+		i--;
+	}
+	printf("--------------- Stack Dump Finished ---------------\n" );
+}
 
 int susb_open(struct aura_node *node, va_list ap)
 {
 
 	struct libusb_context *ctx;
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
+	const char *conf = va_arg(ap, const char *);
+	lua_State* L=lua_open();
+	luaL_openlibs(L);
 	int ret; 
 	ret = libusb_init(&ctx);
 	if (ret != 0) 
@@ -61,15 +89,40 @@ int susb_open(struct aura_node *node, va_list ap)
 	if (!inf)
 		return -ENOMEM;
 
-	slog(0, SLOG_INFO, "Opening dummy transport");
+	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
+
 	inf->ctx = ctx;
 	inf->io_buf_size = 256;
+	
+
+	int status = luaL_loadfile(L, conf);
+	if (status) {
+		slog(2, SLOG_INFO, "usbsimple: config file load error");
+		return -ENODEV;
+	}
+	/* TODO: proper error handling */
+
+	lua_pushstring(L, "hello");
+	/* Ask Lua to run our little script */
+	status = lua_pcall(L, 1, 5, 0);
+	if (status) { 
+		slog(2, SLOG_INFO, "usbsimple: config file exec error");
+		return -EIO;
+	}
+
+	stack_dump(L);	
+
+	dbg("config file loaded, syntax ok!");
+
+	
+/*
 	inf->vid = va_arg(ap, int);
 	inf->pid = va_arg(ap, int);
 	inf->conf    = va_arg(ap, const char *);
 	inf->vendor  = va_arg(ap, const char *);
 	inf->product = va_arg(ap, const char *);
 	inf->serial  = va_arg(ap, const char *);
+*/
 	aura_set_transportdata(node, inf);	
 
 	return 0;
