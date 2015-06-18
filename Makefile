@@ -9,7 +9,7 @@ ifneq ($(GNU_TARGET_NAME),)
 CROSS_COMPILE?=$(GNU_TARGET_NAME)-
 endif
 
-CFLAGS+=-Iinclude/ -g -Wall -fPIC -D_FORTIFY_SOURCE=2
+CFLAGS+=-Iinclude/ -g -Wall -fPIC
 LDFLAGS+=-rdynamic -g
 
 obj-y+= buffer.o buffer-dummy.o 
