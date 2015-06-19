@@ -3,7 +3,7 @@
 
 int main() {
 	int ret; 
-	init_slog(NULL, 8);
+	slog_init(NULL, 8);
 	struct aura_node *n = aura_open("dummy", 1, 2, 3);
 	struct aura_buffer *buf = aura_buffer_request(n, 23); 
 	ret = aura_queue_call(n, 0, NULL, NULL, buf);

@@ -367,8 +367,6 @@ int usb_open(struct aura_node *node, va_list ap)
 	if (ret != 0) 
 		return -EIO;
 
-	slog(4, SLOG_INFO, "usb: Opening usb transport");
-
 	inf->io_buf_size = 256;
 	inf->vid = va_arg(ap, int);
 	inf->pid = va_arg(ap, int);
@@ -376,6 +374,9 @@ int usb_open(struct aura_node *node, va_list ap)
 	inf->product = va_arg(ap, const char *);
 	inf->serial  = va_arg(ap, const char *);
 	aura_set_transportdata(node, inf);	
+
+	slog(4, SLOG_INFO, "usb: vid 0x%x pid 0x%x vendor %s product %s serial %s", 
+	     inf->vid, inf->pid, inf->vendor, inf->product, inf->serial);
 
 	inf->ctrlbuf   = malloc(inf->io_buf_size);
 	if (!inf->ctrlbuf)
@@ -411,8 +412,10 @@ void usb_close(struct aura_node *node)
 	/* Waiting for pending transfers */
 	slog(4, SLOG_INFO, "usb: Waiting for transport to close...");
 	usb_panic_and_reset_state(node);
+
 	while (inf->state != AUSB_DEVICE_RESTART) 
 		libusb_handle_events(inf->ctx);
+
 	slog(4, SLOG_INFO, "usb: Cleaning up...");
 	libusb_free_transfer(inf->ctransfer); 
 	libusb_free_transfer(inf->itransfer); 

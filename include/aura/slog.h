@@ -83,7 +83,7 @@ char* strclr(int clr, char* str, ...);
  * where log will be saved and second argument conf is config file path
  * to be parsed and third argument lvl is log level for this message.
  */
-void init_slog(const char* fname, int lvl);
+void slog_init(const char* fname, int lvl);
 
 
 /*
@@ -91,7 +91,7 @@ void init_slog(const char* fname, int lvl);
  * and returns string in slog format without printing and
  * saveing in file. Return value is char pointer.
  */
-char* ret_slog(char *msg, ...);
+char* slog_sprintf(char *msg, ...);
 
 
 /*

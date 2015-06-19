@@ -166,55 +166,11 @@ void log_to_file(char *out, const char *fname, SystemDate *mdate)
 
 
 /*
- * parse_config - Parse config file. Argument cfg_name is path
- * of config file name to be parsed. Function opens config file
- * and parses LOGLEVEL and LOGTOFILE flags from it.
- */
-int parse_config(const char *cfg_name)
-{
-    /* Used variables */
-    FILE *file;
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    int ret = 1;
-
-    /* Open file pointer */
-    file = fopen(cfg_name, "r");
-    if(file == NULL) return 1;
-
-    /* Line-by-line read cfg file */
-    while ((read = getline(&line, &len, file)) != -1)
-    {
-        /* Find level in file */
-        if(strstr(line, "LOGLEVEL") != NULL)
-        {
-            /* Get log level */
-            slg.level = atoi(line+8);
-            ret = 0;
-        }
-        else if(strstr(line, "LOGTOFILE") != NULL)
-        {
-            /* Get log level */
-            slg.to_file = atoi(line+9);
-            ret = 0;
-        }
-    }
-
-    /* Cleanup */
-    if (line) free(line);
-    fclose(file);
-
-    return ret;
-}
-
-
-/*
  * Retunr string in slog format. Function takes arguments
  * and returns string in slog format without printing and
  * saveing in file. Return value is char pointer.
  */
-char* ret_slog(char *msg, ...)
+char* slog_sprintf(char *msg, ...)
 {
     /* Used variables */
     static char output[MAXMSG];
@@ -294,12 +250,12 @@ void slog(int level, int flag, const char *msg, ...)
         }
 
         /* Print output */
-        printf("%s", ret_slog("%s\n", prints));
+        printf("%s", slog_sprintf("%s\n", prints));
 
         /* Save log in file */
         if (slg.to_file)
         {
-            output = ret_slog("%s\n", string);
+            output = slog_sprintf("%s\n", string);
             log_to_file(output, slg.fname, &mdate);
         }
     }
@@ -312,7 +268,7 @@ void slog(int level, int flag, const char *msg, ...)
  * where log will be saved and second argument conf is config file path
  * to be parsed and third argument lvl is log level for this message.
  */
-void init_slog(const char* fname, int lvl)
+void slog_init(const char* fname, int lvl)
 {
     slg.level = lvl;
     slg.fname = fname;

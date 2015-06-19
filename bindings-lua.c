@@ -91,10 +91,66 @@ static int l_etable_activate(lua_State *L)
 	return 0;
 }
 
+static inline int check_and_push(lua_State *L, struct aura_node *node) 
+{
+	if (node)
+		lua_pushlightuserdata(L, node);
+	else
+		lua_pushnil(L);
+	return 1;
+}
+
+static int l_open_susb(lua_State *L)
+{
+	const char* cname;
+	struct aura_node *node; 
+	aura_check_args(L, 1);
+	cname = lua_tostring(L, 1); 
+	node = aura_open("simpleusb", cname);
+	return check_and_push(L, node);
+}
+
+static int l_open_usb(lua_State *L)
+{
+	const char *vendor, *product, *serial;
+	int vid, pid; 
+	struct aura_node *node;
+	if (lua_gettop(L) < 2)
+		return lua_error("usb needs at least vid and pid to open");
+	vid   = lua_tonumber(L, 1);
+	pid   = lua_tonumber(L, 2);
+
+	vendor  = lua_tostring(L, 3);
+	product = lua_tostring(L, 4);
+	serial  = lua_tostring(L, 5);
+
+	node = aura_open("usb", vid, pid, vendor, product, serial);
+	return check_and_push(L, node);
+}
+
+static int l_slog_init(lua_State *L)
+{
+	const char *fname;
+	int level; 
+
+	aura_check_args(L, 2);
+	fname = lua_tostring(L, 1); 
+	level = lua_tonumber(L, 2); 
+	slog_init(fname, level);
+	return 0;
+}
+
+static const luaL_Reg openfuncs[] = {
+	{ "simpleusb", l_open_susb },
+	{ "usb",       l_open_usb },
+	{NULL, NULL}
+};
+
 static const luaL_Reg libfuncs[] = {
 	{ "etable_create",   l_etable_create    },
 	{ "etable_add",      l_etable_add       },
 	{ "etable_activate", l_etable_activate  },
+	{ "slog_init",       l_slog_init        },
 	{NULL, NULL}
 };
 
@@ -103,5 +159,9 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 {
 	printf("A.U.R.A. Extension loaded.\n");
 	luaL_register(L, "auracore", libfuncs);
+	lua_pushstring(L, "openfuncs");
+	lua_newtable(L);
+	luaL_register(L, NULL, openfuncs);	
+	lua_settable(L, -3);
 	return 0;
 }

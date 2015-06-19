@@ -3,7 +3,7 @@
 int main() {
 	int ret; 
 	int i = 32; 
-	init_slog(NULL, 88);
+	slog_init(NULL, 88);
 	struct aura_node *n = aura_open("usb", 0x1d50, 0x6032, "www.ncrmnt.org", NULL, NULL);
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
