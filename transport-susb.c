@@ -208,40 +208,6 @@ void susb_close(struct aura_node *node)
 	slog(0, SLOG_INFO, "Closing susb transport");
 }
 
-
-static void susb_fill_control_setup(
-	struct aura_node *node,
-	struct aura_buffer *buf,  	
-	uint8_t  	bmRequestType,
-	uint8_t  	bRequest,
-	uint16_t  	wLength)
-{
-	struct libusb_control_setup *setup = (struct libusb_control_setup *) buf->data;
-	uint16_t wIndex, wValue;
-	setup->bmRequestType = bmRequestType;
-	setup->bRequest = bRequest;
-
-	/* Core wrote wValue and wIndex args to the end, so 
-	 * we need to shift them a little (and in worst case) 
-	 * do some swapping, e.g. nrf24lu1) 
-	 */ 
-	wValue = setup->wIndex;
-	wIndex = setup->wLength;
-	
-	/* e.g if device is big endian, but has le descriptors
-	 * we have to be extra careful here 
-	 */
-
-	if (node->need_endian_swap) { 
-		wValue = __swap16(wValue);
-		wIndex = __swap16(wValue);
-	}
-
-	setup->wValue = libusb_cpu_to_le16(wValue);
-	setup->wIndex = libusb_cpu_to_le16(wIndex);
-	setup->wLength = libusb_cpu_to_le16(wLength);
-}
-
 static void cb_call_done(struct libusb_transfer *transfer)
 {
 	struct aura_node *node = transfer->user_data;
@@ -251,7 +217,6 @@ static void cb_call_done(struct libusb_transfer *transfer)
 	check_control(transfer);
 	/* Put the buffer pointer at the start of the data we've got (if any) */
 	aura_buffer_rewind(node, buf);
-	buf->pos += 2 * sizeof(uint16_t);
 	aura_queue_buffer(&node->inbound_buffers, buf);
 	inf->current_buffer = NULL;
 }
@@ -260,14 +225,30 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	struct aura_object *o = buf->userdata;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	uint8_t rqtype;
-	if (o->ret_fmt)
+	uint16_t wIndex, wValue, *ptr;
+	if (!o->ret_fmt)
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
 	else
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
 
+	aura_buffer_rewind(node, buf);
+	ptr = (uint16_t *) &buf->data[buf->pos]; 
+	wValue = *ptr++;
+	wIndex = *ptr++;
+	memmove(&buf->data[buf->pos], ptr, buf->size - LIBUSB_CONTROL_SETUP_SIZE - 2*sizeof(uint16_t));
+	/* e.g if device is big endian, but has le descriptors
+	 * we have to be extra careful here 
+	 */
+
+	if (node->need_endian_swap) { 
+		wValue = __swap16(wValue);
+		wIndex = __swap16(wValue);
+	}
+	
 	inf->current_buffer = buf; 
-	susb_fill_control_setup(node, buf, rqtype,
-				  o->id, buf->size - LIBUSB_CONTROL_SETUP_SIZE);
+	libusb_fill_control_setup((unsigned char *) buf->data, rqtype, o->id, wValue, wIndex, 
+				  buf->size - LIBUSB_CONTROL_SETUP_SIZE);
+
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, 
 				     (unsigned char *) buf->data, cb_call_done, node, 10000);
 	submit_control(node);	
@@ -299,7 +280,7 @@ static struct aura_transport tusb = {
 	.close = susb_close,
 	.loop  = susb_loop,
 	/* We write wIndex and wValue in the setup part of the packet */ 
-	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE - 2 * sizeof(uint16_t), 
-	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE - 2 * sizeof(uint16_t)
+	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE, 
+	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE
 };
 AURA_TRANSPORT(tusb);
