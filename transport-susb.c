@@ -9,7 +9,6 @@
 enum device_state { 
 	SUSB_DEVICE_SEARCHING=0,
 	SUSB_DEVICE_OPERATIONAL,
-	SUSB_DEVICE_FAILING,
 	SUSB_DEVICE_RESTART
 };
 
@@ -32,10 +31,10 @@ struct usb_dev_info {
 
 	int vid;
 	int pid;
-	const char *vendor;
-	const char *product;
-	const char *serial;
-	const char *conf;
+	char *vendor;
+	char *product;
+	char *serial;
+	char *conf;
 };
 
 static void usb_panic_and_reset_state(struct aura_node *node)
@@ -57,6 +56,7 @@ static void submit_control(struct aura_node *node)
 	if (ret!= 0) {
 		slog(0, SLOG_ERROR, "usb: error submitting control transfer");
 		usb_panic_and_reset_state(node);
+		return; 
 	}
 	inf->cbusy=true;
 }
@@ -184,7 +184,7 @@ int susb_open(struct aura_node *node, va_list ap)
 
 	inf->vid = lua_tonumber(L, 1);
 	inf->pid = lua_tonumber(L, 2);
-	inf->product = lua_strfromstack(L, 3);
+	inf->vendor = lua_strfromstack(L, 3);
 	inf->product = lua_strfromstack(L, 4);
 	inf->serial  = lua_strfromstack(L, 5);
 	/* We no not need this state anymore */
@@ -205,7 +205,26 @@ err_free_inf:
 
 void susb_close(struct aura_node *node)
 {
+	struct usb_dev_info *inf = aura_get_transportdata(node);
 	slog(0, SLOG_INFO, "Closing susb transport");
+
+	while (inf->cbusy) 
+		libusb_handle_events(inf->ctx);
+
+	if (inf->vendor)
+		free(inf->vendor);
+	if (inf->product)
+		free(inf->product);
+	if (inf->serial)
+		free(inf->serial);
+
+	libusb_free_transfer(inf->ctransfer);
+
+	if (inf->handle)
+		libusb_close(inf->handle);
+
+	libusb_exit(inf->ctx);
+	free(inf);
 }
 
 static void cb_call_done(struct libusb_transfer *transfer)
@@ -268,10 +287,20 @@ void susb_loop(struct aura_node *node)
 	if (inf->cbusy)
 		return; 
 	
-	buf = aura_dequeue_buffer(&node->outbound_buffers); 
-	if (!buf)
+	if (inf->state == SUSB_DEVICE_RESTART) { 
+		slog(4, SLOG_DEBUG, "usb: transport offlined, starting to look for a device");
+		aura_set_status(node, AURA_STATUS_OFFLINE);
+		libusb_close(inf->handle);
+		inf->state = SUSB_DEVICE_SEARCHING;
+	} else if (inf->state == SUSB_DEVICE_SEARCHING) {
+		usb_try_open_device(node);
 		return;
-	susb_issue_call(node, buf);
+	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
+		buf = aura_dequeue_buffer(&node->outbound_buffers); 
+		if (!buf)
+			return;
+		susb_issue_call(node, buf);
+	}
 }
 
 static struct aura_transport tusb = { 

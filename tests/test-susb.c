@@ -2,7 +2,7 @@
 
 int main() {
         int ret; 
-        int i = 1632; 
+        int i = 32; 
         init_slog(NULL, 88);
         struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/susb-test.conf");
         if (!n) { 
@@ -12,6 +12,7 @@ int main() {
         aura_wait_status(n, AURA_STATUS_ONLINE);
 
         struct aura_buffer *retbuf; 
+
         ret = aura_call(n, "id", &retbuf, 0, 500);
         slog(0, SLOG_DEBUG, "call ret %d", ret);
         if (0 == ret) {
@@ -21,6 +22,7 @@ int main() {
         printf("====> GOT %x from device\n", ret);
 	aura_hexdump("buffer", retbuf->data, retbuf->size);
         aura_buffer_release(n, retbuf); 
+
         while(i--) {
                 aura_loop_once(n);
                 usleep(10000);
