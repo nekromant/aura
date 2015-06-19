@@ -546,7 +546,7 @@ void usb_loop(struct aura_node *node)
 		return; 
 
 	if (inf->state == AUSB_DEVICE_RESTART) { 
-		slog(4, SLOG_DEBUG, "usb: transport offlined, starting looking for a device");
+		slog(4, SLOG_DEBUG, "usb: transport offlined, starting to look for a device");
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		libusb_close(inf->handle);
 		inf->state = AUSB_DEVICE_SEARCHING;

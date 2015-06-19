@@ -6,6 +6,12 @@
 #include <lualib.h>
 
 
+enum device_state { 
+	SUSB_DEVICE_SEARCHING=0,
+	SUSB_DEVICE_OPERATIONAL,
+	SUSB_DEVICE_FAILING,
+	SUSB_DEVICE_RESTART
+};
 
 struct usb_dev_info { 
 	uint8_t  flags;
@@ -32,6 +38,44 @@ struct usb_dev_info {
 	const char *conf;
 };
 
+static void usb_panic_and_reset_state(struct aura_node *node)
+{
+	struct usb_dev_info *inf = aura_get_transportdata(node);	
+
+	if (inf->cbusy)
+		BUG(node, "susb: Failing with busy ctransfer");
+	
+	inf->state = SUSB_DEVICE_RESTART;
+}
+
+static void submit_control(struct aura_node *node)
+{
+	int ret; 
+	struct usb_dev_info *inf = aura_get_transportdata(node);
+
+	ret = libusb_submit_transfer(inf->ctransfer);
+	if (ret!= 0) {
+		slog(0, SLOG_ERROR, "usb: error submitting control transfer");
+		usb_panic_and_reset_state(node);
+	}
+	inf->cbusy=true;
+}
+
+static int check_control(struct libusb_transfer *transfer) 
+{
+	struct aura_node *node = transfer->user_data;
+	struct usb_dev_info *inf = aura_get_transportdata(node);
+	int ret = 0; 
+
+	inf->cbusy = false; 
+		
+	if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+		usb_panic_and_reset_state(node);
+		ret = -EIO;
+	}
+	return ret; 
+}
+
 static void usb_try_open_device(struct aura_node *node)
 {
 	/* FixMe: Reading descriptors is synchronos. This is not needed
@@ -40,7 +84,6 @@ static void usb_try_open_device(struct aura_node *node)
 	 * A proper workaround would be manually reading out string descriptors
 	 * from a device in an async fasion in the background. 
 	 */
-	int ret;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	inf->handle = ncusb_find_and_open(inf->ctx, inf->vid, inf->pid,
 					  inf->vendor,
@@ -50,31 +93,12 @@ static void usb_try_open_device(struct aura_node *node)
 	if (!inf->handle)
 		return; /* Not this time */
 	
-	slog(4, SLOG_DEBUG, "susb: Device opened, ready to accept calls");
+	inf->state = SUSB_DEVICE_OPERATIONAL;
+	slog(4, SLOG_DEBUG, "susb: Device opened and ready to accept calls");
+	aura_set_status(node, AURA_STATUS_ONLINE);
 	return;
 };
 
-static void stack_dump (lua_State *L) {
-	int i=lua_gettop(L);
-	printf(" ----------------  Stack Dump ----------------\n" );
-	while(  i   ) {
-		int t = lua_type(L, i);
-		switch (t) {
-		case LUA_TSTRING:
-			printf("%d:`%s'\n", i, lua_tostring(L, i));
-			break;
-		case LUA_TBOOLEAN:
-			printf("%d: %s\n",i,lua_toboolean(L, i) ? "true" : "false");
-			break;
-		case LUA_TNUMBER:
-			printf("%d: %g\n",  i, lua_tonumber(L, i));
-			break;
-		default: printf("%d: %s\n", i, lua_typename(L, t)); break;
-		}
-		i--;
-	}
-	printf("--------------- Stack Dump Finished ---------------\n" );
-}
 
 
 static void lua_settoken(lua_State *L, const char* name, char t) {
@@ -85,6 +109,13 @@ static void lua_settoken(lua_State *L, const char* name, char t) {
 	lua_setglobal(L, name);
 }
 
+char *lua_strfromstack(lua_State *L, int n)
+{
+	char *ret = NULL;
+	if (lua_isstring(L, n))
+		ret  = strdup(lua_tostring(L, n));
+	return ret;
+}
 
 int luaopen_auracore (lua_State *L);
 int susb_open(struct aura_node *node, va_list ap)
@@ -93,30 +124,35 @@ int susb_open(struct aura_node *node, va_list ap)
 	struct libusb_context *ctx;
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
 	const char *conf = va_arg(ap, const char *);
-	lua_State* L=lua_open();
+	int ret;
+	lua_State* L;
+ 
+	if (!inf)
+		return -ENOMEM;
+
+	ret = libusb_init(&ctx);
+	if (ret != 0) 
+		goto err_free_inf;
+	inf->ctx = ctx;
+
+	L=lua_open();
+	if (!L)
+		goto err_free_ctx;
+
+ 	inf->ctransfer = libusb_alloc_transfer(0);
+	if (!inf->ctransfer)
+		goto err_free_lua;
+
 	luaL_openlibs(L);
 	luaopen_auracore(L);
 	lua_pop(L, 1);
 
-	int ret; 
-	ret = libusb_init(&ctx);
-	if (ret != 0) 
-		return -ENODEV;
-	if (!inf)
-		return -ENOMEM;
-
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
-
-	inf->ctx = ctx;
-	inf->io_buf_size = 256;
-	
-
-	int status = luaL_loadfile(L, "lua/conf-loader.lua");
-	if (status) {
+	ret = luaL_loadfile(L, "lua/conf-loader.lua");
+	if (ret) {
 		slog(2, SLOG_INFO, "usbsimple: config file load error");
-		return -ENODEV;
+		goto err_free_ct;
 	}
-
 
 	lua_pushstring(L, conf);
 	lua_setglobal(L, "simpleconf");
@@ -139,26 +175,32 @@ int susb_open(struct aura_node *node, va_list ap)
 	lua_settoken(L, "SINT64",  URPC_S64);
 
 	/* Ask Lua to run our little script */
-	status = lua_pcall(L, 0, 5, 0);
-	if (status) { 
+	ret = lua_pcall(L, 0, 5, 0);
+	if (ret) { 
 		const char* err = lua_tostring(L, -1);
 		slog(0, SLOG_FATAL, "usbsimple: %s", err);
-		return -EIO;
+		goto err_free_lua;
 	}
-
-	dbg("config file loaded, syntax ok!");
 
 	inf->vid = lua_tonumber(L, 1);
 	inf->pid = lua_tonumber(L, 2);
-	inf->vendor  = strdup(lua_tostring(L, 3));
-	inf->product = strdup(lua_tostring(L, 4));
-	inf->serial  = strdup(lua_tostring(L, 5));
+	inf->product = lua_strfromstack(L, 3);
+	inf->product = lua_strfromstack(L, 4);
+	inf->serial  = lua_strfromstack(L, 5);
 	/* We no not need this state anymore */
 	lua_close(L); 
 	aura_set_transportdata(node, inf);	
 	usb_try_open_device(node);
-	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
+err_free_ct:
+	libusb_free_transfer(inf->ctransfer);
+err_free_lua:
+	lua_close(L);
+err_free_ctx:
+	libusb_exit(inf->ctx);
+err_free_inf:
+	free(inf);
+	return -ENOMEM;
 }
 
 void susb_close(struct aura_node *node)
@@ -166,19 +208,89 @@ void susb_close(struct aura_node *node)
 	slog(0, SLOG_INFO, "Closing susb transport");
 }
 
+
+static void susb_fill_control_setup(
+	struct aura_node *node,
+	struct aura_buffer *buf,  	
+	uint8_t  	bmRequestType,
+	uint8_t  	bRequest,
+	uint16_t  	wLength)
+{
+	struct libusb_control_setup *setup = (struct libusb_control_setup *) buf->data;
+	uint16_t wIndex, wValue;
+	setup->bmRequestType = bmRequestType;
+	setup->bRequest = bRequest;
+
+	/* Core wrote wValue and wIndex args to the end, so 
+	 * we need to shift them a little (and in worst case) 
+	 * do some swapping, e.g. nrf24lu1) 
+	 */ 
+	wValue = setup->wIndex;
+	wIndex = setup->wLength;
+	
+	/* e.g if device is big endian, but has le descriptors
+	 * we have to be extra careful here 
+	 */
+
+	if (node->need_endian_swap) { 
+		wValue = __swap16(wValue);
+		wIndex = __swap16(wValue);
+	}
+
+	setup->wValue = libusb_cpu_to_le16(wValue);
+	setup->wIndex = libusb_cpu_to_le16(wIndex);
+	setup->wLength = libusb_cpu_to_le16(wLength);
+}
+
+static void cb_call_done(struct libusb_transfer *transfer)
+{
+	struct aura_node *node = transfer->user_data;
+	struct usb_dev_info *inf = aura_get_transportdata(node);
+	struct aura_buffer *buf = inf->current_buffer;
+
+	check_control(transfer);
+	/* Put the buffer pointer at the start of the data we've got (if any) */
+	aura_buffer_rewind(node, buf);
+	buf->pos += 2 * sizeof(uint16_t);
+	aura_queue_buffer(&node->inbound_buffers, buf);
+	inf->current_buffer = NULL;
+}
+static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf) 
+{ 
+	struct aura_object *o = buf->userdata;
+	struct usb_dev_info *inf = aura_get_transportdata(node);
+	uint8_t rqtype;
+	if (o->ret_fmt)
+		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
+	else
+		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
+
+	inf->current_buffer = buf; 
+	susb_fill_control_setup(node, buf, rqtype,
+				  o->id, buf->size - LIBUSB_CONTROL_SETUP_SIZE);
+	libusb_fill_control_transfer(inf->ctransfer, inf->handle, 
+				     (unsigned char *) buf->data, cb_call_done, node, 10000);
+	submit_control(node);	
+}
+
 void susb_loop(struct aura_node *node)
 {
 	struct aura_buffer *buf;
-	struct aura_object *o;
+	struct usb_dev_info *inf = aura_get_transportdata(node);
+	struct timeval tv = { 
+		.tv_sec  = 0,
+		.tv_usec = 0
+	};
+
+	libusb_handle_events_timeout(inf->ctx, &tv);
+
+	if (inf->cbusy)
+		return; 
 	
-	while(1) { 
-		buf = aura_dequeue_buffer(&node->outbound_buffers); 
-		if (!buf)
-			break;
-		o = buf->userdata;
-		slog(0, SLOG_DEBUG, "Dequeued/requeued obj id %d (%s)", o->id, o->name);
-		aura_queue_buffer(&node->inbound_buffers, buf);
-	}
+	buf = aura_dequeue_buffer(&node->outbound_buffers); 
+	if (!buf)
+		return;
+	susb_issue_call(node, buf);
 }
 
 static struct aura_transport tusb = { 
@@ -186,7 +298,8 @@ static struct aura_transport tusb = {
 	.open = susb_open,
 	.close = susb_close,
 	.loop  = susb_loop,
-	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE, 
-	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE
+	/* We write wIndex and wValue in the setup part of the packet */ 
+	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE - 2 * sizeof(uint16_t), 
+	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE - 2 * sizeof(uint16_t)
 };
 AURA_TRANSPORT(tusb);

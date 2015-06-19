@@ -39,7 +39,6 @@ int ncusb_match_string(libusb_device_handle *dev, int index, const char* string)
 }
 
 
-
 struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx, 
 					  int vendor, int product, 
 					  const char *vendor_name, 
