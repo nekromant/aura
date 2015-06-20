@@ -116,7 +116,7 @@ static int l_open_usb(lua_State *L)
 	int vid, pid; 
 	struct aura_node *node;
 	if (lua_gettop(L) < 2)
-		return lua_error("usb needs at least vid and pid to open");
+		return luaL_error(L, "usb needs at least vid and pid to open");
 	vid   = lua_tonumber(L, 1);
 	pid   = lua_tonumber(L, 2);
 
