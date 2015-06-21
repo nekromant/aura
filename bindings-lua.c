@@ -110,11 +110,20 @@ static int l_open_susb(lua_State *L)
 	return check_and_push(L, node);
 }
 
+static int l_open_dummy(lua_State *L)
+{
+	struct aura_node *node; 
+	aura_check_args(L, 0);
+	node = aura_open("dummy");
+	return check_and_push(L, node);
+}
+
 static int l_open_usb(lua_State *L)
 {
 	const char *vendor, *product, *serial;
 	int vid, pid; 
 	struct aura_node *node;
+
 	if (lua_gettop(L) < 2)
 		return luaL_error(L, "usb needs at least vid and pid to open");
 	vid   = lua_tonumber(L, 1);
@@ -140,7 +149,9 @@ static int l_slog_init(lua_State *L)
 	return 0;
 }
 
+
 static const luaL_Reg openfuncs[] = {
+	{ "dummy",     l_open_dummy},
 	{ "simpleusb", l_open_susb },
 	{ "usb",       l_open_usb },
 	{NULL, NULL}
@@ -158,13 +169,12 @@ static const luaL_Reg libfuncs[] = {
 LUALIB_API int luaopen_auracore (lua_State *L) 
 {
 	printf("A.U.R.A. Extension loaded.\n");
-	luaL_register(L, "auracore", libfuncs);
-	/* We put all the 'open' functions in aura.openfuncs table
-	 * The actual open() is just a lua wrapper
-	 */
+	luaL_newlib(L, libfuncs);
+
 	lua_pushstring(L, "openfuncs");
 	lua_newtable(L);
-	luaL_register(L, NULL, openfuncs);	
+	luaL_setfuncs(L, openfuncs, 0);	
 	lua_settable(L, -3);
-	return 0;
+	
+	return 1;
 }

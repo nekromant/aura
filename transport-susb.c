@@ -135,7 +135,7 @@ int susb_open(struct aura_node *node, va_list ap)
 		goto err_free_inf;
 	inf->ctx = ctx;
 
-	L=lua_open();
+	L=luaL_newstate();
 	if (!L)
 		goto err_free_ctx;
 

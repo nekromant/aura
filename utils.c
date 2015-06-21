@@ -47,7 +47,7 @@ void aura_hexdump (char *desc, void *addr, int len) {
 	printf ("  %s\n", buff);
 }
 
-void lua_stack_dump (lua_State *L) {
+void lua_stackdump (lua_State *L) {
 	int i=lua_gettop(L);
 	printf(" ----------------  Stack Dump ----------------\n" );
 	while(  i   ) {
@@ -57,7 +57,8 @@ void lua_stack_dump (lua_State *L) {
 			printf("%d:`%s'\n", i, lua_tostring(L, i));
 			break;
 		case LUA_TBOOLEAN:
-			printf("%d: %s\n",i,lua_toboolean(L, i) ? "true" : "false");
+			printf("%d: %s\n",i,lua_toboolean(L, i) ? 
+			"true" : "false");
 			break;
 		case LUA_TNUMBER:
 			printf("%d: %g\n",  i, lua_tonumber(L, i));

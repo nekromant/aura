@@ -2,7 +2,7 @@
 -include blackjack.mk
 
 #CC=clang --analyze -Xanalyzer -analyzer-output=text
-CC=clang
+CC=gcc
 
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
@@ -27,7 +27,7 @@ INCFLAGS += $$(shell pkg-config --cflags-only-I $(1))
 endef
 
 $(eval $(call PKG_CONFIG,libusb-1.0))
-$(eval $(call PKG_CONFIG,lua5.1))
+$(eval $(call PKG_CONFIG,lua5.2))
 
 all: libauracore.so test.usb test.dummy test.susb
 
