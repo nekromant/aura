@@ -61,4 +61,8 @@ test.dummy: tests/dummy-testcases.o $(obj-y)
 	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
-	rm *.o test.dummy test.usb libauracore.som
+	-rm *.o test.dummy test.usb libauracore.som
+	-cd susb-test-fw && make mrproper
+	-cd usb-test-fw && make mrproper
+	-cd usb-test-dummy-fw && make mrproper
+
