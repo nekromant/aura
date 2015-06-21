@@ -159,6 +159,9 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 {
 	printf("A.U.R.A. Extension loaded.\n");
 	luaL_register(L, "auracore", libfuncs);
+	/* We put all the 'open' functions in aura.openfuncs table
+	 * The actual open() is just a lua wrapper
+	 */
 	lua_pushstring(L, "openfuncs");
 	lua_newtable(L);
 	luaL_register(L, NULL, openfuncs);	
