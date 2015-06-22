@@ -100,6 +100,73 @@ static inline int check_and_push(lua_State *L, struct aura_node *node)
 	return 1;
 }
 
+static int l_close(lua_State *L)
+{
+	struct aura_node *node; 
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	aura_close(node);
+	return 0;
+}
+
+static void lua_setfield_string(lua_State *L, const char *key, const char *value)
+{
+	lua_pushstring(L, key);
+	lua_pushstring(L, value);
+	lua_settable(L, -3);
+} 
+
+static void lua_setfield_int(lua_State *L, const char *key, long value)
+{
+	lua_pushstring(L, key);
+	lua_pushnumber(L, value);
+	lua_settable(L, -3);
+} 
+
+static void lua_setfield_bool(lua_State *L, const char *key, bool value)
+{
+	lua_pushstring(L, key);
+	lua_pushboolean(L, value);
+	lua_settable(L, -3);
+} 
+
+static int l_get_exports(lua_State *L)
+{
+	struct aura_node *node; 
+	struct aura_export_table *tbl; 
+	int i;
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	tbl = node->tbl;
+	lua_newtable(L);
+	for (i=0; i<tbl->next; i++) { 
+		struct aura_object *o = &tbl->objects[i];
+		lua_pushinteger(L, i);
+		lua_newtable(L);
+
+		lua_setfield_string(L, "name",  o->name);
+		lua_setfield_bool(L,   "valid", o->valid);
+		lua_setfield_int(L,    "id",    o->id);
+		if (o->arg_fmt)
+			lua_setfield_string(L, "arg", o->arg_fmt);
+		if (o->ret_fmt)
+			lua_setfield_string(L, "ret", o->ret_fmt);
+		if (o->arg_pprinted)
+			lua_setfield_string(L, "arg_pprint", o->arg_pprinted);
+		if (o->arg_pprinted)
+			lua_setfield_string(L, "ret_pprint", o->arg_pprinted);
+		
+		lua_settable(L, -3);
+	}
+	return 1;
+}
+
 static int l_open_susb(lua_State *L)
 {
 	const char* cname;
@@ -159,9 +226,11 @@ static const luaL_Reg openfuncs[] = {
 
 static const luaL_Reg libfuncs[] = {
 	{ "etable_create",   l_etable_create    },
+	{ "etable_get",      l_get_exports      },
 	{ "etable_add",      l_etable_add       },
 	{ "etable_activate", l_etable_activate  },
 	{ "slog_init",       l_slog_init        },
+	{ "close",           l_close            },
 	{NULL, NULL}
 };
 
