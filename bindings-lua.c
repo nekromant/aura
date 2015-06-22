@@ -171,10 +171,15 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 	printf("A.U.R.A. Extension loaded.\n");
 	luaL_newlib(L, libfuncs);
 
+	/* 
+	 * Push open functions as aura["openfunc"]
+	 */
+
 	lua_pushstring(L, "openfuncs");
 	lua_newtable(L);
 	luaL_setfuncs(L, openfuncs, 0);	
 	lua_settable(L, -3);
-	
+
+	/* Return One result */
 	return 1;
 }
