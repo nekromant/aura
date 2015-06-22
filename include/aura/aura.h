@@ -43,6 +43,11 @@ struct aura_node {
 	bool need_endian_swap;
 	struct aura_buffer *sync_ret_buf; 
 	int sync_call_result;
+	/* General callbacks */
+	void *status_changed_arg;
+	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
+	void *etable_changed_arg;
+	void (*etable_changed_cb)(struct aura_node *node, void *arg);
 };
 
 struct aura_buffer {
@@ -247,6 +252,11 @@ int64_t aura_buffer_get_s64(struct aura_buffer *buf);
 
 void *aura_buffer_get_bin(struct aura_buffer *buf, int len);
 
-
+void aura_etable_changed_cb(struct aura_node *node, 
+			    void (*cb)(struct aura_node *node, void *arg),
+			    void *arg);
+void aura_status_changed_cb(struct aura_node *node, 
+			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
+			    void *arg);
 #endif
 

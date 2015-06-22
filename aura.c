@@ -128,6 +128,10 @@ void aura_set_status(struct aura_node *node, int status)
 {
 	int oldstatus = node->status;
 	node->status = status;
+
+	if (oldstatus == status)
+		return;
+
 	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) { 
 		/* Dump etable */
 		int i; 
@@ -144,7 +148,6 @@ void aura_set_status(struct aura_node *node, int status)
 			     node->tbl->objects[i].retlen);
 		}
 		slog(1, SLOG_INFO, "-------------8<-------------");
-		/* TODO: Call status notification callback here */
 	}
 	if ((oldstatus == AURA_STATUS_ONLINE) && (status == AURA_STATUS_OFFLINE)) {
 		int i; 
@@ -167,6 +170,9 @@ void aura_set_status(struct aura_node *node, int status)
 		node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;
 		node->sync_ret_buf = NULL; 
 	}
+
+	if (node->status_changed_cb)
+		node->status_changed_cb(node, status, node->status_changed_arg);
 }
 
 void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
@@ -184,6 +190,22 @@ void aura_loop_once(struct aura_node *node)
 
 	/* Now grab all we got from the inbound queue and fire the callbacks */ 
 	aura_handle_inbound(node);
+}
+
+void aura_status_changed_cb(struct aura_node *node, 
+			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
+			    void *arg)
+{
+	node->status_changed_arg = arg;
+	node->status_changed_cb = cb;
+}
+
+void aura_etable_changed_cb(struct aura_node *node, 
+			    void (*cb)(struct aura_node *node, void *arg),
+			    void *arg)
+{
+	node->etable_changed_arg = arg;
+	node->etable_changed_cb = cb;
 }
 
 int aura_queue_call(struct aura_node *node, 

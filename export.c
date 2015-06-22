@@ -104,14 +104,18 @@ struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
 
 void aura_etable_activate(struct aura_export_table *tbl)
 {
-	if (aura_get_status(tbl->owner) == AURA_STATUS_ONLINE) { 
+	struct aura_node *node = tbl->owner; 
+	if (aura_get_status(node) == AURA_STATUS_ONLINE) { 
 		slog(0, SLOG_FATAL, "Internal BUG: Attemped to change export table when transport is online");
-		aura_panic(tbl->owner);
+		aura_panic(node);
 	}
 	
-	if (tbl->owner->tbl)
-		aura_etable_destroy(tbl->owner->tbl);
-	tbl->owner->tbl = tbl;
+	if (node->tbl)
+		aura_etable_destroy(node->tbl);
+	node->tbl = tbl;
+
+	if (node->etable_changed_cb)
+		node->etable_changed_cb(node, node->etable_changed_arg);
 }
 
 void aura_etable_destroy(struct aura_export_table *tbl)
