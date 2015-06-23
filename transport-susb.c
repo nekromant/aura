@@ -145,7 +145,7 @@ int susb_open(struct aura_node *node, va_list ap)
 
 	luaL_openlibs(L);
 	luaopen_auracore(L);
-	lua_pop(L, 1);
+	lua_setglobal(L, "aura");
 
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
 	ret = luaL_loadfile(L, "lua/conf-loader.lua");

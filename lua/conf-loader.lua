@@ -1,12 +1,10 @@
-aura=require("auracore");
-
 function NONE(name)
    return { name, UINT16..UINT16, ""}
 end
 
 function WRITE(name,...)
    local fmt = UINT16..UINT16;
-   for i,j in ipairs(arg) do
+   for i,j in ipairs({...}) do
       fmt = fmt..j;
    end
    return { name, fmt, ""}
@@ -14,7 +12,7 @@ end
 
 function READ(name,...)
    local fmt = "";
-   for i,j in ipairs(arg) do
+   for i,j in ipairs({...}) do
       fmt = fmt..j;
    end
    return { name, UINT16..UINT16, fmt}
