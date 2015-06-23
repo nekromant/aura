@@ -35,6 +35,7 @@ struct aura_node {
 	const struct aura_transport    *tr;
 	struct aura_export_table *tbl;
 	void                     *transport_data;
+	void                     *user_data;
 	enum aura_node_status     status;
 	struct list_head          outbound_buffers;
 	struct list_head          inbound_buffers;
@@ -145,6 +146,16 @@ static inline void  aura_set_transportdata(struct aura_node *node, void *udata)
 static inline void *aura_get_transportdata(struct aura_node *node)
 {
 	return node->transport_data;
+}
+
+static inline void  aura_set_userdata(struct aura_node *node, void *udata)
+{
+	node->user_data = udata;
+}
+
+static inline void *aura_get_userdata(struct aura_node *node)
+{
+	return node->user_data;
 }
 
 const struct aura_transport *aura_transport_lookup(const char *name);

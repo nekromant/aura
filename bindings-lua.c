@@ -5,6 +5,13 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+struct lua_bindingsdata { 
+	lua_State *L;
+	int status_changed_ref;
+	int status_changed_arg_ref;
+	int etable_changed_ref;
+	int etable_changed_arg_ref;
+};
 
 int aura_typeerror (lua_State *L, int narg, const char *tname) 
 {
@@ -91,16 +98,44 @@ static int l_etable_activate(lua_State *L)
 	return 0;
 }
 
-static inline int check_and_push(lua_State *L, struct aura_node *node) 
+static inline int check_node_and_push(lua_State *L, struct aura_node *node) 
 {
 	if (node)
 		lua_pushlightuserdata(L, node);
 	else
 		lua_pushnil(L);
+	struct lua_bindingsdata *bdata = calloc(1, sizeof(*bdata));
+	if (!bdata)
+		luaL_error(L, "Memory allocation error");
+	bdata->L = L;
+	aura_set_userdata(node, bdata);
 	return 1;
 }
 
 static int l_close(lua_State *L)
+{
+	struct aura_node *node; 
+	struct lua_bindingsdata *bdata;
+ 	
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	bdata = aura_get_userdata(node);
+	/* We assume that we've set all the callback on open 
+	 * in lua counterpart 
+	 */
+	luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_arg_ref);
+	free(bdata);
+	aura_close(node);
+	return 0;
+}
+
+static int l_loop_once(lua_State *L)
 {
 	struct aura_node *node; 
 	aura_check_args(L, 1);
@@ -108,7 +143,64 @@ static int l_close(lua_State *L)
 		aura_typeerror(L, 1, "ludata");
 	}
 	node = lua_touserdata(L, 1);
-	aura_close(node);
+	aura_loop_once(node);
+	return 0;
+}
+
+static void status_cb(struct aura_node *node, int newstatus, void *arg)
+{
+	struct lua_bindingsdata *bdata = arg; 
+	lua_State *L = bdata->L;
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
+	lua_pushnumber(L, newstatus);
+	lua_call(L, 2, 0);
+}
+
+static void etable_cb(struct aura_node *node, void *arg)
+{
+	struct lua_bindingsdata *bdata = arg; 
+	lua_State *L = bdata->L;
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->etable_changed_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->etable_changed_arg_ref);
+	lua_call(L, 1, 0);
+}
+
+static int l_set_status_change_cb(lua_State *L)
+{
+	struct aura_node *node; 
+	struct lua_bindingsdata *bdata; 
+	aura_check_args(L, 2);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	if (!lua_isfunction(L, 2)) {
+		aura_typeerror(L, 2, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	bdata = aura_get_userdata(node); 
+	bdata->status_changed_arg_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	bdata->status_changed_ref     = luaL_ref(L, LUA_REGISTRYINDEX);
+	aura_status_changed_cb(node, status_cb, bdata);
+	return 0;
+}
+
+static int l_set_etable_change_cb(lua_State *L)
+{
+	struct aura_node *node; 
+	struct lua_bindingsdata *bdata;
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	if (!lua_isfunction(L, 2)) {
+		aura_typeerror(L, 2, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	bdata = aura_get_userdata(node); 
+	bdata->etable_changed_arg_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	bdata->etable_changed_ref     = luaL_ref(L, LUA_REGISTRYINDEX);
+	aura_etable_changed_cb(node, etable_cb, bdata);
 	return 0;
 }
 
@@ -174,7 +266,7 @@ static int l_open_susb(lua_State *L)
 	aura_check_args(L, 1);
 	cname = lua_tostring(L, 1); 
 	node = aura_open("simpleusb", cname);
-	return check_and_push(L, node);
+	return check_node_and_push(L, node);
 }
 
 static int l_open_dummy(lua_State *L)
@@ -182,7 +274,7 @@ static int l_open_dummy(lua_State *L)
 	struct aura_node *node; 
 	aura_check_args(L, 0);
 	node = aura_open("dummy");
-	return check_and_push(L, node);
+	return check_node_and_push(L, node);
 }
 
 static int l_open_usb(lua_State *L)
@@ -201,7 +293,7 @@ static int l_open_usb(lua_State *L)
 	serial  = lua_tostring(L, 5);
 
 	node = aura_open("usb", vid, pid, vendor, product, serial);
-	return check_and_push(L, node);
+	return check_node_and_push(L, node);
 }
 
 static int l_slog_init(lua_State *L)
@@ -225,6 +317,9 @@ static const luaL_Reg openfuncs[] = {
 };
 
 static const luaL_Reg libfuncs[] = {
+	{ "loop_once",       l_loop_once              },
+	{ "status_cb",       l_set_status_change_cb        },
+	{ "etable_cb",       l_set_etable_change_cb        },
 	{ "etable_create",   l_etable_create    },
 	{ "etable_get",      l_get_exports      },
 	{ "etable_add",      l_etable_add       },
