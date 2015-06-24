@@ -282,5 +282,9 @@ void aura_etable_changed_cb(struct aura_node *node,
 void aura_status_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
 			    void *arg);
+
+void aura_add_pollfds(struct aura_node *node, int fd, short events);
+void aura_del_pollfds(struct aura_node *node, int fd);
+
 #endif
 
