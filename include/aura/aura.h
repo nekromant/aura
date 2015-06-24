@@ -65,7 +65,7 @@ struct aura_node {
 			      enum aura_fd_action act, void *arg);
 	/* file descriptors to poll */
 	int numfds;
-	int lastfd;
+	int nextfd;
 	struct aura_pollfds *fds;
 };
 

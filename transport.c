@@ -42,10 +42,10 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 		/* Start with 8 fds. Unlikely more will be needed */
 		node->fds    = calloc(8, sizeof(*node->fds));
 		node->numfds = 8;
-		node->lastfd = 0;
+		node->nextfd = 0;
 	}
 
-	if (node->lastfd >= node->numfds) {
+	if (node->nextfd >= node->numfds) {
 		int count = node->numfds * 2;
 		node->fds    = realloc(node->fds, count * sizeof(*node->fds));
 		node->numfds = count; 
@@ -56,7 +56,7 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 		aura_panic(node);
 	}
 
-	ap = &node->fds[node->lastfd++];
+	ap = &node->fds[node->nextfd++];
 	ap->fd = fd; 
 	ap->events = events;
 	ap->node = node;
@@ -68,12 +68,12 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 void aura_del_pollfds(struct aura_node *node, int fd) 
 {
 	int i;
-	for (i=0; i < node->lastfd; i++) {
+	for (i=0; i < node->nextfd; i++) {
 		struct aura_pollfds *fds = &node->fds[i];
 		if (fds->fd == fd) 
 			break;
 	}
-	if (i == node->lastfd) {
+	if (i == node->nextfd) {
 		slog(0, SLOG_FATAL, "Attempt to delete invalid descriptor from node");
 		aura_panic(node); 
 	}
@@ -84,6 +84,7 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 				    node->fd_changed_arg);
 	
 	memmove(&node->fds[i], &node->fds[i+1], 
-		sizeof(struct aura_pollfds) * (node->lastfd - i - 1));
-	node->lastfd--;
+		sizeof(struct aura_pollfds) * (node->nextfd - i - 1));
+	node->nextfd--;
+	bzero(&node->fds[node->nextfd], sizeof(struct aura_pollfds));
 }
