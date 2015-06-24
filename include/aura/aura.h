@@ -63,10 +63,11 @@ struct aura_node {
 	void *fd_changed_arg;
 	void (*fd_changed_cb)(const struct aura_pollfds *fd, 
 			      enum aura_fd_action act, void *arg);
-	/* file descriptors to poll */
+	/* Event system and polling */
 	int numfds;
 	int nextfd;
 	struct aura_pollfds *fds;
+	void *eventsys_data;
 };
 
 struct aura_buffer {
@@ -285,6 +286,10 @@ void aura_status_changed_cb(struct aura_node *node,
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events);
 void aura_del_pollfds(struct aura_node *node, int fd);
-
+const struct aura_pollfds *aura_get_pollfds(struct aura_node *node);
+/* event system */
+int aura_eventsys_init(struct aura_node *node);
+void aura_eventsys_destroy(struct aura_node *node);
+void aura_eventsys_fd_action(struct aura_pollfds *ap, int action);
 #endif
 

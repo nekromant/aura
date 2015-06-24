@@ -36,7 +36,7 @@ void aura_transport_dump_usage()
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events) 
 {
-	struct aura_pollfds * ap;
+	struct aura_pollfds *ap;
 
 	if (!node->fds) { 
 		/* Start with 8 fds. Unlikely more will be needed */
@@ -61,6 +61,8 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 	ap->events = events;
 	ap->node = node;
 
+	aura_eventsys_fd_action(ap, AURA_FD_ADDED);
+
 	if (node->fd_changed_cb)
 		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
 }
@@ -78,6 +80,8 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 		aura_panic(node); 
 	}
 
+	/* Notify the event system */
+	aura_eventsys_fd_action(&node->fds[i], AURA_FD_REMOVED);
 	/* Fire the callback */ 
 	if (node->fd_changed_cb)
 		node->fd_changed_cb(&node->fds[i], AURA_FD_REMOVED, 
@@ -88,3 +92,4 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 	node->nextfd--;
 	bzero(&node->fds[node->nextfd], sizeof(struct aura_pollfds));
 }
+

@@ -15,6 +15,7 @@ LDFLAGS+=-rdynamic -g
 obj-y+= buffer.o buffer-dummy.o 
 obj-y+= slog.o panic.o utils.o
 obj-y+= transport.o aura.o export.o serdes.o retparse.o queue.o
+obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
 obj-y+= transport-usb.o usb-helpers.o

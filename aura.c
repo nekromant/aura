@@ -25,8 +25,16 @@ struct aura_node *aura_open(const char* name, ...)
 
 	if (ret != 0) 
 		goto err_free_node;
+	ret = aura_eventsys_init(node);
+
+	if (ret != 0) 
+		goto err_tr_close;
+	
 	slog(6, SLOG_LIVE, "Created a node using transport: %s", name); 
 	return node;
+err_tr_close:
+	node->tr->close(node);
+	aura_transport_release(node->tr);
 err_free_node:
 	slog(0, SLOG_FATAL, "Error opening transport: %s", name);
 	free(node);
@@ -83,6 +91,12 @@ void aura_close(struct aura_node *node)
 	/* Check if we have an export table registered and nuke it */
 	if (node->tbl)
 		aura_etable_destroy(node->tbl);
+	/* Free file descriptors */
+	if (node->fds)
+		free(node->fds);
+	/* Shut down event notification system */
+	aura_eventsys_destroy(node);
+
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
 }
@@ -190,6 +204,12 @@ void aura_loop_once(struct aura_node *node)
 
 	/* Now grab all we got from the inbound queue and fire the callbacks */ 
 	aura_handle_inbound(node);
+}
+
+void aura_loop_once_timeout(struct aura_node *node, unsigned long timeout_ms)
+{
+	
+	aura_loop_once(node);
 }
 
 void aura_status_changed_cb(struct aura_node *node, 
@@ -361,4 +381,9 @@ int aura_call(
 	*retbuf =  node->sync_ret_buf;
 	node->sync_call_running = false; 
 	return node->sync_call_result;
+}
+
+const struct aura_pollfds *aura_get_pollfds(struct aura_node *node)
+{
+	return node->fds;
 }
