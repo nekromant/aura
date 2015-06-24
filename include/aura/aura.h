@@ -31,6 +31,17 @@ enum aura_call_status {
 	AURA_CALL_TRANSPORT_FAIL,
 };
 
+enum aura_fd_action { 
+	AURA_FD_ADDED,
+	AURA_FD_REMOVED
+};
+
+struct aura_pollfds { 
+	struct aura_node *node; 
+	int fd;
+	short events;
+};
+
 struct aura_node { 
 	const struct aura_transport    *tr;
 	struct aura_export_table *tbl;
@@ -49,6 +60,13 @@ struct aura_node {
 	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
 	void *etable_changed_arg;
 	void (*etable_changed_cb)(struct aura_node *node, void *arg);
+	void *fd_changed_arg;
+	void (*fd_changed_cb)(const struct aura_pollfds *fd, 
+			      enum aura_fd_action act, void *arg);
+	/* file descriptors to poll */
+	int numfds;
+	int lastfd;
+	struct aura_pollfds *fds;
 };
 
 struct aura_buffer {
@@ -57,11 +75,6 @@ struct aura_buffer {
 	void             *userdata;
 	struct list_head  qentry;
 	char              data[];
-};
-
-struct aura_pollfds { 
-	int fd;
-	short evts;
 };
 
 struct aura_object { 
