@@ -7,8 +7,7 @@ static void eventloop_recalculate_timeouts(struct aura_eventloop *loop)
 {
 	loop->poll_timeout = 5000;
 	struct aura_node *pos; 
-	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list)
-	{
+	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
 		if (pos->poll_timeout < loop->poll_timeout)
 			loop->poll_timeout = pos->poll_timeout;
 	}
@@ -111,10 +110,17 @@ void *aura_eventloop_create__(int dummy, ...)
 
 void aura_handle_events(struct aura_eventloop *loop)
 {
-	
+	aura_handle_events_timeout(loop, -1); 
 }
 
 void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 {
+	struct aura_node *pos; 
+	/* Handle any pending events from descriptors */
 	aura_eventsys_backend_wait(loop->eventsysdata, timeout_ms); 
+	/* Check if any nodes needs their periodic poll */ 
+
+	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
+		aura_process_node_event(pos, NULL);
+	}
 }
