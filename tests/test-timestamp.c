@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 #include <inttypes.h>
 #include <unistd.h> 
 

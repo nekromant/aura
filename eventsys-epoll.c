@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 #include <sys/epoll.h>
 #include <sys/time.h>
 #include <unistd.h>

@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 #include <aura/usb_helpers.h>
 #include <libusb.h>
 #include <lua.h>

@@ -1,5 +1,5 @@
 #include <aura/aura.h>
-
+#include <aura/private.h>
 
 int dummy_open(struct aura_node *node, va_list ap)
 {

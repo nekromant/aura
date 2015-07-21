@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 
 struct aura_buffer *aura_buffer_internal_request(int size);
 void aura_buffer_internal_free(struct aura_buffer *buf);

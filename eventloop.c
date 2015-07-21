@@ -1,5 +1,5 @@
 #include <aura/aura.h>
-
+#include <aura/private.h>
 
 /* FixMe: The current timeout handling is pretty naive. But let it be so for now */
 

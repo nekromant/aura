@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 
 struct aura_node *aura_vopen(const char* name, va_list ap)
 {

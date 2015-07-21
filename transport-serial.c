@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 
 struct serialdata { 
 	int fd; 

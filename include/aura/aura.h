@@ -36,7 +36,6 @@ enum aura_fd_action {
 	AURA_FD_REMOVED
 };
 
-
 struct aura_pollfds { 
 	struct aura_node *node; 
 	int fd;
@@ -155,27 +154,6 @@ struct aura_transport
 };
 
 
-/* Serdes API */
-
-struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_list ap);
-int  aura_fmt_len(struct aura_node *node, const char *fmt);
-char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args);
-
-/* Transport Plugins API */
-void aura_transport_register(struct aura_transport *tr);
-void aura_transport_dump_usage();
-void aura_transport_release(const struct aura_transport *tr);
-
-static inline void  aura_set_transportdata(struct aura_node *node, void *udata)
-{
-	node->transport_data = udata;
-}
-
-static inline void *aura_get_transportdata(struct aura_node *node)
-{
-	return node->transport_data;
-}
-
 static inline void  aura_set_userdata(struct aura_node *node, void *udata)
 {
 	node->user_data = udata;
@@ -185,6 +163,14 @@ static inline void *aura_get_userdata(struct aura_node *node)
 {
 	return node->user_data;
 }
+
+
+/* Serdes API */
+
+struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_list ap);
+int  aura_fmt_len(struct aura_node *node, const char *fmt);
+char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args);
+
 
 const struct aura_transport *aura_transport_lookup(const char *name);
 void aura_set_status(struct aura_node *node, int status);
@@ -262,7 +248,6 @@ int aura_call(
 
 
 
-/* Buffer.h */
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
 void aura_buffer_release(struct aura_node *nd, struct aura_buffer *buf);
 struct aura_buffer *aura_buffer_internal_get(int size);
@@ -271,7 +256,6 @@ static inline void aura_buffer_rewind(struct aura_node *node, struct aura_buffer
 }
 
 void aura_panic(struct aura_node *node); 
-
 
 /* retparse */ 
 uint8_t  aura_buffer_get_u8 (struct aura_buffer *buf);
@@ -301,29 +285,20 @@ void aura_del_pollfds(struct aura_node *node, int fd);
 int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
 
 
-/* event system data access functions */
-void *aura_eventsys_get_data(struct aura_node *node);
-void aura_eventsys_set_data(struct aura_node *node, void *data);
 
 #define aura_eventloop_create(...) \
 	aura_eventloop_create__(0, ##__VA_ARGS__, NULL)
 
 void *aura_eventloop_vcreate(va_list ap);
 void *aura_eventloop_create__(int dummy, ...);
+
 void aura_handle_events(struct aura_eventloop *loop);
 void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);
 
+/* event system data access functions */
+void *aura_eventsys_get_data(struct aura_node *node);
+void aura_eventsys_set_data(struct aura_node *node, void *data);
 
-/* Event-System Backend */
-void *aura_eventsys_backend_create();
-void aura_eventsys_backend_destroy(void *backend);
-int aura_eventsys_backend_wait(void *backend, int timeout_ms);
-void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *ap, int action);
-
-
-void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd);
-
-uint64_t aura_platform_timestamp();
 
 static inline void aura_wait_status(struct aura_node *node, int status) 
 { 
@@ -331,6 +306,7 @@ static inline void aura_wait_status(struct aura_node *node, int status)
 	while (node->status != status) 
 		aura_handle_events(loop);
 }
+
 
 #endif
 
