@@ -273,7 +273,7 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);	
 }
 
-void susb_loop(struct aura_node *node)
+void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);

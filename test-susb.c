@@ -1,13 +1,14 @@
 #include <aura/aura.h>
-#include <unistd.h>
 
 int main() {
 	int ret; 
-	int i = 32; 
-	slog_init(NULL, 88);
-	struct aura_node *n = aura_open("usb", 0x1d50, 0x6032, "www.ncrmnt.org", NULL, NULL);
-	struct aura_eventloop *loop = aura_eventloop_create(n); 
-
+	int i = 1632; 
+	init_slog(NULL, 88);
+	struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/phototurntable.conf");
+	if (!n) { 
+		printf("err\n");
+		return -1;
+	}
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
 	struct aura_buffer *retbuf; 
@@ -20,7 +21,7 @@ int main() {
 	printf("====> GOT %d from device\n", ret);
 	aura_buffer_release(n, retbuf); 
 	while(i--) {
-		aura_handle_events(loop);
+		aura_loop_once(n);
 		usleep(10000);
 	}
 	aura_close(n);

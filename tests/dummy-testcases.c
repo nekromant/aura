@@ -6,8 +6,10 @@ int main() {
 	slog_init(NULL, 8);
 	struct aura_node *n = aura_open("dummy", 1, 2, 3);
 	struct aura_buffer *buf = aura_buffer_request(n, 23); 
+	struct aura_eventloop *loop = aura_eventloop_create(n); 
+
 	ret = aura_queue_call(n, 0, NULL, NULL, buf);
-	aura_loop_once(n);
+	aura_handle_events(loop);
 	slog(0, SLOG_DEBUG, "<---------------->");
 
 	struct aura_buffer *retbuf; 

@@ -21,7 +21,7 @@ void dummy_close(struct aura_node *node)
 	slog(0, SLOG_INFO, "Closing dummy transport");
 }
 
-void dummy_loop(struct aura_node *node)
+void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;

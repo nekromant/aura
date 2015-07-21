@@ -138,12 +138,18 @@ static int l_close(lua_State *L)
 static int l_loop_once(lua_State *L)
 {
 	struct aura_node *node; 
+	struct aura_eventloop *loop; 
+
 	aura_check_args(L, 1);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
 	}
 	node = lua_touserdata(L, 1);
-	aura_loop_once(node);
+	loop = aura_eventsys_get_data(node);
+	if (!loop) 
+		luaL_error(L, "BUG: No eventsystem in node"); 
+
+	aura_handle_events(loop);
 	return 0;
 }
 

@@ -5,6 +5,8 @@ int main() {
         int i = 32; 
         slog_init(NULL, 88);
         struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/susb-test.conf");
+	struct aura_eventloop *loop = aura_eventloop_create(n); 
+
         if (!n) { 
                 printf("err\n");
                 return -1;
@@ -24,7 +26,7 @@ int main() {
         aura_buffer_release(n, retbuf); 
 	
         while(i--) {
-                aura_loop_once(n);
+                aura_handle_events(loop);
                 usleep(10000);
         }
         aura_close(n);

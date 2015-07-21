@@ -2,7 +2,7 @@
 -include blackjack.mk
 
 #CC=clang --analyze -Xanalyzer -analyzer-output=text
-CC=gcc
+CC=clang
 
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
@@ -13,13 +13,15 @@ CFLAGS+=-Iinclude/ -g -Wall -fPIC
 LDFLAGS+=-rdynamic -g
 
 obj-y+= buffer.o buffer-dummy.o 
-obj-y+= slog.o panic.o utils.o
-obj-y+= transport.o aura.o export.o serdes.o retparse.o queue.o
+obj-y+= slog.o panic.o utils.o 
+obj-y+= transport.o eventloop.o aura.o export.o serdes.o 
+obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
 obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o bindings-lua.o 
+
 
 define PKG_CONFIG
 CFLAGS   += $$(shell pkg-config --cflags  $(1))
@@ -30,7 +32,7 @@ endef
 $(eval $(call PKG_CONFIG,libusb-1.0))
 $(eval $(call PKG_CONFIG,lua5.2))
 
-all: libauracore.so test.usb test.dummy test.susb
+all: libauracore.so test.usb test.dummy test.susb test.timestamp
 
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
@@ -52,6 +54,9 @@ checkpatch:
 test.usb: tests/test-usb.o $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
+test.timestamp: tests/test-timestamp.o $(obj-y)
+	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
+
 test.susb: tests/test-susb.o $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
@@ -66,4 +71,5 @@ clean:
 	-cd susb-test-fw && make mrproper
 	-cd usb-test-fw && make mrproper
 	-cd usb-test-dummy-fw && make mrproper
+	-rm tests/*.o
 

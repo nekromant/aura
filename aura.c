@@ -1,11 +1,10 @@
 #include <aura/aura.h>
 
-struct aura_node *aura_open(const char* name, ...)
+struct aura_node *aura_vopen(const char* name, va_list ap)
 {
 	struct aura_node *node = calloc(1, sizeof(*node));
 	int ret = 0; 
-	va_list ap;
-
+	node->poll_timeout = 250; /* 250 ms default */
 	if (!node)
 		return NULL;
 	node->tr = aura_transport_lookup(name); 
@@ -16,31 +15,37 @@ struct aura_node *aura_open(const char* name, ...)
 
 	INIT_LIST_HEAD(&node->outbound_buffers);
 	INIT_LIST_HEAD(&node->inbound_buffers);
+
 	node->status = AURA_STATUS_OFFLINE;
 
-	va_start(ap, name);
+	/*  Eventsystem will be either lazy-initialized or created via 
+	 *  aura_eventloop_* functions 
+	 */
+
 	if (node->tr->open)
 		ret = node->tr->open(node, ap);
-	va_end(ap);
 
 	if (ret != 0) 
 		goto err_free_node;
-	ret = aura_eventsys_init(node);
-
-	if (ret != 0) 
-		goto err_tr_close;
 	
 	slog(6, SLOG_LIVE, "Created a node using transport: %s", name); 
 	return node;
-err_tr_close:
-	node->tr->close(node);
-	aura_transport_release(node->tr);
+
 err_free_node:
 	slog(0, SLOG_FATAL, "Error opening transport: %s", name);
 	free(node);
 	return NULL;
 }
 
+struct aura_node *aura_open(const char *name, ...)
+{
+	struct aura_node *ret; 
+	va_list ap;
+	va_start(ap, name);	
+	ret = aura_vopen(name, ap);
+	va_end(ap);
+	return ret; 
+}
 
 int aura_chain(struct aura_node *node, const char* name, ...)
 {
@@ -94,8 +99,6 @@ void aura_close(struct aura_node *node)
 	/* Free file descriptors */
 	if (node->fds)
 		free(node->fds);
-	/* Shut down event notification system */
-	aura_eventsys_destroy(node);
 
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
@@ -196,20 +199,19 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
 }
 
 
-void aura_loop_once(struct aura_node *node)
+void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
 {
-	/* Process transport stuff */
-	if (node->tr->loop) 
-		node->tr->loop(node);
+	uint64_t curtime = aura_platform_timestamp();
+	/* See if we need to gently poll the node */
 
+	if (fd || (curtime - node->last_checked < node->poll_timeout))
+		if (node->tr->loop) { 
+			node->tr->loop(node, fd);
+			node->last_checked = curtime;
+		}
+	
 	/* Now grab all we got from the inbound queue and fire the callbacks */ 
 	aura_handle_inbound(node);
-}
-
-void aura_loop_once_timeout(struct aura_node *node, unsigned long timeout_ms)
-{
-	
-	aura_loop_once(node);
 }
 
 void aura_status_changed_cb(struct aura_node *node, 
@@ -218,6 +220,14 @@ void aura_status_changed_cb(struct aura_node *node,
 {
 	node->status_changed_arg = arg;
 	node->status_changed_cb = cb;
+}
+
+void aura_fd_changed_cb(struct aura_node *node, 
+			void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
+			void *arg)
+{
+	node->fd_changed_arg = arg;
+	node->fd_changed_cb = cb;
 }
 
 void aura_etable_changed_cb(struct aura_node *node, 
@@ -313,12 +323,16 @@ int aura_call_raw(
 	struct aura_buffer *buf; 
 	int ret; 
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
-	
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
 
 	if (!o)
 		return -EBADSLT;
+
+	if (!loop)
+		BUG(node, "Node has no assosiated event system. Fix your code!");
 	
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, ap);
@@ -336,7 +350,7 @@ int aura_call_raw(
 		return ret;
 	
 	while (node->tbl->objects[id].pending)
-		aura_loop_once(node);
+		aura_handle_events(loop);
 	
 	*retbuf =  node->sync_ret_buf;
 	node->sync_call_running = false; 
@@ -353,12 +367,16 @@ int aura_call(
 	struct aura_buffer *buf; 
 	int ret; 
 	struct aura_object *o = aura_etable_find(node->tbl, name);
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
 	
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
 
 	if (!o)
 		return -EBADSLT;
+
+	if (!loop)
+		BUG(node, "Node has no assosiated event system. Fix your code!");
 	
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, ap);
@@ -376,14 +394,20 @@ int aura_call(
 		return ret;
 	
 	while (o->pending)
-		aura_loop_once(node);
+		aura_handle_events(loop);
 	
 	*retbuf =  node->sync_ret_buf;
 	node->sync_call_running = false; 
 	return node->sync_call_result;
 }
 
-const struct aura_pollfds *aura_get_pollfds(struct aura_node *node)
+void *aura_eventsys_get_data(struct aura_node *node)
 {
-	return node->fds;
+	return node->eventsys_data;
 }
+
+void aura_eventsys_set_data(struct aura_node *node, void *data)
+{
+	node->eventsys_data = data;
+}
+

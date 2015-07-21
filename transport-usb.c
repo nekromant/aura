@@ -535,7 +535,7 @@ static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);
 }
 
-void usb_loop(struct aura_node *node)
+void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);

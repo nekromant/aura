@@ -8,7 +8,7 @@ void aura_transport_register(struct aura_transport *tr)
 	/* TODO: Transport sanity checking */
 }
 
-/* No fancy hash table, we won't have that many */
+/* No fancy hash table, we won't have that many. Really. */
 const struct aura_transport *aura_transport_lookup(const char *name)
 {
 	struct aura_transport *pos; 
@@ -33,6 +33,20 @@ void aura_transport_dump_usage()
 		slog(0, SLOG_INFO, "%s (%d instances in use)", pos->name, pos->usage);
 }
 
+/** 
+ * Get a set of descriptors to poll events for this node. 
+ * The memory for this struct is managed by the library and it should NOT
+ * be freed (Unless it's a crash you want)
+ *
+ -- @param node 
+ * 
+ * @return 
+ */
+int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
+{
+	*fds = node->fds;
+	return node->nextfd; 
+}
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events) 
 {
@@ -61,8 +75,6 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 	ap->events = events;
 	ap->node = node;
 
-	aura_eventsys_fd_action(ap, AURA_FD_ADDED);
-
 	if (node->fd_changed_cb)
 		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
 }
@@ -80,8 +92,6 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 		aura_panic(node); 
 	}
 
-	/* Notify the event system */
-	aura_eventsys_fd_action(&node->fds[i], AURA_FD_REMOVED);
 	/* Fire the callback */ 
 	if (node->fd_changed_cb)
 		node->fd_changed_cb(&node->fds[i], AURA_FD_REMOVED, 

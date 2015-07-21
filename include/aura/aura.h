@@ -36,6 +36,7 @@ enum aura_fd_action {
 	AURA_FD_REMOVED
 };
 
+
 struct aura_pollfds { 
 	struct aura_node *node; 
 	int fd;
@@ -55,6 +56,7 @@ struct aura_node {
 	bool need_endian_swap;
 	struct aura_buffer *sync_ret_buf; 
 	int sync_call_result;
+
 	/* General callbacks */
 	void *status_changed_arg;
 	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
@@ -63,11 +65,16 @@ struct aura_node {
 	void *fd_changed_arg;
 	void (*fd_changed_cb)(const struct aura_pollfds *fd, 
 			      enum aura_fd_action act, void *arg);
+
 	/* Event system and polling */
-	int numfds;
-	int nextfd;
-	struct aura_pollfds *fds;
-	void *eventsys_data;
+	int numfds; /* Currently available space for descriptors */
+	int nextfd; /* Next descriptor to add */
+	struct aura_pollfds *fds; /* descriptor and event array */
+
+	void *eventsys_data; /* eventloop structure */
+	unsigned int poll_timeout; 
+	uint64_t last_checked;
+	struct list_head eventloop_node_list;
 };
 
 struct aura_buffer {
@@ -100,6 +107,13 @@ struct aura_object {
 	void *arg;
 };
 
+struct aura_eventloop { 
+	int poll_timeout;
+	struct list_head nodelist;
+	void *eventsysdata;
+};
+
+
 #define object_is_event(o)  (o->arg_fmt==NULL)
 #define object_is_method(o) (o->arg_fmt!=NULL)
 
@@ -127,7 +141,7 @@ struct aura_transport
 
 	int    (*open)(struct aura_node *node, va_list ap);
 	void   (*close)(struct aura_node *node);
-	void   (*loop)(struct aura_node *node);
+	void   (*loop)(struct aura_node *node, const struct aura_pollfds *fd);
 	
 	/* Pointer ops, optional */
 	void               *(*ptr_pull)(struct aura_buffer *buf);
@@ -206,18 +220,13 @@ void aura_etable_destroy(struct aura_export_table *tbl);
 
 struct aura_node *aura_open(const char* name, ...); 
 void aura_close(struct aura_node *dev); 
-void aura_loop_once(struct aura_node *n);
+
 
 static inline int aura_get_status(struct aura_node *node) 
 {
 	return node->status;
 }
 
-static inline void aura_wait_status(struct aura_node *node, int status) 
-{ 
-	while (node->status != status) 
-		aura_loop_once(node);
-}
 
 int aura_queue_call(struct aura_node *node, 
 		    int id,
@@ -283,13 +292,45 @@ void aura_etable_changed_cb(struct aura_node *node,
 void aura_status_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
 			    void *arg);
+void aura_fd_changed_cb(struct aura_node *node, 
+			 void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
+			 void *arg);
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events);
 void aura_del_pollfds(struct aura_node *node, int fd);
-const struct aura_pollfds *aura_get_pollfds(struct aura_node *node);
-/* event system */
-int aura_eventsys_init(struct aura_node *node);
-void aura_eventsys_destroy(struct aura_node *node);
-void aura_eventsys_fd_action(struct aura_pollfds *ap, int action);
+int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
+
+
+/* event system data access functions */
+void *aura_eventsys_get_data(struct aura_node *node);
+void aura_eventsys_set_data(struct aura_node *node, void *data);
+
+#define aura_eventloop_create(...) \
+	aura_eventloop_create__(0, ##__VA_ARGS__, NULL)
+
+void *aura_eventloop_vcreate(va_list ap);
+void *aura_eventloop_create__(int dummy, ...);
+void aura_handle_events(struct aura_eventloop *loop);
+void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);
+
+
+/* Event-System Backend */
+void *aura_eventsys_backend_create();
+void aura_eventsys_backend_destroy(void *backend);
+int aura_eventsys_backend_wait(void *backend, int timeout_ms);
+void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *ap, int action);
+
+
+void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd);
+
+uint64_t aura_platform_timestamp();
+
+static inline void aura_wait_status(struct aura_node *node, int status) 
+{ 
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	while (node->status != status) 
+		aura_handle_events(loop);
+}
+
 #endif
 
