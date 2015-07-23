@@ -132,12 +132,21 @@ struct aura_export_table {
 /** Represents an aura transport module */
 struct aura_transport
 {
-	/** String name identifying the transport e.g. "usb" */
+	/** \brief Required
+	 *
+	 * String name identifying the transport e.g. "usb"
+	 */
 	const char *name;
-	/** Optional Flags. TODO: Is it still needed? */
+	/** \brief Optional
+	 *
+	 * Flags. TODO: Is it still needed?
+	 */
 	uint32_t flags; 
 	
-	/** Optional. Additional bytes to allocate for each buffer.
+	/**
+	 * \brief Optional.
+	 *
+	 * Additional bytes to allocate for each buffer.
 	 *
 	 *  If your transport layer requires any additional bytes to encapsulate the
 	 *  actual serialized message - just specify how many. This is node to avoid
@@ -146,7 +155,9 @@ struct aura_transport
 	 */
 	int      buffer_overhead;
 
-	/** Optional. Offset in the buffer at which core puts serialized data.
+	/** \brief Optional.
+	 *
+	 * Offset in the buffer at which core puts serialized data.
 	 *
 	 * NOTE: Your buffer_overhead should more or equal buffer_offset bytes. Otherwise
 	 * core will complain and refuse to register your transport.
@@ -154,7 +165,9 @@ struct aura_transport
 	 */
 	int      buffer_offset;
 
-	/** Required. Open function.
+	/** \brief Required.
+	 *
+	 *  Open function.
 	 *
 	 *  Open function should perform sanity checking on supplied (in ap) arguments
 	 *  and allocate internal data structures and set required periodic timeout in
@@ -167,7 +180,9 @@ struct aura_transport
 	 */
 	int    (*open)(struct aura_node *node, va_list ap);
 	/**
-	 * Required. Close function.
+	 * \brief Required.
+	 *
+	 * Close function.
 	 *
 	 * The reverse of open. Free any allocated memory, etc.
 	 * This function may block if required. But avoid it if you can.
@@ -176,7 +191,9 @@ struct aura_transport
 	 */
 	void   (*close)(struct aura_node *node);
 	/**
-	 * Required. The main loop function and the workhorse of your transport plugin.
+	 * \brief Required
+	 *
+	 * The main loop function and the workhorse of your transport plugin.
 	 * Called via event loop either when timer expires or when a descriptor
 	 * is ready for operations.
 	 *
@@ -186,14 +203,18 @@ struct aura_transport
 	void   (*loop)(struct aura_node *node, const struct aura_pollfds *fd);
 	
 	/**
-	 * Optional. If your transport supplies any advanced work with custom pointers
+	 * \brief Optional.
+	 *
+	 * If your transport supplies any advanced work with custom pointers
 	 * this function will be called to get a pointer out of the buffer.
 	 *
 	 * @param buf
 	 */
 	void               *(*ptr_pull)(struct aura_buffer *buf);
 	/**
-	 * Optional. If your transport supplies any advanced work with custom pointers
+	 * \brief Optional
+	 *
+	 * If your transport supplies any advanced work with custom pointers
 	 * this function will be called to put a pointer to the buffer.
 	 * @param buf
 	 * @param ptr
@@ -201,7 +222,9 @@ struct aura_transport
 	void                (*ptr_push)(struct aura_buffer *buf, void *ptr);
 
 	/**
-	 * Optional. Override Buffer allocation. This may be called if you need
+	 * \brief Optional
+	 *
+	 * Override Buffer allocation. This may be called if you need
 	 * any special consideration when allocating buffers (e.g. ION).
 	 * The size includes any transport-required overhead, but doesn't include
 	 * the actual struct aura_buffer.
@@ -224,7 +247,9 @@ struct aura_transport
 	 */
 	struct aura_buffer *(*buffer_request)(struct aura_node *node, int size);
 	/**
-	 * Optional. Override Buffer deallocation. This may be called if you need
+	 * \brief Optional.
+	 *
+	 * Override Buffer deallocation. This may be called if you need
 	 * any special consideration when allocating and deallocating buffers (e.g. ION)
 	 *
 	 *
@@ -234,10 +259,14 @@ struct aura_transport
 	 */
 	void                (*buffer_release)(struct aura_node *node, struct aura_buffer *buf);
 
-	/** Private. Transport usage count */
+	/** \brief Private.
+	 *
+	 * Transport usage count */
 	int usage;
 
-	/** Private. List entry for global transport list */
+	/** \brief Private.
+	 *
+	 * List entry for global transport list */
 	struct list_head registry;
 
 };
