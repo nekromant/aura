@@ -1,6 +1,14 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 
 
+/**
+ * Returns the length of the buffer required to serialize the data of the following format including buffer overheads
+ *
+ * @param node
+ * @param fmt
+ * @return
+ */
 int  aura_fmt_len(struct aura_node *node, const char *fmt)
 {
 	int len=0;
@@ -41,7 +49,19 @@ int  aura_fmt_len(struct aura_node *node, const char *fmt)
  	return len + node->tr->buffer_overhead;
 }
 
-/* A relic of old days, replace with strncat impl */
+/**
+ * Return a pretty-printed representation of format in an allocated string.
+ * This function also validates the format and calculates the number of args
+ * The user should take care to free the string
+ *
+ * FixME: This implementation is old and hacky and should be refactored
+ *
+ * @param fmt string representing argument format
+ * @param valid pointer to an integer. It will contain 1 if the supplied format
+ *        is valid, 0 if not.
+ * @param num_args The number of arguments this format contains
+ * @return
+ */
 char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 {
 	*valid = 1;
@@ -183,7 +203,15 @@ static inline void va_put_S64(struct aura_buffer *buf, va_list ap, bool swap)
 
 
 
-
+/**
+ * Serialize a va_list ap of arguments according to format in an allocated aura_buffer
+ * This function takes care to do all the needed endian swapping and buffer overhead handling.
+ *
+ * @param node
+ * @param fmt
+ * @param ap
+ * @return
+ */
 struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_list ap)
 {
 	int size = aura_fmt_len(node, fmt);

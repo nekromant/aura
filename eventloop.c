@@ -3,6 +3,11 @@
 
 /* FixMe: The current timeout handling is pretty naive. But let it be so for now */
 
+ /** \addtogroup loop
+ *  @{
+ */
+
+
 static void eventloop_recalculate_timeouts(struct aura_eventloop *loop)
 {
 	loop->poll_timeout = 5000;
@@ -20,6 +25,15 @@ static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_
 	aura_eventsys_backend_fd_action(loop->eventsysdata, fd, act);
 }
 
+/**
+ * Add a node to existing event loop.
+ *
+ * WARNING: This node should not be registered in any other event loops or
+ * a panic will occur.
+ *
+ * @param loop
+ * @param node
+ */
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
@@ -45,6 +59,13 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 	aura_fd_changed_cb(node, eventloop_fd_changed_cb, loop); 
 }
 
+/**
+ * Remove a node from an event loop.
+ *
+ * WARNING: If node is not bound to any event loop a panic will occur
+ * @param loop
+ * @param node
+ */
 void aura_eventloop_del(struct aura_eventloop *loop, struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
@@ -70,6 +91,11 @@ void aura_eventloop_del(struct aura_eventloop *loop, struct aura_node *node)
 	aura_fd_changed_cb(node, NULL, NULL); 
 }
 
+/**
+ * Create an event loop from a NULL-terminated list of nodes passed in va_list
+ *
+ * @param ap
+ */
 void *aura_eventloop_vcreate(va_list ap)
 {
 	struct aura_node *node; 
@@ -97,6 +123,11 @@ err_free_loop:
 	return NULL; 
 }
 
+/**
+ * Create an event loop from a list of null-terminated nodes.
+ * Do not use this function. See aura_eventloop_create()
+ * @param dummy
+ */
 void *aura_eventloop_create__(int dummy, ...)
 {
 	void *ret;
@@ -107,12 +138,21 @@ void *aura_eventloop_create__(int dummy, ...)
 	return ret;
 }
 
-
+/**
+ * Handle events in the specified loop forever.
+ * @param loop
+ */
 void aura_handle_events(struct aura_eventloop *loop)
 {
 	aura_handle_events_timeout(loop, -1); 
 }
 
+/**
+ * Handle events in the specified loop.
+ *
+ * @param loop
+ * @param timeout_ms
+ */
 void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 {
 	struct aura_node *pos; 
@@ -124,3 +164,7 @@ void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 		aura_process_node_event(pos, NULL);
 	}
 }
+
+/**
+ * @}
+ */

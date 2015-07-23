@@ -4,7 +4,19 @@
 
 #define TRACE_LEN 36
 
-/* Obtain a backtrace and print it to stdout. */
+
+/**  \addtogroup misc
+ *  @{
+ */
+
+ /**
+ * Call this function to immediately cause an emergency exit.
+ *
+ * This function will take care to print a stack trace and dump all
+ * the interesting things to log. This function never returns.
+ *
+ * @param node - Node that caused panic. Can be NULL.
+ */
 void aura_panic(struct aura_node *node)
 {
   void *array[TRACE_LEN];
@@ -27,6 +39,9 @@ void aura_panic(struct aura_node *node)
   exit(128);
 }
 
+/**
+ * @}
+ */
 
 static void handler(int sig, siginfo_t *si, void *unused)
 {
@@ -42,3 +57,5 @@ void __attribute__((constructor (101))) reg_seg_handler() {
 	sa.sa_sigaction = handler;
 	sigaction(SIGSEGV, &sa, NULL);
 }
+
+

@@ -184,7 +184,7 @@ static int check_control(struct libusb_transfer *transfer)
 	return ret; 
 }
 
-/* TODO: Boundary checking */
+/* FixMe: Boundary checking, hardware may be nasty */
 static inline char *next(char *nx)
 {
 	return &nx[strlen(nx)+1];
@@ -406,7 +406,7 @@ err_free_inf:
 	return -ENOMEM;
 }
 
-void usb_close(struct aura_node *node)
+static void usb_close(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	inf->itransfer_enabled = false;
@@ -536,7 +536,7 @@ static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);
 }
 
-void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);

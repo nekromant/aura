@@ -110,7 +110,7 @@ static void lua_settoken(lua_State *L, const char* name, char t) {
 	lua_setglobal(L, name);
 }
 
-char *lua_strfromstack(lua_State *L, int n)
+static char *lua_strfromstack(lua_State *L, int n)
 {
 	char *ret = NULL;
 	if (lua_isstring(L, n))
@@ -118,8 +118,8 @@ char *lua_strfromstack(lua_State *L, int n)
 	return ret;
 }
 
-int luaopen_auracore (lua_State *L);
-int susb_open(struct aura_node *node, va_list ap)
+extern int luaopen_auracore (lua_State *L);
+static int susb_open(struct aura_node *node, va_list ap)
 {
 
 	struct libusb_context *ctx;
@@ -204,7 +204,7 @@ err_free_inf:
 	return -ENOMEM;
 }
 
-void susb_close(struct aura_node *node)
+static void susb_close(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	slog(0, SLOG_INFO, "Closing susb transport");

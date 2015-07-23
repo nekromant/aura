@@ -38,8 +38,8 @@ void aura_transport_dump_usage()
  * The memory for this struct is managed by the library and it should NOT
  * be freed (Unless it's a crash you want)
  *
- -- @param node 
- * 
+ * @param node
+ * @param fds
  * @return 
  */
 int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)

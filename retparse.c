@@ -28,7 +28,7 @@ DECLARE_GETFUNC(int32_t,  s32, __swap32);
 DECLARE_GETFUNC(uint64_t, u64, __swap64);
 DECLARE_GETFUNC(int64_t,  s64, __swap64);
 
-void *aura_buffer_get_bin(struct aura_buffer *buf, int len)
+const void *aura_buffer_get_bin(struct aura_buffer *buf, int len)
 {
 	struct aura_node *node = buf->userdata;
 	int pos = buf->pos;

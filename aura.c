@@ -1,6 +1,18 @@
 #include <aura/aura.h>
 #include <aura/private.h>
 
+ /**
+ * \addtogroup node
+ * @{
+ */
+
+/**
+ * Open an aura node and return the instance.
+ *
+ * @param name the name of the transport (e.g. usb)
+ * @param ap va_list of transport arguments. See transport docs.
+ * @return pointer to the newly created node
+ */
 struct aura_node *aura_vopen(const char* name, va_list ap)
 {
 	struct aura_node *node = calloc(1, sizeof(*node));
@@ -38,6 +50,12 @@ err_free_node:
 	return NULL;
 }
 
+/**
+ * Open a remote node. Transport arguments are passed in a variadic fasion.
+ * The number and format is transport-dependent.
+ * @param name transport name
+ * @return node instance or NULL
+ */
 struct aura_node *aura_open(const char *name, ...)
 {
 	struct aura_node *ret; 
@@ -48,26 +66,6 @@ struct aura_node *aura_open(const char *name, ...)
 	return ret; 
 }
 
-int aura_chain(struct aura_node *node, const char* name, ...)
-{
-	va_list ap;
-	int ret = 0; 
-	const struct aura_transport *tr = aura_transport_lookup(name); 
-	if (!tr) { 
-		slog(0, SLOG_FATAL, "Invalid transport name: %s", name);
-		return -EIO;
-	}
-
-	if (!node->tr)
-		BUG(node, "Attempt to chain for node that has no transport");
-
-	va_start(ap, name);
-	if (tr->open)
-		ret = tr->open(node, ap);
-	va_end(ap);
-	/* FixMe: Really add this shit to the chain */ 	
-	return ret; 
-}
 
 static void cleanup_buffer_queue(struct list_head *q)
 {
@@ -84,6 +82,12 @@ static void cleanup_buffer_queue(struct list_head *q)
 	slog(6, SLOG_LIVE, "Cleaned up %d buffers", i);
 }
 
+
+/**
+ * Close the node and free memory.
+ *
+ * @param node
+ */
 void aura_close(struct aura_node *node)
 {
 	if (node->tr->close)
@@ -100,10 +104,20 @@ void aura_close(struct aura_node *node)
 	/* Free file descriptors */
 	if (node->fds)
 		free(node->fds);
+	/* FixMe: Deregister from event loop */
 
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
 }
+
+/**
+ * @}
+ */
+
+/**
+ * \addtogroup workflow
+ * @{
+ */
 
 static void aura_handle_inbound(struct aura_node *node)
 {
@@ -142,79 +156,14 @@ static void aura_handle_inbound(struct aura_node *node)
 	}	
 }
 
-void aura_set_status(struct aura_node *node, int status)
-{
-	int oldstatus = node->status;
-	node->status = status;
-
-	if (oldstatus == status)
-		return;
-
-	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) { 
-		/* Dump etable */
-		int i; 
-		slog(2, SLOG_INFO, "Node %s is now going online", node->tr->name); 
-		slog(2, SLOG_INFO, "--- Dumping export table ---");
-		for (i=0; i< node->tbl->next; i++) { 
-			slog(2, SLOG_INFO, "%d. %s %s %s(%s )  [out %d bytes] | [in %d bytes] ", 
-			     node->tbl->objects[i].id,
-			     object_is_method((&node->tbl->objects[i])) ? "METHOD" : "EVENT ",
-			     node->tbl->objects[i].ret_pprinted,
-			     node->tbl->objects[i].name,
-			     node->tbl->objects[i].arg_pprinted,
-			     node->tbl->objects[i].arglen,
-			     node->tbl->objects[i].retlen);
-		}
-		slog(1, SLOG_INFO, "-------------8<-------------");
-	}
-	if ((oldstatus == AURA_STATUS_ONLINE) && (status == AURA_STATUS_OFFLINE)) {
-		int i; 
-		
-		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
-		     node->tr->name); 
-		cleanup_buffer_queue(&node->outbound_buffers);
-		/* Handle any remaining inbound messages */ 
-		aura_handle_inbound(node); 
-		/* Cancel any pending calls */
-		for (i=0; i < node->tbl->next; i++) { 
-			struct aura_object *o;
-			o=&node->tbl->objects[i];
-			if (o->pending && o->calldonecb) { 
-				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
-				o->pending--;
-			}
-		}
-		/* If any of the synchronos calls are running - inform them */
-		node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;
-		node->sync_ret_buf = NULL; 
-	}
-
-	if (node->status_changed_cb)
-		node->status_changed_cb(node, status, node->status_changed_arg);
-}
-
-void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
-{
-	if (aura_get_host_endianness() != en) 
-		node->need_endian_swap = true;
-}
-
-
-void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
-{
-	uint64_t curtime = aura_platform_timestamp();
-	/* See if we need to gently poll the node */
-
-	if (fd || (curtime - node->last_checked < node->poll_timeout))
-		if (node->tr->loop) { 
-			node->tr->loop(node, fd);
-			node->last_checked = curtime;
-		}
-	
-	/* Now grab all we got from the inbound queue and fire the callbacks */ 
-	aura_handle_inbound(node);
-}
-
+/**
+ * Setup the status change callback. This callback will be called when
+ * the node goes online and offline
+ *
+ * @param node
+ * @param cb
+ * @param arg
+ */
 void aura_status_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
 			    void *arg)
@@ -223,6 +172,14 @@ void aura_status_changed_cb(struct aura_node *node,
 	node->status_changed_cb = cb;
 }
 
+/**
+ * Set the fd changed callback. You don't need this call unless you're using your
+ * own eventsystem.
+ *
+ * @param node
+ * @param cb
+ * @param arg
+ */
 void aura_fd_changed_cb(struct aura_node *node, 
 			void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
 			void *arg)
@@ -231,6 +188,12 @@ void aura_fd_changed_cb(struct aura_node *node,
 	node->fd_changed_cb = cb;
 }
 
+/**
+ * Set up etable changed callback.
+ * @param node
+ * @param cb
+ * @param arg
+ */
 void aura_etable_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, void *arg),
 			    void *arg)
@@ -239,6 +202,18 @@ void aura_etable_changed_cb(struct aura_node *node,
 	node->etable_changed_cb = cb;
 }
 
+/**
+ * Queue a call for object with id id to the node.
+ * Normally you do not need this function - use aura_call() and aura_call_raw()
+ * synchronous calls and aura_start_call() and aura_start_call_raw() for async.
+ *
+ * @param node
+ * @param id
+ * @param calldonecb
+ * @param arg
+ * @param buf
+ * @return
+ */
 int aura_queue_call(struct aura_node *node, 
 		    int id,
 		    void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
@@ -266,7 +241,18 @@ int aura_queue_call(struct aura_node *node,
 	return 0;
 }
 
-
+/**
+ * Start a call for the object identified by its id the export table.
+ * Upon completion the specified callback will be fired with call results.
+ *
+ * @param node
+ * @param id
+ * @param calldonecb
+ * @param arg
+ * @return -EBADSLT if the requested id is not in etable
+ * 		   -EIO if serialization failed or another synchronous call for this id is pending
+ * 		   -ENOEXEC if the node is currently offline
+ */
 int aura_start_call_raw(
 	struct aura_node *node, 
 	int id,
@@ -289,6 +275,16 @@ int aura_start_call_raw(
 	return aura_queue_call(node, id, calldonecb, arg, buf);
 }
 
+/**
+ * Start a call to an object identified by name.
+ * @param node
+ * @param name
+ * @param calldonecb
+ * @param arg
+ * @return -EBADSLT if the requested id is not in etable
+ * 		   -EIO if serialization failed or another synchronous call for this id is pending
+ * 		   -ENOEXEC if the node is currently offline
+ */
 int aura_start_call(
 	struct aura_node *node, 
 	const char *name,
@@ -313,7 +309,14 @@ int aura_start_call(
 }
 
 
-
+/**
+ * Synchronously call an object identified by id.
+ *
+ * @param node
+ * @param id
+ * @param retbuf
+ * @return
+ */
 int aura_call_raw(
 	struct aura_node *node, 
 	int id,
@@ -340,7 +343,7 @@ int aura_call_raw(
 	va_end(ap);
 
 	if (!buf) {
-		slog(2, SLOG_WARN, "Serialisation failed");
+		slog(2, SLOG_WARN, "Serialization failed");
 		return -EIO;
 	}
 
@@ -358,6 +361,14 @@ int aura_call_raw(
 	return node->sync_call_result;
 }
 
+/**
+ * Synchronously call a remote method identified by name
+ *
+ * @param node
+ * @param name
+ * @param retbuf
+ * @return
+ */
 int aura_call(
 	struct aura_node *node, 
 	const char *name,
@@ -402,6 +413,10 @@ int aura_call(
 	return node->sync_call_result;
 }
 
+/**
+ * @}
+ */
+
 void *aura_eventsys_get_data(struct aura_node *node)
 {
 	return node->eventsys_data;
@@ -410,5 +425,120 @@ void *aura_eventsys_get_data(struct aura_node *node)
 void aura_eventsys_set_data(struct aura_node *node, void *data)
 {
 	node->eventsys_data = data;
+}
+
+
+/**
+ * \addtogroup trapi
+ * @{
+ */
+
+
+/**
+ * Change node status.
+ * This function should be called by transport plugins whenever the node
+ * changes the status
+ *
+ * @param node
+ * @param status
+ */
+void aura_set_status(struct aura_node *node, int status)
+{
+	int oldstatus = node->status;
+	node->status = status;
+
+	if (oldstatus == status)
+		return;
+
+	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) {
+		/* Dump etable */
+		int i;
+		slog(2, SLOG_INFO, "Node %s is now going online", node->tr->name);
+		slog(2, SLOG_INFO, "--- Dumping export table ---");
+		for (i=0; i< node->tbl->next; i++) {
+			slog(2, SLOG_INFO, "%d. %s %s %s(%s )  [out %d bytes] | [in %d bytes] ",
+			     node->tbl->objects[i].id,
+			     object_is_method((&node->tbl->objects[i])) ? "METHOD" : "EVENT ",
+			     node->tbl->objects[i].ret_pprinted,
+			     node->tbl->objects[i].name,
+			     node->tbl->objects[i].arg_pprinted,
+			     node->tbl->objects[i].arglen,
+			     node->tbl->objects[i].retlen);
+		}
+		slog(1, SLOG_INFO, "-------------8<-------------");
+	}
+	if ((oldstatus == AURA_STATUS_ONLINE) && (status == AURA_STATUS_OFFLINE)) {
+		int i;
+
+		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
+		     node->tr->name);
+		cleanup_buffer_queue(&node->outbound_buffers);
+		/* Handle any remaining inbound messages */
+		aura_handle_inbound(node);
+		/* Cancel any pending calls */
+		for (i=0; i < node->tbl->next; i++) {
+			struct aura_object *o;
+			o=&node->tbl->objects[i];
+			if (o->pending && o->calldonecb) {
+				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
+				o->pending--;
+			}
+		}
+		/* If any of the synchronos calls are running - inform them */
+		node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;
+		node->sync_ret_buf = NULL;
+	}
+
+	if (node->status_changed_cb)
+		node->status_changed_cb(node, status, node->status_changed_arg);
+}
+
+/**
+ * Set node endianness.
+ * This function should be called by transport when it knows the remote
+ * endianness before any of the actual calls are made.
+ *
+ * @param node
+ * @param en
+ */
+void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
+{
+	if (aura_get_host_endianness() != en)
+		node->need_endian_swap = true;
+}
+
+/**
+ * Process an event for the node.
+ * If it is just periodic polling fd can be NULL. This
+ *
+ * @param node
+ * @param fd
+ */
+
+/**
+ * @}
+ */
+
+
+void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
+{
+	if (fd && node->tr->loop)
+		node->tr->loop(node, fd);
+
+	uint64_t curtime = aura_platform_timestamp();
+	if ((curtime - node->last_checked < node->poll_timeout) && node->tr->loop) {
+		node->tr->loop(node, NULL);
+		node->last_checked = curtime;
+	}
+
+	/* Now grab all we got from the inbound queue and fire the callbacks */
+	aura_handle_inbound(node);
+}
+
+void aura_wait_status(struct aura_node *node, int status)
+{
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	while (node->status != status)
+		aura_handle_events(loop);
 }
 

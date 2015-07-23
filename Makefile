@@ -73,3 +73,12 @@ clean:
 	-cd usb-test-dummy-fw && make mrproper
 	-rm tests/*.o
 
+doxygen: 
+	( cat Doxyfile ; echo "PROJECT_NUMBER=0.1" ) | doxygen 
+	cd doxygen; \
+	rm -Rfv .git; \
+	git init .;\
+	git add *;\
+	git commit -m "documentation-for-gh-pages";\
+
+.PHONY: doxygen

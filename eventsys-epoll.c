@@ -40,7 +40,7 @@ void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *a
 	int ret; 
 	int op = (action == AURA_FD_ADDED) ? EPOLL_CTL_ADD : EPOLL_CTL_DEL;
 
-	ev.events = 0; /* FixMe: ... */
+	ev.events = ap->events; 
 	ev.data.ptr = (void *) ap;
 	ret = epoll_ctl(epd->epollfd, op, ap->fd, &ev);
 	if (ret != 0) 

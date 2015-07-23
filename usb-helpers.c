@@ -84,7 +84,15 @@ struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx,
 		
 	}
 	libusb_free_device_list(list, 1);
+
 	return found;
 }
 
-
+int ncusb_watch_for_device(struct libusb_contex *ctx, 
+			   int vid, 
+			   int pid, 
+			   int (*openfunc)(void *arg),
+			   void *arg)
+{
+	
+}
