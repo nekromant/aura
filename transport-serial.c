@@ -21,7 +21,7 @@ static void serpacket_pack(struct aura_node *node, struct aura_buffer *buf)
 	
 }
 */
-int ser_open(struct aura_node *node, va_list ap)
+static int ser_open(struct aura_node *node, va_list ap)
 {
 	const char *port = va_arg(ap, const char *);
 	int spd  = va_arg(ap, int);
@@ -33,12 +33,12 @@ int ser_open(struct aura_node *node, va_list ap)
 	return 0;
 }
 
-void ser_close(struct aura_node *node)
+static void ser_close(struct aura_node *node)
 {
 	slog(0, SLOG_INFO, "Closing dummy transport");
 }
 
-void ser_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void ser_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;
