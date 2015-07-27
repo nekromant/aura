@@ -67,9 +67,9 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 }
 
 /**
- * Remove a node from an event loop.
+ * Remove a node from it's associated event loop.
  *
- * WARNING: If node is not bound to any event loop a panic will occur
+ * WARNING: If the node is not bound to any event loop a panic will occur
  * @param loop
  * @param node
  */
@@ -81,7 +81,7 @@ void aura_eventloop_del(struct aura_node *node)
 
 	/* Some sanity checking first */
 	if (loop == NULL)
-		BUG(node, "Specified node is not bound to any eventsystem");	
+		BUG(node, "Specified node is not bound to any eventloop");	
 
 	/* Remove our node from the list */
 	list_del(&node->eventloop_node_list);
@@ -133,8 +133,9 @@ err_free_loop:
 
 /**
  * Create an event loop from a list of null-terminated nodes.
- * Do not use this function. See aura_eventloop_create()
- * @param dummy
+ * Do not use this function. See aura_eventloop_create() macro
+ * @param dummy a dummy parameter required by va_start
+ * @param ... A NULL-terminated list of nodes
  */
 void *aura_eventloop_create__(int dummy, ...)
 {
@@ -146,6 +147,11 @@ void *aura_eventloop_create__(int dummy, ...)
 	return ret;
 }
 
+/** 
+ * Destroy and eventloop and deassociate any nodes from it. 
+ * 
+ * @param loop 
+ */
 void aura_eventloop_destroy(struct aura_eventloop *loop) 
 {
 	struct list_head *pos; 
@@ -160,6 +166,7 @@ void aura_eventloop_destroy(struct aura_eventloop *loop)
 	aura_eventsys_backend_destroy(loop->eventsysdata);
 	free(loop);
 }
+
 /**
  * Handle events in the specified loop until someone calls
  * aura_eventloop_break()
@@ -221,6 +228,14 @@ void aura_eventloop_interrupt(struct aura_eventloop *loop)
 	aura_eventsys_backend_interrupt(loop->eventsysdata);
 }
 
+/** 
+ * Internal function called by the eventsystem to report an event on a descriptor ap. 
+ * Reporting ap as NULL means that the event processing has been interrupted via 
+ * aura_eventloop_interrupt()
+ * 
+ * @param loop 
+ * @param ap 
+ */
 void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfds *ap)
 {
 	struct aura_node *node; 

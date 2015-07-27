@@ -338,6 +338,9 @@ int aura_start_call(
 
 /**
  * Synchronously call an object identified by id.
+ * If the call succeeds, retbuf will be the pointer to aura_buffer containing
+ * the values. It's your responsibility to call aura_buffer_release() on the retbuf
+ * after you are done working with resulting values
  *
  * @param node
  * @param id
@@ -389,7 +392,10 @@ int aura_call_raw(
 }
 
 /**
- * Synchronously call a remote method identified by name
+ * Synchronously call a remote method of node identified by name. 
+ * If the call succeeds, retbuf will be the pointer to aura_buffer containing
+ * the values. It's your responsibility to call aura_buffer_release() on the retbuf
+ * after you are done working with resulting values
  *
  * @param node
  * @param name
