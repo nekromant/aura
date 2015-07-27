@@ -105,6 +105,7 @@ struct aura_object {
 
 struct aura_eventloop { 
 	int autocreated;
+	int keep_running;
 	int poll_timeout;
 	struct list_head nodelist;
 	void *eventsysdata;

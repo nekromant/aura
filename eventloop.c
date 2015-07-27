@@ -161,16 +161,21 @@ void aura_eventloop_destroy(struct aura_eventloop *loop)
 	free(loop);
 }
 /**
- * Handle events in the specified loop forever.
+ * Handle events in the specified loop until someone calls
+ * aura_eventloop_break()
+ *
  * @param loop
  */
 void aura_handle_events(struct aura_eventloop *loop)
 {
-	aura_handle_events_timeout(loop, 3000); 
+	loop->keep_running = 1;
+	while (loop->keep_running)
+		aura_handle_events_timeout(loop, -1); 
 }
 
 /**
- * Handle events in the specified loop.
+ * Wait and handle an event in the specified loop and return or 
+ * just wait until a timeout occurs.
  *
  * @param loop
  * @param timeout_ms
@@ -186,18 +191,35 @@ void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 	}
 }
 
-
-void aura_eventloop_interrupt(struct aura_eventloop *loop)
+/** 
+ * Interrupt a running event loop. 
+ * This function can be called from the callbacks.  
+ * 
+ * @param loop 
+ */
+void aura_eventloop_break(struct aura_eventloop *loop)
 {
-	slog(4, SLOG_DEBUG, "eventloop: Interrupting eventloop!");
-	aura_eventsys_backend_interrupt(loop->eventsysdata);
+	loop->keep_running = 0; 
+	aura_eventloop_interrupt(loop);
 }
-
 
 
 /**
  * @}
  */
+
+
+/** 
+ * Internal function that causes eventsystem to stop waiting and reiterate 
+ * all the nodes. Do not use it in your applications! Use aura_eventloop_break() 
+ * instead. 
+ * 
+ -- @param loop 
+*/
+void aura_eventloop_interrupt(struct aura_eventloop *loop)
+{
+	aura_eventsys_backend_interrupt(loop->eventsysdata);
+}
 
 void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfds *ap)
 {
