@@ -104,6 +104,7 @@ struct aura_object {
 };
 
 struct aura_eventloop { 
+	int autocreated;
 	int poll_timeout;
 	struct list_head nodelist;
 	void *eventsysdata;
@@ -539,8 +540,14 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
  * @}
  */
 
+
+void aura_eventloop_destroy(struct aura_eventloop *loop);
 void *aura_eventloop_vcreate(va_list ap);
 void *aura_eventloop_create__(int dummy, ...);
+void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node);
+void aura_eventloop_del(struct aura_node *node);
+void aura_eventloop_interrupt(struct aura_eventloop *loop);
+
 
 void aura_handle_events(struct aura_eventloop *loop);
 void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);

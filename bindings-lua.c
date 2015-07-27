@@ -1,6 +1,7 @@
 #define LUA_LIB
 
 #include <aura/aura.h>
+#include <aura/private.h>
 #include <search.h>
 #include <lua.h>
 #include <lauxlib.h>

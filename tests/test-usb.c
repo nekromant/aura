@@ -3,10 +3,10 @@
 
 int main() {
 	int ret; 
-	int i = 32; 
+	int i = 3200; 
 	slog_init(NULL, 88);
 	struct aura_node *n = aura_open("usb", 0x1d50, 0x6032, "www.ncrmnt.org", NULL, NULL);
-	struct aura_eventloop *loop = aura_eventloop_create(n); 
+
 
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
@@ -19,10 +19,16 @@ int main() {
 	}
 	printf("====> GOT %d from device\n", ret);
 	aura_buffer_release(n, retbuf); 
+
+	/* Test if auto-created eventsystem will get properly destroyed */
+	struct aura_eventloop *loop = aura_eventloop_create(n); 
+
 	while(i--) {
 		aura_handle_events(loop);
 		usleep(10000);
 	}
+
 	aura_close(n);
+	aura_eventloop_destroy(loop);
 	return 0;
 }

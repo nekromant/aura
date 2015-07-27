@@ -70,6 +70,14 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
 	return node->nextfd;
 }
 
+/** 
+ * Add a file descriptor to be polled by the event system. 
+ * Events are a bitmask from poll.h 
+ * 
+ * @param node 
+ * @param fd 
+ * @param events 
+ */
 void aura_add_pollfds(struct aura_node *node, int fd, short events)
 {
 	struct aura_pollfds *ap;
@@ -79,12 +87,14 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 		node->fds    = calloc(8, sizeof(*node->fds));
 		node->numfds = 8;
 		node->nextfd = 0;
+		slog(4, SLOG_DEBUG, "node: %d descriptor slots available", node->numfds);
 	}
 
 	if (node->nextfd >= node->numfds) {
 		int count = node->numfds * 2;
 		node->fds    = realloc(node->fds, count * sizeof(*node->fds));
 		node->numfds = count;
+		slog(4, SLOG_DEBUG, "node: Resized. %d descriptor slots available", node->numfds);
 	}
 
 	if (!node->fds) {
@@ -101,6 +111,12 @@ void aura_add_pollfds(struct aura_node *node, int fd, short events)
 		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
 }
 
+/** 
+ * Remove a descriptor from the list of the descriptors to be polled.
+ * 
+ * @param node 
+ * @param fd 
+ */
 void aura_del_pollfds(struct aura_node *node, int fd)
 {
 	int i;

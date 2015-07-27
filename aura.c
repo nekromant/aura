@@ -1,5 +1,23 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <inttypes.h>
+
+
+static void *aura_eventsys_get_autocreate(struct aura_node *node)
+{
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	if (loop == NULL) {
+		slog(3, SLOG_DEBUG, "aura: Auto-creating eventsystem for node");
+		loop = aura_eventloop_create(node);
+		if (!loop) {
+			slog(0, SLOG_ERROR, "aura: eventloop auto-creation failed");
+			aura_panic(node);
+		}
+		loop->autocreated = 1;
+		aura_eventsys_set_data(node, loop);
+	}
+	return loop;
+}
 
  /**
  * \addtogroup node
@@ -17,9 +35,9 @@ struct aura_node *aura_vopen(const char* name, va_list ap)
 {
 	struct aura_node *node = calloc(1, sizeof(*node));
 	int ret = 0; 
-	node->poll_timeout = 250; /* 250 ms default */
 	if (!node)
 		return NULL;
+	node->poll_timeout = 250; /* 250 ms default */
 	node->tr = aura_transport_lookup(name); 
 	if (!node->tr) { 
 		slog(0, SLOG_FATAL, "Invalid transport name: %s", name);
@@ -90,8 +108,13 @@ static void cleanup_buffer_queue(struct list_head *q)
  */
 void aura_close(struct aura_node *node)
 {
+	struct aura_eventloop *loop = aura_eventsys_get_data(node); 
+	
 	if (node->tr->close)
 		node->tr->close(node);
+
+	if (loop)
+		aura_eventloop_del(node);
 
 	/* After transport shutdown we need to clean up 
 	   remaining buffers */
@@ -101,11 +124,11 @@ void aura_close(struct aura_node *node)
 	/* Check if we have an export table registered and nuke it */
 	if (node->tbl)
 		aura_etable_destroy(node->tbl);
+
 	/* Free file descriptors */
 	if (node->fds)
 		free(node->fds);
-	/* FixMe: Deregister from event loop */
-
+	
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
 }
@@ -221,6 +244,7 @@ int aura_queue_call(struct aura_node *node,
 		    struct aura_buffer *buf)
 {
 	struct aura_object *o;
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
 	if(node->status != AURA_STATUS_ONLINE) 
 		return -ENOEXEC;
@@ -237,7 +261,10 @@ int aura_queue_call(struct aura_node *node,
 	buf->userdata = o;
 	o->pending++;
 	aura_queue_buffer(&node->outbound_buffers, buf);
-	slog(4, SLOG_DEBUG, "Queued call for id %d (%s)", id, o->name); 
+	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", id, o->name);
+	/* Reset the last_checked timestamp to force-call transport's loop */
+	node->last_checked = 0;
+	aura_eventloop_interrupt(loop);
 	return 0;
 }
 
@@ -327,7 +354,7 @@ int aura_call_raw(
 	struct aura_buffer *buf; 
 	int ret; 
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
-	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
@@ -379,7 +406,7 @@ int aura_call(
 	struct aura_buffer *buf; 
 	int ret; 
 	struct aura_object *o = aura_etable_find(node->tbl, name);
-	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
@@ -526,7 +553,8 @@ void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *
 		node->tr->loop(node, fd);
 
 	uint64_t curtime = aura_platform_timestamp();
-	if ((curtime - node->last_checked < node->poll_timeout) && node->tr->loop) {
+
+	if ((curtime - node->last_checked > node->poll_timeout) && node->tr->loop) {
 		node->tr->loop(node, NULL);
 		node->last_checked = curtime;
 	}
@@ -537,7 +565,7 @@ void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *
 
 void aura_wait_status(struct aura_node *node, int status)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	while (node->status != status)
 		aura_handle_events(loop);
 }

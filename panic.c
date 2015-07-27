@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 #include <execinfo.h>
 #include <signal.h>
 

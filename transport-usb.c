@@ -3,9 +3,6 @@
 #include <aura/usb_helpers.h>
 #include <libusb.h>
 
-/* int vid, int pid, char *vendor, char *product, char *serial */
-
-
 struct usb_interrupt_packet { 
 	uint8_t pending_evts; 
 } __attribute__((packed));
@@ -54,6 +51,7 @@ enum device_state {
  */
 
 struct usb_dev_info { 
+	struct aura_node *node; 
 	uint8_t  flags;
 	struct aura_export_table *etbl;
 	
@@ -75,12 +73,8 @@ struct usb_dev_info {
 	struct libusb_transfer* itransfer;
 	unsigned char ibuffer[8]; /* static interrupt buffer */
 
-
-	int vid;
-	int pid;
-	const char *vendor;
-	const char *product;
-	const char *serial;
+	/* Usb device string */
+	struct ncusb_devwatch_data dev_descr;
 };
 
 enum usb_requests { 
@@ -315,7 +309,7 @@ static void cb_got_dev_info(struct libusb_transfer *transfer)
 	request_object(node, inf->current_object++);
 }
 
-static void usb_try_open_device(struct aura_node *node)
+static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 {
 	/* FixMe: Reading descriptors is synchronos. This is not needed
 	 * often, but leaves a possibility of a flaky usb device to 
@@ -324,14 +318,10 @@ static void usb_try_open_device(struct aura_node *node)
 	 * from a device in an async fasion in the background. 
 	 */
 	int ret;
-	struct usb_dev_info *inf = aura_get_transportdata(node);
+	struct usb_dev_info *inf = arg;
+	struct aura_node *node = inf->node; 
 
-	inf->handle = ncusb_find_and_open(inf->ctx, inf->vid, inf->pid,
-					  inf->vendor,
-					  inf->product,
-					  inf->serial);
-	if (!inf->handle) 
-		return;
+	inf->handle = hndl;
 	
 	libusb_fill_interrupt_transfer(inf->itransfer, inf->handle, 0x81,
 				       inf->ibuffer, 8, 
@@ -346,14 +336,14 @@ static void usb_try_open_device(struct aura_node *node)
 	ret = libusb_submit_transfer(inf->ctransfer);
 	if (ret!= 0) {
 		libusb_close(inf->handle);
-		return;
+		return -1;
 	}
 
 	inf->state = AUSB_DEVICE_INIT; /* Change our state */
 	inf->cbusy = true;
 
 	slog(4, SLOG_DEBUG, "usb: Device opened, info packet requested");
-	return;
+	return 0;
 };
 
 int usb_open(struct aura_node *node, va_list ap)
@@ -369,15 +359,21 @@ int usb_open(struct aura_node *node, va_list ap)
 		return -EIO;
 
 	inf->io_buf_size = 256;
-	inf->vid = va_arg(ap, int);
-	inf->pid = va_arg(ap, int);
-	inf->vendor  = va_arg(ap, const char *);
-	inf->product = va_arg(ap, const char *);
-	inf->serial  = va_arg(ap, const char *);
+	inf->dev_descr.vid = va_arg(ap, int);
+	inf->dev_descr.pid = va_arg(ap, int);
+	inf->dev_descr.vendor  = va_arg(ap, char *);
+	inf->dev_descr.product = va_arg(ap, char *);
+	inf->dev_descr.serial  = va_arg(ap, char *);
+	inf->dev_descr.device_found_func = usb_start_ops;
+	inf->dev_descr.arg = inf;
+	inf->node = node;
+
+	ncusb_start_descriptor_watching(node, inf->ctx);
 	aura_set_transportdata(node, inf);	
 
 	slog(4, SLOG_INFO, "usb: vid 0x%x pid 0x%x vendor %s product %s serial %s", 
-	     inf->vid, inf->pid, inf->vendor, inf->product, inf->serial);
+	     inf->dev_descr.vid, inf->dev_descr.pid, inf->dev_descr.vendor, 
+	     inf->dev_descr.product, inf->dev_descr.serial);
 
 	inf->ctrlbuf   = malloc(inf->io_buf_size);
 	if (!inf->ctrlbuf)
@@ -390,10 +386,10 @@ int usb_open(struct aura_node *node, va_list ap)
 	if (!inf->ctransfer)
 		goto err_free_int;
 	
-	usb_try_open_device(node); /* Try it! */
-	if (inf->state == AUSB_DEVICE_SEARCHING)
-		slog(0, SLOG_WARN, "usb: Device not found, will try again later");
-	
+	slog(1, SLOG_INFO, "usb: Now looking for a matching device");
+
+	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
+
 	return 0;
 	
 err_free_int:
@@ -559,12 +555,7 @@ static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		return;
 	}
 
-	/* TODO: Make use of libusb hotplug notification here */
-	/* Else, see what we can do now */
-	if (inf->state == AUSB_DEVICE_SEARCHING) {
-		usb_try_open_device(node);
-		return;
-	} else if (inf->state == AUSB_DEVICE_OPERATIONAL) {
+	if (inf->state == AUSB_DEVICE_OPERATIONAL) {
 		if (inf->pending) 
 			submit_event_readout(node);
 		else if ( (buf = aura_dequeue_buffer(&node->outbound_buffers)) ) { 

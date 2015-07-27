@@ -25,9 +25,9 @@ int main() {
 	aura_hexdump("buffer", retbuf->data, retbuf->size);
         aura_buffer_release(n, retbuf); 
 	
-        while(i--) {
-                aura_handle_events(loop);
-                usleep(10000);
+	while(i--) {
+		aura_handle_events(loop);
+		usleep(10000);
         }
         aura_close(n);
         return 0;

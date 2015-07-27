@@ -1,5 +1,6 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <sys/eventfd.h>
 
 /* FixMe: The current timeout handling is pretty naive. But let it be so for now */
 
@@ -28,8 +29,8 @@ static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_
 /**
  * Add a node to existing event loop.
  *
- * WARNING: This node should not be registered in any other event loops or
- * a panic will occur.
+ * WARNING: This node should not be registered in any other manually created event loops or a panic 
+ * will occur. 
  *
  * @param loop
  * @param node
@@ -38,10 +39,16 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
 	int i, count; 
+	struct aura_eventloop *curloop = aura_eventsys_get_data(node);
 
 	/* Some sanity checking first */
-	if (aura_eventsys_get_data(node) != NULL)
-		BUG(node, "Specified node already has an event-system");
+	if ((curloop != NULL) && (!curloop->autocreated))
+		BUG(node, "Specified node is already bound to an event-system");
+
+	if (curloop != NULL) { 
+		slog(4, SLOG_DEBUG, "eventloop: Node has an associated auto-created eventsystem, destroying...");
+		aura_eventloop_destroy(curloop);
+	}
 
 	/* Link our next node into our list and adjust timeouts */
 	list_add_tail(&node->eventloop_node_list, &loop->nodelist);
@@ -66,13 +73,14 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
  * @param loop
  * @param node
  */
-void aura_eventloop_del(struct aura_eventloop *loop, struct aura_node *node)
+void aura_eventloop_del(struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
 	int i, count; 
+	struct aura_eventloop *loop = aura_eventsys_get_data(node);
 
 	/* Some sanity checking first */
-	if (aura_eventsys_get_data(node) == NULL)
+	if (loop == NULL)
 		BUG(node, "Specified node is not bound to any eventsystem");	
 
 	/* Remove our node from the list */
@@ -101,11 +109,11 @@ void *aura_eventloop_vcreate(va_list ap)
 	struct aura_node *node; 
 	struct aura_eventloop *loop = calloc(1, sizeof(*loop));
 
-	loop->poll_timeout = 5000; 
 	if (!loop)
 		return NULL;
 
-	loop->eventsysdata = aura_eventsys_backend_create();
+	loop->poll_timeout = 5000; 
+	loop->eventsysdata = aura_eventsys_backend_create(loop);
 	if (!loop->eventsysdata)
 		goto err_free_loop;
 
@@ -138,13 +146,27 @@ void *aura_eventloop_create__(int dummy, ...)
 	return ret;
 }
 
+void aura_eventloop_destroy(struct aura_eventloop *loop) 
+{
+	struct list_head *pos; 
+	struct list_head *tmp; 
+
+	list_for_each_safe(pos, tmp, &loop->nodelist) {
+		struct aura_node *node = list_entry(pos, struct aura_node, 
+						    eventloop_node_list);
+		aura_eventloop_del(node);
+	}
+
+	aura_eventsys_backend_destroy(loop->eventsysdata);
+	free(loop);
+}
 /**
  * Handle events in the specified loop forever.
  * @param loop
  */
 void aura_handle_events(struct aura_eventloop *loop)
 {
-	aura_handle_events_timeout(loop, -1); 
+	aura_handle_events_timeout(loop, 3000); 
 }
 
 /**
@@ -158,13 +180,34 @@ void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 	struct aura_node *pos; 
 	/* Handle any pending events from descriptors */
 	aura_eventsys_backend_wait(loop->eventsysdata, timeout_ms); 
-	/* Check if any nodes needs their periodic poll */ 
-
+	/* Check if any nodes needs their periodic medicine */ 
 	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
 		aura_process_node_event(pos, NULL);
 	}
 }
 
+
+void aura_eventloop_interrupt(struct aura_eventloop *loop)
+{
+	slog(4, SLOG_DEBUG, "eventloop: Interrupting eventloop!");
+	aura_eventsys_backend_interrupt(loop->eventsysdata);
+}
+
+
+
 /**
  * @}
  */
+
+void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfds *ap)
+{
+	struct aura_node *node; 
+	if (ap) { 
+		node = ap->node;
+		aura_process_node_event(node, ap);
+	} else {
+		list_for_each_entry(node, &loop->nodelist, eventloop_node_list) {
+			aura_process_node_event(node, NULL);
+		}
+	}
+}

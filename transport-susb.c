@@ -14,6 +14,7 @@ enum device_state {
 };
 
 struct usb_dev_info { 
+	struct aura_node *node;
 	uint8_t  flags;
 	struct aura_export_table *etbl;
 
@@ -30,12 +31,8 @@ struct usb_dev_info {
 	struct libusb_transfer* ctransfer;
 	bool cbusy; 
 
-	int vid;
-	int pid;
-	char *vendor;
-	char *product;
-	char *serial;
-	char *conf;
+	/* Usb device string */
+	struct ncusb_devwatch_data dev_descr;
 };
 
 static void usb_panic_and_reset_state(struct aura_node *node)
@@ -77,7 +74,7 @@ static int check_control(struct libusb_transfer *transfer)
 	return ret; 
 }
 
-static void usb_try_open_device(struct aura_node *node)
+static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 {
 	/* FixMe: Reading descriptors is synchronos. This is not needed
 	 * often, but leaves a possibility of a flaky usb device to 
@@ -85,19 +82,15 @@ static void usb_try_open_device(struct aura_node *node)
 	 * A proper workaround would be manually reading out string descriptors
 	 * from a device in an async fasion in the background. 
 	 */
-	struct usb_dev_info *inf = aura_get_transportdata(node);
-	inf->handle = ncusb_find_and_open(inf->ctx, inf->vid, inf->pid,
-					  inf->vendor,
-					  inf->product,
-					  inf->serial);
+	struct usb_dev_info *inf = arg;
+	struct aura_node *node = inf->node; 
 
-	if (!inf->handle)
-		return; /* Not this time */
+	inf->handle = hndl;
 	
 	inf->state = SUSB_DEVICE_OPERATIONAL;
 	slog(4, SLOG_DEBUG, "susb: Device opened and ready to accept calls");
 	aura_set_status(node, AURA_STATUS_ONLINE);
-	return;
+	return 0;
 };
 
 
@@ -183,15 +176,22 @@ static int susb_open(struct aura_node *node, va_list ap)
 		goto err_free_lua;
 	}
 
-	inf->vid = lua_tonumber(L, 1);
-	inf->pid = lua_tonumber(L, 2);
-	inf->vendor = lua_strfromstack(L, 3);
-	inf->product = lua_strfromstack(L, 4);
-	inf->serial  = lua_strfromstack(L, 5);
+	inf->dev_descr.vid = lua_tonumber(L, 1);
+	inf->dev_descr.pid = lua_tonumber(L, 2);
+	inf->dev_descr.vendor = lua_strfromstack(L, 3);
+	inf->dev_descr.product = lua_strfromstack(L, 4);
+	inf->dev_descr.serial  = lua_strfromstack(L, 5);
+	inf->dev_descr.device_found_func = usb_start_ops;
+	inf->dev_descr.arg = inf;
+	inf->node = node;
 	/* We no not need this state anymore */
 	lua_close(L); 
-	aura_set_transportdata(node, inf);	
-	usb_try_open_device(node);
+	aura_set_transportdata(node, inf);
+	
+	ncusb_start_descriptor_watching(node, inf->ctx);
+	slog(1, SLOG_INFO, "usb: Now looking for a matching device");
+	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
+
 	return 0;
 err_free_ct:
 	libusb_free_transfer(inf->ctransfer);
@@ -212,12 +212,12 @@ static void susb_close(struct aura_node *node)
 	while (inf->cbusy) 
 		libusb_handle_events(inf->ctx);
 
-	if (inf->vendor)
-		free(inf->vendor);
-	if (inf->product)
-		free(inf->product);
-	if (inf->serial)
-		free(inf->serial);
+	if (inf->dev_descr.vendor)
+		free(inf->dev_descr.vendor);
+	if (inf->dev_descr.product)
+		free(inf->dev_descr.product);
+	if (inf->dev_descr.serial)
+		free(inf->dev_descr.serial);
 
 	libusb_free_transfer(inf->ctransfer);
 
@@ -274,7 +274,7 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);	
 }
 
-void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
@@ -284,7 +284,7 @@ void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	};
 
 	libusb_handle_events_timeout(inf->ctx, &tv);
-
+	slog(0, SLOG_DEBUG, "susb: loop state %d", inf->state);
 	if (inf->cbusy)
 		return; 
 	
@@ -293,13 +293,11 @@ void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		libusb_close(inf->handle);
 		inf->state = SUSB_DEVICE_SEARCHING;
-	} else if (inf->state == SUSB_DEVICE_SEARCHING) {
-		usb_try_open_device(node);
-		return;
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
 		buf = aura_dequeue_buffer(&node->outbound_buffers); 
 		if (!buf)
 			return;
+		slog(4, SLOG_DEBUG, "susb: outgoing...");
 		susb_issue_call(node, buf);
 	}
 }
