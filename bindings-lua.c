@@ -101,15 +101,17 @@ static int l_etable_activate(lua_State *L)
 
 static inline int check_node_and_push(lua_State *L, struct aura_node *node) 
 {
-	if (node)
+	if (node) {
 		lua_pushlightuserdata(L, node);
-	else
+		struct lua_bindingsdata *bdata = calloc(1, sizeof(*bdata));
+		if (!bdata)
+			return luaL_error(L, "Memory allocation error");
+		bdata->L = L;
+		aura_set_userdata(node, bdata);
+
+	} else {  
 		lua_pushnil(L);
-	struct lua_bindingsdata *bdata = calloc(1, sizeof(*bdata));
-	if (!bdata)
-		luaL_error(L, "Memory allocation error");
-	bdata->L = L;
-	aura_set_userdata(node, bdata);
+	}
 	return 1;
 }
 

@@ -18,7 +18,7 @@
  *
  * @param node - Node that caused panic. Can be NULL.
  */
-void aura_panic(struct aura_node *node)
+void __attribute__((noreturn)) aura_panic(struct aura_node *node)
 {
   void *array[TRACE_LEN];
   size_t size;

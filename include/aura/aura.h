@@ -381,7 +381,7 @@ int aura_call(
 	struct aura_buffer **ret,
 	...);
 
-void aura_panic(struct aura_node *node); 
+void __attribute__((noreturn)) aura_panic(struct aura_node *node);
 
 /** \addtogroup retparse
  *  @{
