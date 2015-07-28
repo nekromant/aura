@@ -245,6 +245,7 @@ int aura_queue_call(struct aura_node *node,
 {
 	struct aura_object *o;
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	int isfirst;
 
 	if(node->status != AURA_STATUS_ONLINE) 
 		return -ENOEXEC;
@@ -256,15 +257,21 @@ int aura_queue_call(struct aura_node *node,
 	if (o->pending) 
 		return -EIO; 
 
+	isfirst = list_empty(&node->outbound_buffers);
+
 	o->calldonecb = calldonecb; 
 	o->arg = arg; 
 	buf->userdata = o;
 	o->pending++;
 	aura_queue_buffer(&node->outbound_buffers, buf);
 	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", id, o->name);
-	/* Reset the last_checked timestamp to force-call transport's loop */
-	node->last_checked = 0;
-	aura_eventloop_interrupt(loop);
+
+	if (isfirst) {
+		slog(4, SLOG_DEBUG, "Notifying transport of queue status change");
+		node->last_checked = 0;
+		aura_eventloop_interrupt(loop);
+	};
+
 	return 0;
 }
 
@@ -300,6 +307,64 @@ int aura_start_call_raw(
 		return -EIO;
 	
 	return aura_queue_call(node, id, calldonecb, arg, buf);
+}
+
+/**
+ * Set the callback that will be called when event with supplied id arrives.
+ * NULL calldonecb disables this event callback.
+ * aura_buffer supplied to called in 'ret' contains any data assiciated with this event.
+ * You should not free the data buffer in the callback or access the buffer from anywhere
+ * but this callback. Make a copy if you need it.
+ *
+ * @param node
+ * @param id
+ * @param calldonecb
+ * @param arg
+ * @return
+ */
+int aura_set_event_callback_raw(
+		struct aura_node *node,
+		int id,
+		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+		void *arg)
+{
+	struct aura_buffer *buf;
+	struct aura_object *o = aura_etable_find_id(node->tbl, id);
+	if (!o)
+		return -EBADSLT;
+
+	o->calldonecb = calldonecb;
+	o->arg = arg;
+	return 0;
+}
+
+/**
+ * Set the callback that will be called when event with supplied name arrives.
+ * NULL calldonecb disables this event callback.
+ * aura_buffer supplied to called in 'ret' contains any data assiciated with this event.
+ * You should not free the data buffer in the callback or access the buffer from anywhere
+ * but this callback. Make a copy if you need it.
+ *
+ * @param node
+ * @param event
+ * @param calldonecb
+ * @param arg
+ * @return
+ */
+int aura_set_event_callback(
+		struct aura_node *node,
+		const char *event,
+		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+		void *arg)
+{
+	struct aura_buffer *buf;
+	struct aura_object *o = aura_etable_find(node->tbl, event);
+	if (!o)
+		return -EBADSLT;
+
+	o->calldonecb = calldonecb;
+	o->arg = arg;
+	return 0;
 }
 
 /**
