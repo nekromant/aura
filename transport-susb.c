@@ -293,6 +293,7 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		libusb_close(inf->handle);
 		inf->state = SUSB_DEVICE_SEARCHING;
+		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
 		buf = aura_dequeue_buffer(&node->outbound_buffers); 
 		if (!buf)
