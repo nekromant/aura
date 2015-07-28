@@ -102,6 +102,74 @@ struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
 	return &tbl->objects[id];	
 }
 
+#define format_matches(one, two) \
+		((!one && !two) || \
+		(one && two && strcmp(one, two)))
+
+static int object_is_equal(struct aura_object *one, struct aura_object *two)
+{
+	/* Objects are considered equal if: */
+
+	/* Names match */
+	if (strcmp(one->name, two->name) != 0)
+		return 1; /* Nope */
+
+	/* Argument formats match */
+	if (!format_matches(one->arg_fmt, two->arg_fmt))
+		return 1;
+
+	/* Ret formats match */
+	if (!format_matches(one->ret_fmt, two->ret_fmt))
+		return 1;
+
+	return 0;
+}
+
+static int migrate_object(struct aura_object *src, struct aura_object *dst)
+{
+	if (!src || !dst)
+		return 0;
+
+	if (object_is_equal(src, dst)) {
+		dst->calldonecb = src->calldonecb;
+		dst->arg = src->arg;
+		slog(4, SLOG_DEBUG, "etable: Successful migration of obj %d->%d (%s)",src->id, dst->id, dst->name);
+		return 1;
+	}
+	return 0;
+}
+static void etable_migrate(struct aura_export_table *old, struct aura_export_table *new)
+{
+	int i;
+	if (!old) /* Nothing to migrate */
+		return;
+	/* Migration is a complex process. We need to scan tables to see if there are any
+	 * differences (e.g. If the node was down for a firmware update) and move all the callbacks and
+	 * their arguments to the new table before nuking the old one.
+	 *
+	 * If return format or arguments formats have changed, we
+	 * will NOT migrate anything. This is better than keeping in a potentially broken state.
+	 *
+	 * The algo is somewhat smart:
+	 * We first try one-to-one mapping with the same id, since it's more likely to be the case 99% of the time.
+	 * If that fails - we do a hash-search of the name in the new table, and try to migrate our callbacks there
+	 *
+	 */
+	for(i=0; i < old->next; i++) {
+		struct aura_object *src = &old->objects[i];
+		struct aura_object *dst = &new->objects[i];
+
+		/* One-to-one mapping */
+		if (migrate_object(src, dst))
+			continue;
+
+		/* Try hash-search */
+		dst = aura_etable_find(new, src->name);
+		if (migrate_object(src, dst))
+			continue;
+	}
+}
+
 void aura_etable_activate(struct aura_export_table *tbl)
 {
 	struct aura_node *node = tbl->owner; 
@@ -110,8 +178,10 @@ void aura_etable_activate(struct aura_export_table *tbl)
 		aura_panic(node);
 	}
 	
-	if (node->tbl)
+	if (node->tbl) {
+		etable_migrate(node->tbl, tbl);
 		aura_etable_destroy(node->tbl);
+	}
 	node->tbl = tbl;
 
 	if (node->etable_changed_cb)
