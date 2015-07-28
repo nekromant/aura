@@ -195,9 +195,17 @@ struct aura_transport
 	/**
 	 * \brief Required
 	 *
-	 * The main loop function and the workhorse of your transport plugin.
-	 * Called via event loop either when timer expires or when a descriptor
-	 * is ready for operations.
+	 * The workhorse of your transport plugin.
+	 *
+	 * This function should check the node->outbound_buffers queue for any new messages to
+	 * deliver and place any incoming messages into node->inbound_buffers queue.
+	 *
+	 * This function is called by the core when:
+	 * - Descriptors associated with this node report being ready for I/O (fd will be set to
+	 *   the descriptor that reports being ready for I/O)
+	 * - Node's periodic timeout expires (fd will be NULL)
+	 * - A new message has been put into outbound queue that has previously been empty
+	 *   (e.g. Wake up! We've got work to do) (fd will NULL)
 	 *
 	 * @param node current node
 	 * @param fd pointer to struct aura_pollfds that generated an event.
@@ -270,7 +278,6 @@ struct aura_transport
 	 *
 	 * List entry for global transport list */
 	struct list_head registry;
-
 };
 
 /**

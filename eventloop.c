@@ -218,10 +218,13 @@ void aura_eventloop_break(struct aura_eventloop *loop)
 
 /** 
  * Internal function that causes eventsystem to stop waiting and reiterate 
- * all the nodes. Do not use it in your applications! Use aura_eventloop_break() 
+ * all the nodes. Called by the core to notify transport that a new message
+ * has been posted.
+ *
+ * Do not use it in your applications! Use aura_eventloop_break()
  * instead. 
  * 
- -- @param loop 
+ * @param loop
 */
 void aura_eventloop_interrupt(struct aura_eventloop *loop)
 {
