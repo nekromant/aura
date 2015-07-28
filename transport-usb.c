@@ -552,6 +552,7 @@ static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		libusb_close(inf->handle);
 		inf->handle = NULL;
 		inf->state = AUSB_DEVICE_SEARCHING;
+		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 		return;
 	}
 
