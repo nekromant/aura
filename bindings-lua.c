@@ -138,7 +138,7 @@ static int l_close(lua_State *L)
 	return 0;
 }
 
-static int l_loop_once(lua_State *L)
+static int l_handle_events(lua_State *L)
 {
 	struct aura_node *node; 
 	struct aura_eventloop *loop; 
@@ -147,6 +147,7 @@ static int l_loop_once(lua_State *L)
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
 	}
+
 	node = lua_touserdata(L, 1);
 	loop = aura_eventsys_get_data(node);
 	if (!loop) 
@@ -317,6 +318,10 @@ static int l_slog_init(lua_State *L)
 	return 0;
 }
 
+static int l_handle_events_timeout(lua_State *L)
+{
+	
+}
 
 static const luaL_Reg openfuncs[] = {
 	{ "dummy",     l_open_dummy},
@@ -326,7 +331,7 @@ static const luaL_Reg openfuncs[] = {
 };
 
 static const luaL_Reg libfuncs[] = {
-	{ "loop_once",       l_loop_once              },
+	{ "handle_events",   l_handle_events               },
 	{ "status_cb",       l_set_status_change_cb        },
 	{ "etable_cb",       l_set_etable_change_cb        },
 	{ "etable_create",   l_etable_create    },
