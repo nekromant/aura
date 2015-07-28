@@ -149,7 +149,7 @@ static int l_handle_events(lua_State *L)
 	}
 
 	node = lua_touserdata(L, 1);
-	loop = aura_eventsys_get_data(node);
+	loop = aura_eventloop_get_data(node);
 	if (!loop) 
 		luaL_error(L, "BUG: No eventsystem in node"); 
 

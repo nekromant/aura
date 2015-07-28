@@ -564,15 +564,17 @@ void aura_wait_status(struct aura_node *node, int status);
 
 
 /**
- * \addtogroup workflow
+ * \addtogroup node
  * @{
  */
 
  /** Set user data associated with this node.
- *
- * @param node
- * @param udata
- */
+  *  Just a convenient way to attach an arbitary pointer to this node.
+  *  See aura_get_userdata()
+  *
+  * @param node
+  * @param udata
+  */
 static inline void  aura_set_userdata(struct aura_node *node, void *udata)
 {
 	node->user_data = udata;
@@ -580,6 +582,7 @@ static inline void  aura_set_userdata(struct aura_node *node, void *udata)
 
 /**
  * Get user data associated with this node.
+ * See aura_set_userdata()
  *
  * @param node
  */

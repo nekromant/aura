@@ -74,6 +74,7 @@ clean:
 	-rm tests/*.o
 
 doxygen: 
+	-rm -Rfv doxygen/
 	( cat Doxyfile ; echo "PROJECT_NUMBER=0.1" ) | doxygen 
 	cd doxygen/html;\
 	rm -Rfv .git;\

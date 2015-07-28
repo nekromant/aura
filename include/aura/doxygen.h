@@ -1,6 +1,12 @@
 /* This include file is for doxygen groups only */
 
-/** @defgroup node Opening and closing nodes
+/** @defgroup node The basics
+ *
+ * This documentation describes only the C API and aura's internal stuff. If you
+ * are looking for documentation on lua bindings - it's not here. See luadoc.
+ *
+ * TODO: Describe that we need to include <aura/aura.h>, pkg-config and the rest
+ * of the stuff
  *
  * You start working with aura by opening a node using aura_open() or aura_vopen().
  * struct aura_node represents a remote device connected via some transport.
@@ -10,18 +16,23 @@
  * can go offline and online multiple times and normally this doesn't cause an application
  * to terminate (although, you can always do so).
  *
+ * You can associate your own data with a node using aura_set_userdata() and retrieve the pointer
+ * with aura_get_userdata()
+ *
  * When you are done working with the node, you just call aura_close() and all the memory is
- * freed. Simple, huh? Process to the next section to learn how to make calls on the opened node.
+ * freed. Simple, huh? Get over to to the next section to learn how to do something useful with a node
+ * apart from opening and closing.
+ *
  */
 
-
- /** @defgroup workflow Working with nodes
+ /** @defgroup sync The synchronous API
  *
+ * One of the core things of aura is the export table, or etable for short.
  * A node 'exports' a table of 'events' and 'methods' that it provides. This is all done
- * in the main event loop. Once aura receives and compiles the table of available objects
- * the node changes the state to indicate that it is ready to accept calls and deliver
- * events. If the node goes offline for some reason aura will read the export table again
- * once it goes online.
+ * by the transport in the main event loop. Once aura receives and compiles the table of
+ * available objects the node changes the state to indicate that it is ready to accept
+ * calls and deliver incoming events. If the node goes offline for some reason aura
+ * will read the export table again once it goes online.
  *
  * A 'method' represents a simple remote function. It accepts several arguments and
  * returns several results e.g. it looks just like a function call in lua:
@@ -29,7 +40,8 @@
  * a, b, c = function(arg1, arg2)
  *
  * The method can be called either synchronously using (See aura_call() and aura_call_raw()
- * or asynchronously using aura_start_call() or aura_start_call_raw().
+ * or asynchronously using aura_start_call() or aura_start_call_raw(). This section covers
+ * only synchronous API.
  *
  * Let's start with the simplest synchronous example for calling remote functions.
  * \code{.c}
@@ -57,33 +69,53 @@
  *
  * That's it? Thought it would be harder?
  *
- * However in real life synchronous API is rarely enough for anything serious, so we need
- * to be asynchronous instead.
+ * Events, on the contrary represent something that happened on the remote side. E.g. a timer
+ * expired, or a user pressed a button. Events can deliver arbitrary payload. Just like returning
+ * function arguments. Events are queued by the receiving side and should be read by via
+ * aura_read_event() and aura_read_event_timeout(). These function block until an actual event arrives.
+ * You can use aura_get_pending_events() to find out how many events are pending.
  *
  *
- * Events represent something that happens on the remote side and can be only handled in
- * asynchronous fashion. Events can also deliver a set of arguments for the user to handle.
+ * Objects (methods and events alike) are stored internally in a struct aura_object, enumerated from
+ * 0 to n. You can either do calls and set callbacks using object names (they are searched using a
+ * hash table, that's pretty fast) or via their ids. Beware, though: If the node represents a hardware
+ * device, it goes offline for a firmware upgrade and when it comes back to life it has a different export
+ * table and the id for the same method may change. Calling by name allows you to avoid conflicts.
+ * You get the idea, so don't shoot yourself in the knee!
  *
- * TODO: EVENT API DESCRIPTION HERE
+ * For something advanced usage - have a look at the async API that is way more powerful.
+ */
+
+
+ /** @defgroup async The asynchronous API
  *
- * Objects (methods and events alike) are stored internally enumerated from 0 to n. You can either
- * do calls and set callbacks using object names (they are searched using a hash table, that's
- * pretty fast) or via their ids. Beware, though: If the node represents a hardware device, it
- * goes offline for a firmware upgrade and when it comes back to life it has a different export
- * table and the id for the same method may change. You get the idea, so don't shoot yourself in
- * the knee!
+ * If you are reading this, you must be familiar with the concept of events and methods.
+ * If not have a look at the previous section that describes synchronous API. It has a nice
+ * overview of how things work.
  *
- * TODO: Right now if the node goes offline all the callbacks to events are reset and all pending
- * method calls are cancelled with AURA_CALL_TRANSPORT_FAIL status. Further versions are planned
- * to try and preserve existing callbacks and warn if any object signature changes.
+ * In this section we'll be dealing with asynchronous API. In real life your target device may
+ * work at speeds of several Mhz and take ages (compared to the host PC) to execute a method call.
+ * That's not cool, because we can do many other things while the remote side gets the job done.
  *
- * Before you can do synchronous calls on the node you have to create an eventloop using
- * aura_eventloop_create(). Right now it is not created automatically for added flexibility.
- * After it is done you can do synchronous calls or enter event handling loop using aura_handle_events()
- * and aura_handle_events_timeout()
+ * With asynchronous API you can start a method call, and get the results in the supplied callback.
+ * Events also get delivered into their respective callbacks (if any).
  *
- * TODO: We really should create an eventloop internally for only one node in lazy fashion, if
- * the user only wants synchronous calls. More newbie-friendly.
+ * If the node goes offline and later becomes live once more with a different export table, aura will
+ * try to preserve all of the event callbacks, even if their id changes. The callback will only get
+ * unregistered if event signature changes (e.g. the number or type of the returned values changes)
+ *
+ * All of the callbacks are delivered from the eventloop. aura comes with it's own easy to use event loop
+ * implementation that is covered in the next section. The general workflow is:
+ *
+ * - Open one or several nodes using aura_open() or aura_vopen()
+ * - Register all of your callbacks
+ * - Create an eventloop using aura_eventloop_create()
+ * - Run the event processing loop with aura_handle_events() for as long as you want
+ *
+ *
+ * If you wish to integrate aura with your own event loop, see aura_get_pollfds() to get a list of
+ * descriptors to poll and aura_fd_changed_cb() to get notified whenever transport expects a descriptor
+ * to be added/removed.
  *
  */
 

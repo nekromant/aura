@@ -39,7 +39,7 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
 	int i, count; 
-	struct aura_eventloop *curloop = aura_eventsys_get_data(node);
+	struct aura_eventloop *curloop = aura_eventloop_get_data(node);
 
 	/* Some sanity checking first */
 	if ((curloop != NULL) && (!curloop->autocreated))
@@ -52,7 +52,7 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 
 	/* Link our next node into our list and adjust timeouts */
 	list_add_tail(&node->eventloop_node_list, &loop->nodelist);
-	aura_eventsys_set_data(node, loop);
+	aura_eventloop_set_data(node, loop);
 
 	if (loop->poll_timeout > node->poll_timeout)
 		loop->poll_timeout = node->poll_timeout;
@@ -77,7 +77,7 @@ void aura_eventloop_del(struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
 	int i, count; 
-	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	struct aura_eventloop *loop = aura_eventloop_get_data(node);
 
 	/* Some sanity checking first */
 	if (loop == NULL)
@@ -85,7 +85,7 @@ void aura_eventloop_del(struct aura_node *node)
 
 	/* Remove our node from the list */
 	list_del(&node->eventloop_node_list);
-	aura_eventsys_set_data(node, NULL);
+	aura_eventloop_set_data(node, NULL);
 
 	/* Recalc all timeouts */ 
 	eventloop_recalculate_timeouts(loop);

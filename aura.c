@@ -5,7 +5,7 @@
 
 static void *aura_eventsys_get_autocreate(struct aura_node *node)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_data(node);
+	struct aura_eventloop *loop = aura_eventloop_get_data(node);
 	if (loop == NULL) {
 		slog(3, SLOG_DEBUG, "aura: Auto-creating eventsystem for node");
 		loop = aura_eventloop_create(node);
@@ -14,7 +14,7 @@ static void *aura_eventsys_get_autocreate(struct aura_node *node)
 			aura_panic(node);
 		}
 		loop->autocreated = 1;
-		aura_eventsys_set_data(node, loop);
+		aura_eventloop_set_data(node, loop);
 	}
 	return loop;
 }
@@ -108,7 +108,7 @@ static void cleanup_buffer_queue(struct list_head *q)
  */
 void aura_close(struct aura_node *node)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_data(node); 
+	struct aura_eventloop *loop = aura_eventloop_get_data(node); 
 	
 	if (node->tr->close)
 		node->tr->close(node);
@@ -137,10 +137,6 @@ void aura_close(struct aura_node *node)
  * @}
  */
 
-/**
- * \addtogroup workflow
- * @{
- */
 
 static void aura_handle_inbound(struct aura_node *node)
 {
@@ -160,24 +156,31 @@ static void aura_handle_inbound(struct aura_node *node)
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
 		     object_is_method(o) ? "response" : "event", 
 		     o->id, o->name);
+
 		if (object_is_method(o) && !o->pending) { 
 			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)", 
 			     o->id, o->name);
+			aura_buffer_release(node, buf);
 		} else if (o->calldonecb) { 
 			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
+			aura_buffer_release(node, buf);
 		} else if (node->sync_call_running) { 
 			node->sync_call_result = AURA_CALL_COMPLETED;
 			node->sync_ret_buf = buf; 
 		} else {
+			/* TODO: Buffer events here for synchronous processing */
 			slog(0, SLOG_WARN, "Dropping unhandled event %d (%s)", 
 			     o->id, o->name);
+			aura_buffer_release(node, buf);
 		}
 		o->pending--;
-		/* Don't free buffer for synchronos calls */
-		if (!node->sync_call_running)
-			aura_buffer_release(node, buf);
 	}	
 }
+
+/**
+ * \addtogroup async
+ * @{
+ */
 
 /**
  * Setup the status change callback. This callback will be called when
@@ -224,6 +227,7 @@ void aura_etable_changed_cb(struct aura_node *node,
 	node->etable_changed_arg = arg;
 	node->etable_changed_cb = cb;
 }
+
 
 /**
  * Queue a call for object with id id to the node.
@@ -400,6 +404,26 @@ int aura_start_call(
 	return aura_queue_call(node, o->id, calldonecb, arg, buf);
 }
 
+/**
+ * @}
+ * \addtogroup sync
+ * @{
+ */
+
+
+/**
+ * Block until node's status becomes one of the requested
+ *
+ * @param node
+ * @param status
+ */
+void aura_wait_status(struct aura_node *node, int status)
+{
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	while (node->status != status)
+		aura_handle_events(loop);
+}
+
 
 /**
  * Synchronously call an object identified by id.
@@ -480,20 +504,20 @@ int aura_call(
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	
 	if (node->sync_call_running) 
-		BUG(node, "Internal bug: Synchronos call within a synchronos call");
+		BUG(node, "BUG: Synchronous call within a synchronous call - fix your code!");
 
 	if (!o)
 		return -EBADSLT;
 
 	if (!loop)
-		BUG(node, "Node has no assosiated event system. Fix your code!");
+		BUG(node, "Node has no associated event system - fix your code!");
 	
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, ap);
 	va_end(ap);
 
 	if (!buf) {
-		slog(2, SLOG_WARN, "Serialisation failed");
+		slog(2, SLOG_WARN, "Serialization failed");
 		return -EIO;
 	}
 
@@ -515,12 +539,12 @@ int aura_call(
  * @}
  */
 
-void *aura_eventsys_get_data(struct aura_node *node)
+void *aura_eventloop_get_data(struct aura_node *node)
 {
 	return node->eventsys_data;
 }
 
-void aura_eventsys_set_data(struct aura_node *node, void *data)
+void aura_eventloop_set_data(struct aura_node *node, void *data)
 {
 	node->eventsys_data = data;
 }
@@ -604,6 +628,9 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
 	if (aura_get_host_endianness() != en)
 		node->need_endian_swap = true;
 }
+/**
+ * @}
+ */
 
 /**
  * Process an event for the node.
@@ -612,12 +639,6 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
  * @param node
  * @param fd
  */
-
-/**
- * @}
- */
-
-
 void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	if (fd && node->tr->loop)
@@ -634,10 +655,4 @@ void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *
 	aura_handle_inbound(node);
 }
 
-void aura_wait_status(struct aura_node *node, int status)
-{
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
-	while (node->status != status)
-		aura_handle_events(loop);
-}
 
