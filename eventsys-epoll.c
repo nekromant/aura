@@ -65,10 +65,8 @@ void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *a
 int aura_eventsys_backend_wait(void *backend, int timeout_ms) 
 {
 	struct aura_epoll_data *epd = backend;
-	struct aura_pollfds *ap;
 	struct epoll_event ev[NUM_EVTS];
 	int i; 
-
 	int ret = epoll_wait(epd->epollfd, ev, NUM_EVTS, timeout_ms);
 
 	slog(4, SLOG_LIVE, "epoll: reported %d events", ret);
@@ -79,6 +77,7 @@ int aura_eventsys_backend_wait(void *backend, int timeout_ms)
 	}
 
 	for (i = 0; i< ret; i++) {
+		struct aura_pollfds *ap;
 		ap = ev[i].data.ptr;
 		if (ap == &epd->evtfd) { 
 			/* Read out our event */
