@@ -19,7 +19,7 @@ static void *aura_eventsys_get_autocreate(struct aura_node *node)
 	return loop;
 }
 
- /**
+/**
  * \addtogroup node
  * @{
  */
@@ -169,10 +169,26 @@ static void aura_handle_inbound(struct aura_node *node)
 			node->sync_call_result = AURA_CALL_COMPLETED;
 			node->sync_ret_buf = buf; 
 		} else {
-			/* TODO: Buffer events here for synchronous processing */
-			slog(0, SLOG_WARN, "Dropping unhandled event %d (%s)", 
-			     o->id, o->name);
-			aura_buffer_release(node, buf);
+			/* This one is tricky. We have an event with no callback */
+			if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
+				/* If we have an overrun - drop the oldest event */
+				if (node->sync_event_max <= node->sync_event_count) {
+					struct aura_buffer *todrop;
+					const struct aura_object *dummy;
+					int ret = aura_get_next_event(node, &dummy, &todrop);
+					if (ret != 0)
+						BUG(node, "Internal bug");
+					aura_buffer_release(node, todrop);
+				}
+
+				/* Now just queue the next one */
+				aura_queue_buffer(&node->event_buffers, buf);
+				node->sync_event_count++;
+			} else {
+				slog(0, SLOG_WARN, "Dropping event %d (%s)",
+				     o->id, o->name);
+				aura_buffer_release(node, buf);
+			}
 		}
 		o->pending--;
 	}	
@@ -328,10 +344,10 @@ int aura_start_call_raw(
  * @return
  */
 int aura_set_event_callback_raw(
-		struct aura_node *node,
-		int id,
-		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-		void *arg)
+	struct aura_node *node,
+	int id,
+	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+	void *arg)
 {
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
 	if (!o)
@@ -356,10 +372,10 @@ int aura_set_event_callback_raw(
  * @return
  */
 int aura_set_event_callback(
-		struct aura_node *node,
-		const char *event,
-		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-		void *arg)
+	struct aura_node *node,
+	const char *event,
+	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+	void *arg)
 {
 	struct aura_object *o = aura_etable_find(node->tbl, event);
 	if (!o)
