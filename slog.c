@@ -48,18 +48,21 @@ static slog_flags slg;
  */
 void get_system_date(SystemDate *mdate)
 {
-    time_t rawtime;
-    struct tm *timeinfo;
-    rawtime = time(NULL);
-    timeinfo = localtime(&rawtime);
-
-    /* Get System Date */
-    mdate->year = timeinfo->tm_year+1900;
-    mdate->mon = timeinfo->tm_mon+1;
-    mdate->day = timeinfo->tm_mday;
-    mdate->hour = timeinfo->tm_hour;
-    mdate->min = timeinfo->tm_min;
-    mdate->sec = timeinfo->tm_sec;
+	time_t rawtime;
+	struct tm *timeinfo;
+	rawtime = time(NULL);
+	timeinfo = localtime(&rawtime);
+	if (!timeinfo) {
+		memset(mdate, 0x0, sizeof(*mdate));
+		return;
+	}
+	/* Get System Date */
+	mdate->year = timeinfo->tm_year+1900;
+	mdate->mon = timeinfo->tm_mon+1;
+	mdate->day = timeinfo->tm_mday;
+	mdate->hour = timeinfo->tm_hour;
+	mdate->min = timeinfo->tm_min;
+	mdate->sec = timeinfo->tm_sec;
 }
 
 

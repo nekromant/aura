@@ -2,7 +2,7 @@
 -include blackjack.mk
 
 #CC=clang --analyze -Xanalyzer -analyzer-output=text
-CC=clang
+CC?=clang
 
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
@@ -37,16 +37,27 @@ all: libauracore.so test.usb test.dummy test.susb test.timestamp
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
+# Hint: Use gcc -E -x c++ - -v < /dev/nul to find out the paths
 cppcheck:
-	cppcheck --enable=all --force \
-	-Iinclude/ \
+	@echo "Running cppcheck, please standby..."
+	@cppcheck --enable=all --force \
+	-I/usr/include/c++/4.9 \
+	-I/usr/include/x86_64-linux-gnu/c++/4.9 \
+	-I/usr/include/c++/4.9/backward \
 	-I/usr/lib/gcc/x86_64-linux-gnu/4.9/include \
 	-I/usr/local/include \
 	-I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed \
 	-I/usr/include/x86_64-linux-gnu \
 	-I/usr/include \
-	$(INCFLAGS) $(obj-y:.o=.c) > /dev/null
+	$(INCFLAGS) $(obj-y:.o=.c) > /dev/null 2>cppcheck.log
+	@cat cppcheck.log | grep -v "information"
 
+clang-analyze:
+	make clean
+	make CC=clang --analyze -Xanalyzer -analyzer-output=text
+infer: 
+	make clean
+	/opt/infer-linux64-v0.1.0/infer/infer/bin/infer -- make
 
 checkpatch:
 	./checkpatch.pl --no-tree -f $(obj-y:.o=.c) include/aura/*.h

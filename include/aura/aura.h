@@ -393,6 +393,11 @@ int aura_call(
 	struct aura_buffer **ret,
 	...);
 
+void aura_enable_sync_events(struct aura_node *node, int count);
+int aura_get_pending_events(struct aura_node *node);
+int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj, struct aura_buffer **retbuf);
+
+
 void __attribute__((noreturn)) aura_panic(struct aura_node *node);
 
 /** \addtogroup retparse

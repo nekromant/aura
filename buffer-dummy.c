@@ -8,6 +8,8 @@ struct aura_buffer *aura_buffer_internal_request(int size)
 {
 	int act_size = sizeof(struct aura_buffer) + size; 
 	struct aura_buffer *ret = malloc(act_size);
+	if (!ret)
+		return NULL;
 
 	ret->size = size;
 	ret->pos = 0;

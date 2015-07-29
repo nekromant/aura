@@ -72,6 +72,8 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		return str;
 	}
 	char *str = malloc(strlen(fmt) * 10 + 64);
+	if (!str)
+		aura_panic(NULL);
 	*str = 0x0;
 	char *tmp = str;
 	int shift = 0;

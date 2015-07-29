@@ -557,7 +557,7 @@ int aura_call(
 void aura_enable_sync_events(struct aura_node *node, int count)
 {
 	while(node->sync_event_max >= count) {
-		struct aura_object *o;
+		const struct aura_object *o;
 		struct aura_buffer *buf;
 		int ret = aura_get_next_event(node, &o, &buf);
 		if (ret!=0)
@@ -596,7 +596,7 @@ int aura_get_pending_events(struct aura_node *node)
  * @param retbuf
  * @return 0 if the event has been read out.
  */
-int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf)
+int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj, struct aura_buffer **retbuf)
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
@@ -608,7 +608,7 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, 
 	if (!*retbuf)
 		aura_panic(node);
 
-	*obj = (*retbuf)->userdata;
+	*obj = (const struct aura_object *)(*retbuf)->userdata;
 	node->sync_event_count--;
 	return 0;
 }
