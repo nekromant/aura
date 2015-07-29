@@ -60,6 +60,11 @@ struct aura_node {
 	struct aura_buffer *sync_ret_buf; 
 	int sync_call_result;
 
+	/* Synchronous event storage */
+	struct list_head          event_buffers;
+	int sync_event_max;
+	int sync_event_count;
+
 	/* General callbacks */
 	void *status_changed_arg;
 	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);

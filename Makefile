@@ -38,7 +38,7 @@ libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
 cppcheck:
-	cppcheck --enable=all \
+	cppcheck --enable=all --force \
 	-Iinclude/ \
 	-I/usr/lib/gcc/x86_64-linux-gnu/4.9/include \
 	-I/usr/local/include \

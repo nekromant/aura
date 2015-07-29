@@ -46,6 +46,7 @@ struct aura_node *aura_vopen(const char* name, va_list ap)
 
 	INIT_LIST_HEAD(&node->outbound_buffers);
 	INIT_LIST_HEAD(&node->inbound_buffers);
+	INIT_LIST_HEAD(&node->event_buffers);
 
 	node->status = AURA_STATUS_OFFLINE;
 
@@ -332,7 +333,6 @@ int aura_set_event_callback_raw(
 		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
 		void *arg)
 {
-	struct aura_buffer *buf;
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
 	if (!o)
 		return -EBADSLT;
@@ -361,7 +361,6 @@ int aura_set_event_callback(
 		void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
 		void *arg)
 {
-	struct aura_buffer *buf;
 	struct aura_object *o = aura_etable_find(node->tbl, event);
 	if (!o)
 		return -EBADSLT;
@@ -533,6 +532,85 @@ int aura_call(
 	*retbuf =  node->sync_ret_buf;
 	node->sync_call_running = false; 
 	return node->sync_call_result;
+}
+
+
+/**
+ * Enable synchronous event processing.
+ *
+ * Call this function to make the node queue up to count events in an internal buffer
+ * to be read out. By default the node does not queue any events for synchronous readout and
+ * drops them immediately if no callbacks are installed to catch this event.
+ * If the number of events in this queue reaches count - events will be dropped (oldest first)
+ *
+ * To disable synchronous event processing completely - call this function with count=0
+ *
+ * Adding a callback for an event is not recommended if you use this API, although possible.
+ * It will just prevent events from being queued here - instead your callback will be fired.
+ *
+ * If there are more than count events already queued - all extra events will be immediately
+ * discarded.
+ *
+ * @param node
+ * @param count Maximum number of events to store for synchronous readout
+ */
+void aura_enable_sync_events(struct aura_node *node, int count)
+{
+	while(node->sync_event_max >= count) {
+		struct aura_object *o;
+		struct aura_buffer *buf;
+		int ret = aura_get_next_event(node, &o, &buf);
+		if (ret!=0)
+			BUG(node, "Internal bug while resizing event queue (failed to drop some events)");
+		aura_buffer_release(node, buf);
+	}
+	node->sync_event_max = count;
+}
+
+/**
+ * Get the number of events currently in internal event queue.
+ *
+ * @param node
+ * @return
+ */
+int aura_get_pending_events(struct aura_node *node)
+{
+	return node->sync_event_count;
+}
+
+/**
+ * Retrieve the next event from the synchronous event queue. If there is no events in queue -
+ * this function may block until the next event arrives.
+ *
+ * If the node goes offline during waiting for event this function will return an error
+ *
+ * The caller should not in any way modify or free the obj pointer. The obj pointer returned will
+ * may not be valid after the next synchronous call (e.g. if the node went offline and back online)
+ * so do not rely on that in your application.
+ *
+ * The caller should free the retbuf pointer with aura_buffer_release when it is no longer
+ * needed
+ *
+ * @param node
+ * @param obj
+ * @param retbuf
+ * @return 0 if the event has been read out.
+ */
+int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf)
+{
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+
+	while (!node->sync_event_count) {
+		aura_handle_events(loop);
+	}
+
+	*retbuf = aura_dequeue_buffer(&node->inbound_buffers);
+	if (!*retbuf)
+		aura_panic(node);
+
+	*obj = (*retbuf)->userdata;
+	node->sync_event_count--;
+	return 0;
 }
 
 /**
