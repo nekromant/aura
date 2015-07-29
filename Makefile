@@ -1,7 +1,6 @@
 .SUFFIXES:
 -include blackjack.mk
 
-#CC=clang --analyze -Xanalyzer -analyzer-output=text
 CC?=clang
 
 #Handle case when we're not cross-compiling
@@ -54,7 +53,7 @@ cppcheck:
 
 clang-analyze:
 	make clean
-	make CC=clang --analyze -Xanalyzer -analyzer-output=text
+	make CC="clang --analyze -Xanalyzer -analyzer-output=text"
 infer: 
 	make clean
 	/opt/infer-linux64-v0.1.0/infer/infer/bin/infer -- make
