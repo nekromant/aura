@@ -1,5 +1,4 @@
 #include <aura/aura.h>
-#include <aura/private.h>
 
 #define ARG 100500
 #define ARG2 100502
@@ -31,7 +30,6 @@ int main() {
 
 	int ret; 
 	struct aura_node *n = aura_open("dummy", 1, 2, 3);
-	
 	ret = aura_start_call(n, "echo_u16", calldonecb, (void *) ARG, 0x0102);
 	printf("call started with ret %d\n", ret);
 

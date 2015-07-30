@@ -211,6 +211,21 @@ static void aura_handle_inbound(struct aura_node *node)
  * @{
  */
 
+
+/** 
+ * Get the eventloop associated with this node
+ * 
+ * @param node 
+ * 
+ * @return Pointer to node's eventloop or NULL if node has none
+ */
+struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node)
+{
+	return node->eventsys_data;
+}
+
+
+
 /**
  * Setup the status change callback. This callback will be called when
  * the node goes online and offline
@@ -651,15 +666,6 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
  * @}
  */
 
-void *aura_eventloop_get_data(struct aura_node *node)
-{
-	return node->eventsys_data;
-}
-
-void aura_eventloop_set_data(struct aura_node *node, void *data)
-{
-	node->eventsys_data = data;
-}
 
 
 /**
@@ -765,6 +771,11 @@ void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *
 
 	/* Now grab all we got from the inbound queue and fire the callbacks */
 	aura_handle_inbound(node);
+}
+
+void aura_eventloop_set_data(struct aura_node *node, struct aura_eventloop *data)
+{
+	node->eventsys_data = data;
 }
 
 

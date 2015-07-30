@@ -620,4 +620,8 @@ static inline void *aura_get_userdata(struct aura_node *node)
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
 void aura_buffer_release(struct aura_node *nd, struct aura_buffer *buf);
 
+/* event system data access functions */
+struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node);
+
+
 #endif

@@ -49,9 +49,6 @@ static inline void *aura_get_transportdata(struct aura_node *node)
  * @}
  */
 
-/* event system data access functions */
-void *aura_eventloop_get_data(struct aura_node *node);
-void aura_eventloop_set_data(struct aura_node *node, void *data);
 
 /* Buffer stuff */
 
@@ -75,5 +72,6 @@ static inline void aura_buffer_rewind(struct aura_node *node, struct aura_buffer
  * @}
  */
 
+void aura_eventloop_set_data(struct aura_node *node, struct aura_eventloop *);
 
 #endif
