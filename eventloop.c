@@ -181,15 +181,15 @@ void aura_handle_events_forever(struct aura_eventloop *loop)
 }
 
 /**
- * Handle events in the specified loop until an event occurs
- * or someone calls aura_eventloop_break()
+ * Handle events in the specified loop for a default timeout
+ * or until aura_eventloop_break()
  *
  * @param loop
  */
 
 void aura_handle_events(struct aura_eventloop *loop)
 {
-		aura_handle_events_timeout(loop, -1); 
+	aura_handle_events_timeout(loop, loop->poll_timeout); 
 }
 
 /**

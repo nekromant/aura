@@ -633,8 +633,8 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
 		aura_handle_events(loop);
 	}
 
-	*retbuf = aura_dequeue_buffer(&node->inbound_buffers);
-	if (!*retbuf)
+	*retbuf = aura_dequeue_buffer(&node->event_buffers);
+	if (!(*retbuf))
 		aura_panic(node);
 
 	*obj = (const struct aura_object *)(*retbuf)->userdata;
