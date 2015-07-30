@@ -196,6 +196,10 @@ void aura_handle_events(struct aura_eventloop *loop)
  * Wait and handle an event in the specified loop and return or 
  * just wait until a timeout occurs.
  *
+ * timeout_ms equal to 0 makes this function non-blocking
+ *
+ * timeout_ms equal to -1 makes thsi function idential to aura_handle_events()
+ *
  * @param loop
  * @param timeout_ms
  */
