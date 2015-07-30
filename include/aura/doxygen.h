@@ -70,11 +70,19 @@
  * That's it? Thought it would be harder?
  *
  * Events, on the contrary represent something that happened on the remote side. E.g. a timer
- * expired, or a user pressed a button. Events can deliver arbitrary payload. Just like returning
- * function arguments. Events are queued by the receiving side and should be read by via
- * aura_read_event() and aura_read_event_timeout(). These function block until an actual event arrives.
- * You can use aura_get_pending_events() to find out how many events are pending.
+ * expired, or a user pressed a button and so on. Events can deliver arbitrary payload.
+ * Just like returning function arguments. Normally events make sense if you use asynchronous API.
  *
+ * However, aura provides a way to handle events in synchronous way. By default the core will
+ * discard any incoming events unless they have an associated callback. If you want to process
+ * events in the synchronous way you have to first call aura_enable_sync_events() and specify the queue
+ * size. Up to count incoming events will be queued this way.
+ *
+ * Once event queuing is enabled you can read the next event with aura_get_next_event() and
+ * aura_get_next_event_timeout(). These functions may block until the next event arrives.
+ *
+ * You can also get aura_get_pending_events() to find out the number of queued events.
+ * If it is 0 - aura_get_next_event() will block.
  *
  * Objects (methods and events alike) are stored internally in a struct aura_object, enumerated from
  * 0 to n. You can either do calls and set callbacks using object names (they are searched using a
