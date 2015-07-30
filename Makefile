@@ -46,6 +46,13 @@ endef
 $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 
 # Hint: Use gcc -E -x c++ - -v < /dev/nul to find out the paths
+
+test: all
+	valgrind --leak-check=full ./tests/dummy-sync-call
+	valgrind --leak-check=full ./tests/dummy-sync-call-by-id
+	valgrind --leak-check=full ./tests/dummy-sync-evt-read
+
+
 cppcheck:
 	@echo "Running cppcheck, please standby..."
 	@cppcheck --enable=all --force \

@@ -366,6 +366,9 @@ int aura_set_event_callback_raw(
 	if (!o)
 		return -EBADSLT;
 
+	if (!object_is_event(o))
+		return -EBADF;
+
 	o->calldonecb = calldonecb;
 	o->arg = arg;
 	return 0;
@@ -393,6 +396,9 @@ int aura_set_event_callback(
 	struct aura_object *o = aura_etable_find(node->tbl, event);
 	if (!o)
 		return -EBADSLT;
+
+	if (!object_is_event(o))
+		return -EBADF;
 
 	o->calldonecb = calldonecb;
 	o->arg = arg;
