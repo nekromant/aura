@@ -114,8 +114,12 @@ void aura_close(struct aura_node *node)
 	if (node->tr->close)
 		node->tr->close(node);
 
-	if (loop)
-		aura_eventloop_del(node);
+	if (loop) { 
+		if (loop->autocreated)
+			aura_eventloop_destroy(loop);
+		else
+			aura_eventloop_del(node);
+	}
 
 	/* After transport shutdown we need to clean up 
 	   remaining buffers */
