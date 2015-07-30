@@ -167,9 +167,13 @@ static void aura_handle_inbound(struct aura_node *node)
 			     o->id, o->name);
 			aura_buffer_release(node, buf);
 		} else if (o->calldonecb) { 
+			slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
+			     o->id, o->name);
 			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
 			aura_buffer_release(node, buf);
-		} else if (node->sync_call_running) { 
+		} else if (object_is_method(o) && (node->sync_call_running)) { 
+			slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
+			     o->id, o->name);
 			node->sync_call_result = AURA_CALL_COMPLETED;
 			node->sync_ret_buf = buf; 
 		} else {
@@ -188,14 +192,19 @@ static void aura_handle_inbound(struct aura_node *node)
 				/* Now just queue the next one */
 				aura_queue_buffer(&node->event_buffers, buf);
 				node->sync_event_count++;
+				slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout", 
+				     o->id, o->name);
 			} else {
 				slog(0, SLOG_WARN, "Dropping event %d (%s)",
 				     o->id, o->name);
 				aura_buffer_release(node, buf);
 			}
+			continue;
 		}
 		o->pending--;
-	}	
+		if (o->pending < 0)
+			BUG(node, "Internal BUG: pending evt count lesser than zero");
+	}
 }
 
 /**

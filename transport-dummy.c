@@ -11,6 +11,7 @@ int dummy_open(struct aura_node *node, va_list ap)
 	aura_etable_add(etbl, "echo_u8", "1", "1");
 	aura_etable_add(etbl, "echo_u16", "2", "2");
 	aura_etable_add(etbl, "echo_i16", "7", "7");
+	aura_etable_add(etbl, "ping", NULL, "1");
 	aura_etable_activate(etbl);
 	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
@@ -25,7 +26,12 @@ void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;
-	
+
+	/* queue an event */
+	buf = aura_buffer_request(node, 8);
+	buf->userdata = aura_etable_find(node->tbl, "ping");
+	aura_queue_buffer(&node->inbound_buffers, buf);
+
 	while(1) { 
 		buf = aura_dequeue_buffer(&node->outbound_buffers); 
 		if (!buf)
