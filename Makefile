@@ -2,7 +2,8 @@
 -include blackjack.mk
 
 CC?=clang
-unit-tests = $(shell ls tests/*.c)
+unit-tests  = $(shell ls tests/*.c)
+dummy-tests = $(shell ls tests/dummy-*.c)
 
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
@@ -48,10 +49,10 @@ $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 # Hint: Use gcc -E -x c++ - -v < /dev/nul to find out the paths
 
 test: all
-	valgrind --leak-check=full ./tests/dummy-sync-call
-	valgrind --leak-check=full ./tests/dummy-sync-call-by-id
-	valgrind --leak-check=full ./tests/dummy-sync-evt-read
-
+	echo "Running test suite"
+	$(foreach u,$(dummy-tests),\
+	valgrind --show-leak-kinds=all --leak-check=full $(subst .c,,$(u)) && ) \
+		echo "...Passed"
 
 cppcheck:
 	@echo "Running cppcheck, please standby..."
