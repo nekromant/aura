@@ -569,7 +569,7 @@ void aura_eventloop_interrupt(struct aura_eventloop *loop);
 
 void aura_handle_events(struct aura_eventloop *loop);
 void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);
-
+void aura_handle_events_forever(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
 

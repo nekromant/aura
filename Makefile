@@ -2,6 +2,7 @@
 -include blackjack.mk
 
 CC?=clang
+unit-tests = $(shell ls tests/*.c)
 
 #Handle case when we're not cross-compiling
 ifneq ($(GNU_TARGET_NAME),)
@@ -31,10 +32,18 @@ endef
 $(eval $(call PKG_CONFIG,libusb-1.0))
 $(eval $(call PKG_CONFIG,lua5.2))
 
-all: libauracore.so test.usb test.dummy test.susb test.timestamp
+all: libauracore.so $(subst .c,,$(unit-tests))
 
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
+
+define unit_test_rule
+$(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
+	$$(SILENT_LD)$$(CROSS_COMPILE)$$(CC) -o $$(@) $$(LDFLAGS) $$(^)
+endef
+
+
+$(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 
 # Hint: Use gcc -E -x c++ - -v < /dev/nul to find out the paths
 cppcheck:
@@ -60,18 +69,6 @@ infer:
 
 checkpatch:
 	./checkpatch.pl --no-tree -f $(obj-y:.o=.c) include/aura/*.h
-
-test.usb: tests/test-usb.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
-
-test.timestamp: tests/test-timestamp.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
-
-test.susb: tests/test-susb.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
-
-test.dummy: tests/dummy-testcases.o $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)$(CC) -o $(@) $(LDFLAGS) $(^)
 
 %.o: %.c 
 	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)

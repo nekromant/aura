@@ -33,6 +33,7 @@ void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		o = buf->userdata;
 		slog(0, SLOG_DEBUG, "Dequeued/requeued obj id %d (%s)", o->id, o->name);
 		aura_queue_buffer(&node->inbound_buffers, buf);
+		aura_eventloop_interrupt(aura_eventloop_get_data(node));
 	}
 }
 

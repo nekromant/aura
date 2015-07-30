@@ -168,15 +168,27 @@ void aura_eventloop_destroy(struct aura_eventloop *loop)
 }
 
 /**
- * Handle events in the specified loop until someone calls
- * aura_eventloop_break()
+ * Handle events in the specified loop forever or 
+ * until someone calls aura_eventloop_break()
  *
  * @param loop
  */
-void aura_handle_events(struct aura_eventloop *loop)
+void aura_handle_events_forever(struct aura_eventloop *loop)
 {
 	loop->keep_running = 1;
 	while (loop->keep_running)
+		aura_handle_events_timeout(loop, -1); 
+}
+
+/**
+ * Handle events in the specified loop until an event occurs
+ * or someone calls aura_eventloop_break()
+ *
+ * @param loop
+ */
+
+void aura_handle_events(struct aura_eventloop *loop)
+{
 		aura_handle_events_timeout(loop, -1); 
 }
 
