@@ -11,6 +11,7 @@ int aura_eventsys_backend_wait(void *backend, int timeout_ms);
 void aura_eventsys_backend_interrupt(void *backend);
 void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *ap, int action);
 void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd);
+void aura_eventloop_interrupt(struct aura_eventloop *loop);
 
 
 void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfds *ap);

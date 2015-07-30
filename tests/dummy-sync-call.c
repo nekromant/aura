@@ -1,6 +1,5 @@
 #include <aura/aura.h>
 
-
 int main() {
 	slog_init(NULL, 18);
 

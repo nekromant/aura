@@ -176,6 +176,9 @@ static void aura_handle_inbound(struct aura_node *node)
 			     o->id, o->name);
 			node->sync_call_result = AURA_CALL_COMPLETED;
 			node->sync_ret_buf = buf; 
+			o->pending--;
+			if (o->pending < 0)
+				BUG(node, "Internal BUG: pending evt count lesser than zero");
 		} else {
 			/* This one is tricky. We have an event with no callback */
 			if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
@@ -199,11 +202,7 @@ static void aura_handle_inbound(struct aura_node *node)
 				     o->id, o->name);
 				aura_buffer_release(node, buf);
 			}
-			continue;
 		}
-		o->pending--;
-		if (o->pending < 0)
-			BUG(node, "Internal BUG: pending evt count lesser than zero");
 	}
 }
 

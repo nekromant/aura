@@ -393,6 +393,18 @@ int aura_call(
 	struct aura_buffer **ret,
 	...);
 
+int aura_set_event_callback_raw(
+	struct aura_node *node,
+	int id,
+	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+	void *arg);
+
+int aura_set_event_callback(
+	struct aura_node *node,
+	const char *event,
+	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+	void *arg);
+
 void aura_enable_sync_events(struct aura_node *node, int count);
 int aura_get_pending_events(struct aura_node *node);
 int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj, struct aura_buffer **retbuf);
@@ -564,7 +576,7 @@ void *aura_eventloop_vcreate(va_list ap);
 void *aura_eventloop_create__(int dummy, ...);
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node);
 void aura_eventloop_del(struct aura_node *node);
-void aura_eventloop_interrupt(struct aura_eventloop *loop);
+void aura_eventloop_break(struct aura_eventloop *loop);
 
 
 void aura_handle_events(struct aura_eventloop *loop);

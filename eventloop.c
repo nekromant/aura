@@ -177,7 +177,7 @@ void aura_handle_events_forever(struct aura_eventloop *loop)
 {
 	loop->keep_running = 1;
 	while (loop->keep_running)
-		aura_handle_events_timeout(loop, -1); 
+		aura_handle_events_timeout(loop, loop->poll_timeout); 
 }
 
 /**
