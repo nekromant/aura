@@ -203,6 +203,11 @@ static inline void va_put_S64(struct aura_buffer *buf, va_list ap, bool swap)
 	buf->pos+=sizeof(v);	
 }
 
+static inline void va_put_BIN(struct aura_buffer *buf, int len, va_list ap)
+{
+	void *ptr = va_arg(ap, void *);
+	memcpy(&buf->data[buf->pos], ptr, len);
+}
 
 
 /**
@@ -223,10 +228,10 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 
 	aura_buffer_rewind(node, buf);
 
-#define PUT(n)								\
-	case URPC_ ## n:						\
-		va_put_ ## n(buf, ap, node->need_endian_swap);		\
-		break;							\
+#define PUT(n)							\
+	case URPC_ ## n:					\
+		va_put_ ## n(buf, ap, node->need_endian_swap);	\
+		break;						\
 		
 	while (*fmt) {
 		switch (*fmt++) { 
@@ -238,6 +243,16 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 			PUT(S32);
 			PUT(U64);
 			PUT(S64);
+
+		case URPC_BIN:
+		{
+			int len = atoi(fmt);
+			if (len == 0) 
+				BUG(NULL, "Internal serilizer bug processing: %s", fmt);
+			va_put_BIN(buf, len, ap);
+			while (*fmt && (*fmt++ != '.'));
+			break;
+		}
 		};
 	};
 
