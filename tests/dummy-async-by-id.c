@@ -30,13 +30,13 @@ int main() {
 
 	int ret; 
 	struct aura_node *n = aura_open("dummy", 1, 2, 3);
-	ret = aura_start_call(n, "echo_u16", calldonecb, (void *) ARG, 0x0102);
+	ret = aura_start_call_raw(n, 2, calldonecb, (void *) ARG, 0x0102);
 	printf("call started with ret %d\n", ret);
 
-	ret = aura_set_event_callback(n, "ping", pingcb, (void *) ARG2);
+	ret = aura_set_event_callback_raw(n, 4, pingcb, (void *) ARG2);
 	printf("event handler set with ret %d\n", ret);
 	aura_handle_events_forever(aura_eventloop_get_data(n));
-	printf("Closing teh shop...");
+	printf("Closing the shop...");
 	aura_close(n);
 
 	return 0;
