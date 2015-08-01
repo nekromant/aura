@@ -142,7 +142,7 @@ static int susb_open(struct aura_node *node, va_list ap)
 	lua_setglobal(L, "aura");
 
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
-	ret = luaL_loadfile(L, "lua/conf-loader.lua");
+	ret = luaL_loadfile(L, "lua/aura/conf-loader.lua");
 	if (ret) {
 		slog(2, SLOG_INFO, "usbsimple: config file load error");
 		goto err_free_ct;
@@ -167,6 +167,8 @@ static int susb_open(struct aura_node *node, va_list ap)
 	lua_settoken(L, "SINT16",  URPC_S16);
 	lua_settoken(L, "SINT32",  URPC_S32);
 	lua_settoken(L, "SINT64",  URPC_S64);
+
+	lua_settoken(L, "FMT_BIN",  URPC_BIN);
 
 	/* Ask Lua to run our little script */
 	ret = lua_pcall(L, 0, 5, 0);
@@ -246,7 +248,9 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	uint8_t rqtype;
 	uint16_t wIndex, wValue, *ptr;
-	if (!o->ret_fmt)
+
+
+	if (o->ret_fmt)
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
 	else
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
@@ -255,7 +259,9 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	ptr = (uint16_t *) &buf->data[buf->pos]; 
 	wValue = *ptr++;
 	wIndex = *ptr++;
+
 	memmove(&buf->data[buf->pos], ptr, buf->size - LIBUSB_CONTROL_SETUP_SIZE - 2*sizeof(uint16_t));
+
 	/* e.g if device is big endian, but has le descriptors
 	 * we have to be extra careful here 
 	 */
