@@ -177,6 +177,9 @@ void aura_etable_activate(struct aura_export_table *tbl)
 		slog(0, SLOG_FATAL, "Internal BUG: Attemped to change export table when transport is online");
 		aura_panic(node);
 	}
+
+	if (node->etable_changed_cb)
+		node->etable_changed_cb(node, node->tbl, tbl, node->etable_changed_arg);
 	
 	if (node->tbl) {
 		etable_migrate(node->tbl, tbl);
@@ -184,8 +187,7 @@ void aura_etable_activate(struct aura_export_table *tbl)
 	}
 	node->tbl = tbl;
 
-	if (node->etable_changed_cb)
-		node->etable_changed_cb(node, node->etable_changed_arg);
+
 }
 
 void aura_etable_destroy(struct aura_export_table *tbl)

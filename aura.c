@@ -158,6 +158,7 @@ static void aura_handle_inbound(struct aura_node *node)
 		 * aura_buffer_get calls simpler 
 		 */
 		buf->userdata = node; 
+
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
 		     object_is_method(o) ? "response" : "event", 
 		     o->id, o->name);
@@ -182,13 +183,13 @@ static void aura_handle_inbound(struct aura_node *node)
 		} else {
 			/* This one is tricky. We have an event with no callback */
 			if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
-				/* If we have an overrun - drop the oldest event */
+				/* If we have an overrun - drop the oldest event to free up space first*/
 				if (node->sync_event_max <= node->sync_event_count) {
 					struct aura_buffer *todrop;
 					const struct aura_object *dummy;
 					int ret = aura_get_next_event(node, &dummy, &todrop);
 					if (ret != 0)
-						BUG(node, "Internal bug");
+						BUG(node, "Internal bug, no next event");
 					aura_buffer_release(node, todrop);
 				}
 
@@ -198,8 +199,12 @@ static void aura_handle_inbound(struct aura_node *node)
 				slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout", 
 				     o->id, o->name);
 			} else {
-				slog(0, SLOG_WARN, "Dropping event %d (%s)",
-				     o->id, o->name);
+				/* Last resort - try the catch-all event callback */
+				if (node->unhandled_evt_cb)
+					node->unhandled_evt_cb(node, o, buf, node->unhandled_evt_arg);
+				else /* Or just drop it with a warning */
+					slog(0, SLOG_WARN, "Dropping event %d (%s)",
+					     o->id, o->name);
 				aura_buffer_release(node, buf);
 			}
 		}
@@ -210,7 +215,6 @@ static void aura_handle_inbound(struct aura_node *node)
  * \addtogroup async
  * @{
  */
-
 
 /** 
  * Get the eventloop associated with this node
@@ -265,11 +269,33 @@ void aura_fd_changed_cb(struct aura_node *node,
  * @param arg
  */
 void aura_etable_changed_cb(struct aura_node *node, 
-			    void (*cb)(struct aura_node *node, void *arg),
+			    void (*cb)(struct aura_node *node, 
+				       struct aura_export_table *old, 
+				       struct aura_export_table *new, 
+				       void *arg),
 			    void *arg)
 {
 	node->etable_changed_arg = arg;
 	node->etable_changed_cb = cb;
+}
+
+/** 
+ * Set up a generic callback to catch all events that have no callbacks installed.
+ * Warning: This callback will not be called if you enable synchronous event processing
+ * 
+ * @param node 
+ * @param cb The callback function to call
+ * @param arg Argument that will be passed to the callback function
+ */
+void aura_unhandled_evt_cb(struct aura_node *node, 
+			   void (*cb)(struct aura_node *node, 
+				      struct aura_object *o, 
+				      struct aura_buffer *buf, 
+				      void *arg),
+			   void *arg)
+{
+	node->unhandled_evt_cb = cb;
+	node->unhandled_evt_arg = arg;
 }
 
 

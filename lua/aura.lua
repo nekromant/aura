@@ -7,7 +7,7 @@ aura.open = function(name, ...)
    if (nil == nhandle) then
       return nil;
    end
-   node = require("aura/node")(nhandle, {...});
+   local node = require("aura/node")(aura, nhandle, {...});
    return node;
 end
 

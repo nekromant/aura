@@ -46,6 +46,7 @@ struct aura_pollfds {
 	short events;
 };
 
+struct aura_object;
 struct aura_node { 
 	const struct aura_transport    *tr;
 	struct aura_export_table *tbl;
@@ -69,11 +70,20 @@ struct aura_node {
 	void *status_changed_arg;
 	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
 	void *etable_changed_arg;
-	void (*etable_changed_cb)(struct aura_node *node, void *arg);
+	void (*etable_changed_cb)(struct aura_node *node, 
+				  struct aura_export_table *old, 
+				  struct aura_export_table *new, 
+				  void *arg);
+	void (*unhandled_evt_cb)(struct aura_node *node, 
+				 struct aura_object *obj, 
+				 struct aura_buffer *ret, 
+				 void *arg);
+	void *unhandled_evt_arg;
 	void *fd_changed_arg;
 	void (*fd_changed_cb)(const struct aura_pollfds *fd, 
 			      enum aura_fd_action act, void *arg);
 
+		
 	/* Event system and polling */
 	int numfds; /* Currently available space for descriptors */
 	int nextfd; /* Next descriptor to add */
@@ -538,14 +548,26 @@ const void *aura_buffer_get_ptr(struct aura_buffer *buf);
  */
 
 void aura_etable_changed_cb(struct aura_node *node, 
-			    void (*cb)(struct aura_node *node, void *arg),
+			    void (*cb)(struct aura_node *node, 
+				       struct aura_export_table *old, 
+				       struct aura_export_table *new, 
+				       void *arg),
 			    void *arg);
+
 void aura_status_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
 			    void *arg);
+
 void aura_fd_changed_cb(struct aura_node *node, 
 			 void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
 			 void *arg);
+
+void aura_unhandled_evt_cb(struct aura_node *node, 
+			   void (*cb)(struct aura_node *node, 
+				      struct aura_object *o, 
+				      struct aura_buffer *buf, 
+				      void *arg),
+			   void *arg);
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events);
 void aura_del_pollfds(struct aura_node *node, int fd);

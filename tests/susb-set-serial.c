@@ -5,6 +5,7 @@
 
 void write_serial(struct aura_node *node, const char *str)
 {
+	int len = strlen(str);
 	int ret;
 	uint16_t *data = malloc(32); 
 	int i = 0;
@@ -34,8 +35,6 @@ int main(int argc, const char **argv) {
         aura_wait_status(n, AURA_STATUS_ONLINE);
 
 	write_serial(n, argv[1]);
-
-	
 
         aura_close(n);
         return 0;

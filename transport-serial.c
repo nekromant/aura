@@ -4,15 +4,30 @@
 struct serialdata { 
 	int fd; 
 	uint16_t curmagic; 
+	uint64_t lastping;
 };
 
 struct __attribute__((packed)) serpacket  { 
-	uint16_t magic;
+	uint8_t  start;
 	uint16_t datalen; 
 	uint16_t invdatalen; 
 	uint32_t crc32; 
-	uint8_t   op;
 	char data[];
+};
+
+enum serpacket_type { 
+	PACKET_HELLO,
+	PACKET_INFO,
+	PACKET_PING, 
+	PACKET_CALL,
+};
+
+
+struct __attribute__((packed)) serpacket_data {
+	uint8_t type;	
+	union {
+		
+	} data;
 };
 
 /* 
