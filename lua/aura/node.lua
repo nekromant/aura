@@ -26,6 +26,16 @@ node.__init = function(self, aura, handle, args);
    aura.set_node_containing_table(handle, self);
    aura.status_cb(handle, handle_status_change, 5);
    aura.etable_cb(handle, handle_etable_change, 6);
+   aura.event_cb(handle, handle_inbound, 6);
+end
+
+node.close = function(self)
+   self._aura.close(self.handle);
+   self = { } 
+end
+
+node.handle_events = function(self, timeout)
+   
 end
 
 return node; 

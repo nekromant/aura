@@ -9,6 +9,7 @@
 #define REF_NODE_CONTAINER (1<<0)
 #define REF_STATUS_CB      (1<<1)
 #define REF_ETABLE_CB      (1<<2)
+#define REF_EVENT_CB       (1<<3)
 
 struct lua_bindingsdata { 
 	lua_State *L;
@@ -18,7 +19,10 @@ struct lua_bindingsdata {
 	int status_changed_arg_ref;
 	int etable_changed_ref;
 	int etable_changed_arg_ref;
+	int inbound_event_ref;
+	int inbound_event_arg_ref;
 };
+
 
 static inline int check_node_and_push(lua_State *L, struct aura_node *node) 
 {
@@ -185,34 +189,53 @@ static int l_close(lua_State *L)
 	}
 	node = lua_touserdata(L, 1);
 	bdata = aura_get_userdata(node);
-	/* We assume that we've set all the callback on open 
-	 * in lua counterpart 
-	 */
-	luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
-	luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
-	luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_ref);
-	luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_arg_ref);
+
+	/* Clear up references we've set up so far*/
+	
+	if (bdata->refs & REF_NODE_CONTAINER)
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->node_container);
+
+	if (bdata->refs & REF_STATUS_CB) { 
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
+	}
+
+	if (bdata->refs & REF_ETABLE_CB) { 
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->etable_changed_arg_ref);
+	}
+
+	if (bdata->refs & REF_EVENT_CB) { 
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->inbound_event_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, bdata->inbound_event_arg_ref);
+	}
+
 	free(bdata);
 	aura_close(node);
+
 	return 0;
 }
 
 static int l_handle_events(lua_State *L)
 {
-	struct aura_node *node; 
 	struct aura_eventloop *loop; 
+	int timeout = -1; 
 
 	aura_check_args(L, 1);
+
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
 	}
 
-	node = lua_touserdata(L, 1);
-	loop = aura_eventloop_get_data(node);
-	if (!loop) 
-		luaL_error(L, "BUG: No eventsystem in node"); 
+	loop = lua_touserdata(L, 1);
 
-	aura_handle_events(loop);
+	if (lua_gettop(L) == 2) { 
+		timeout = lua_tonumber(L, 2);
+		aura_handle_events_timeout(loop, timeout);
+	} else { 
+		aura_handle_events_forever(loop);
+	}
+
 	return 0;
 }
 
@@ -242,7 +265,7 @@ static void etable_cb(struct aura_node *node,
 {
 	struct lua_bindingsdata *bdata = arg; 
 	lua_State *L = bdata->L;
-	bdata->refs |= REF_ETABLE_CB;
+
 	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->etable_changed_ref);
 	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->node_container);
 	lua_push_etable(L, old);
@@ -256,7 +279,41 @@ static void event_cb(struct aura_node *node, struct aura_object *o, struct aura_
 {
 	struct lua_bindingsdata *bdata = arg; 
 	lua_State *L = bdata->L;
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->inbound_event_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->node_container);
+	lua_pushnumber(L, o->id);
+	/* TODO: Unpack the buf data into lua evironment */
+	lua_pushnil(L);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->inbound_event_arg_ref);
+	lua_call(L, 4, 0);
+}
+
+static int l_set_event_cb(lua_State *L)
+{
+	struct aura_node *node; 
+	struct lua_bindingsdata *bdata; 
+
+	aura_check_args(L, 2);
+
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+
+	if (!lua_isfunction(L, 2)) {
+		aura_typeerror(L, 2, "function");
+	}
+
+	node = lua_touserdata(L, 1);
+	bdata = aura_get_userdata(node);
+
+	bdata->refs |= REF_EVENT_CB;
+	bdata->inbound_event_arg_ref      = luaL_ref(L, LUA_REGISTRYINDEX);
+	bdata->inbound_event_ref          = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	aura_unhandled_evt_cb(node, event_cb, bdata);
 	
+	return 0;
 }
 
 static int l_set_status_change_cb(lua_State *L)
@@ -276,6 +333,7 @@ static int l_set_status_change_cb(lua_State *L)
 	node = lua_touserdata(L, 1);
 	bdata = aura_get_userdata(node);
 
+	bdata->refs |= REF_STATUS_CB;
 	bdata->status_changed_arg_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	bdata->status_changed_ref     = luaL_ref(L, LUA_REGISTRYINDEX);
 	aura_status_changed_cb(node, status_cb, bdata);
@@ -298,6 +356,7 @@ static int l_set_etable_change_cb(lua_State *L)
 	}
 	node = lua_touserdata(L, 1);
 	bdata = aura_get_userdata(node); 
+	bdata->refs |= REF_ETABLE_CB;
 	bdata->etable_changed_arg_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	bdata->etable_changed_ref     = luaL_ref(L, LUA_REGISTRYINDEX);
 	aura_etable_changed_cb(node, etable_cb, bdata);
@@ -367,12 +426,73 @@ static int l_slog_init(lua_State *L)
 	return 0;
 }
 
-/*
-static int l_handle_events_timeout(lua_State *L)
+static int l_eventloop_create(lua_State *L)
 {
+	struct aura_node *node; 
+	struct aura_eventloop *loop; 
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	loop = aura_eventloop_create(node);
+	if (!loop) 
+		lua_pushnil(L);
+	else
+		lua_pushlightuserdata(L, loop);
+	return 1;
+}
+
+static int l_eventloop_add(lua_State *L)
+{
+	struct aura_node *node; 
+	struct aura_eventloop *loop; 
+	aura_check_args(L, 2);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata (loop)");
+	}
+	if (!lua_islightuserdata(L, 2)) {
+		aura_typeerror(L, 2, "ludata (node)");
+	}
+
+	loop = lua_touserdata(L, 1);
+	node = lua_touserdata(L, 2);
+	
+	aura_eventloop_add(loop, node);
 	return 0;
 }
-*/
+
+static int l_eventloop_del(lua_State *L)
+{
+	struct aura_node *node; 
+
+	aura_check_args(L, 1);
+
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata (node)");
+	}
+
+	node = lua_touserdata(L, 2);
+	
+	aura_eventloop_del(node);
+	return 0;
+}
+
+static int l_eventloop_destroy(lua_State *L)
+{
+	struct aura_eventloop *loop; 
+	aura_check_args(L, 1);
+
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata (loop)");
+	}
+
+	loop = lua_touserdata(L, 1);
+	aura_eventloop_destroy(loop);
+
+	return 0;
+}
+
 static int l_set_node_container(lua_State *L)
 {
 	struct aura_node *node;
@@ -405,15 +525,22 @@ static const luaL_Reg openfuncs[] = {
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
 	{ "set_node_containing_table", l_set_node_container          }, 
+
+	{ "status_cb",                 l_set_status_change_cb        },
+	{ "etable_cb",                 l_set_etable_change_cb        },
+	{ "event_cb",                  l_set_event_cb                },
+	{ "core_close",                l_close                       },
+
+	{ "handle_events",             l_handle_events               },
+	{ "eventloop_create",          l_eventloop_create            },
+	{ "eventloop_add",             l_eventloop_add               },
+	{ "eventloop_del",             l_eventloop_del               },
+	{ "eventloop_destroy",         l_eventloop_destroy           },
+	
 	{ "etable_create",             l_etable_create               },
 	{ "etable_get",                l_get_exports                 },
 	{ "etable_add",                l_etable_add                  },
 	{ "etable_activate",           l_etable_activate             },
-	{ "status_cb",                 l_set_status_change_cb        },
-	{ "etable_cb",                 l_set_etable_change_cb        },
-
-	{ "close",                     l_close                       },
-	{ "handle_events",             l_handle_events               },
 
 	{NULL,                         NULL}
 };

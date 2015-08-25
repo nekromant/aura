@@ -11,16 +11,18 @@ aura.open = function(name, ...)
    return node;
 end
 
-aura.newloop = function(...)
-   for loop in ipairs({...}) do
-      print(loop)
-   end
+aura.eventloop = function(...)   
+   return require("aura/loop")(aura, ...);
 end
 
 aura.dumpnodes = function()
    for n in pairs(aura.nodes) do
       print(n)
    end
+end
+
+aura.close = function(node) 
+   aura.core_close(node._handle);
 end
 
 return aura
