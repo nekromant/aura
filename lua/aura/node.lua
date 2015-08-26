@@ -1,6 +1,8 @@
 require("aura/class");
 local node = class();
 
+node.has_evtsys = false; 
+
 local function handle_status_change(self, newstatus, arg) 
    print("Status changed", self, newstatus, arg);
    self.__status = newstatus;
@@ -8,11 +10,21 @@ end
 
 local function handle_etable_change(self, old, new, arg)
    print("Etable changed", self, old, new, arg);
+
+   for i,j in ipairs(new) do
+      print(j.name);
+   end
+
    self.__etable = new;
 end
 
 local function handle_inbound(self, id, ...)
-   print("Inbound on ".. self.__etable[id].name);
+   local name = self.__etable[id].name
+   if (self[name] ~= nil) then
+      self[name](...);
+   else
+      print("WARN: Unhandled event: ".. self.__etable[id].name);
+   end
 end
 
 local function start_call(self, name, ...)
@@ -29,12 +41,7 @@ node.__init = function(self, aura, handle, args);
    aura.event_cb(handle, handle_inbound, 6);
 end
 
-node.close = function(self)
-   self._aura.close(self.handle);
-   self = { } 
-end
-
-node.handle_events = function(self, timeout)
+node.__handle_events = function(self, timeout)
    
 end
 

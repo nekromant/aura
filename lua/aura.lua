@@ -1,3 +1,4 @@
+-- Consider aura a singleton
 local aura = require("auracore");
 
 aura.nodes = { }
@@ -8,6 +9,7 @@ aura.open = function(name, ...)
       return nil;
    end
    local node = require("aura/node")(aura, nhandle, {...});
+   table.insert(aura.nodes, node);
    return node;
 end
 
@@ -22,7 +24,8 @@ aura.dumpnodes = function()
 end
 
 aura.close = function(node) 
-   aura.core_close(node._handle);
+   aura.core_close(node._handle);   
+   node = nil;
 end
 
 return aura

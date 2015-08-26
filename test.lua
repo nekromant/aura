@@ -11,6 +11,10 @@ function cb(arg)
    print("whoohoo");
 end
 
+node.ping = function(arg)
+   print("ping",arg);
+end
+
 evloop = aura.eventloop(node)
 
 while true do
