@@ -144,7 +144,8 @@ static int susb_open(struct aura_node *node, va_list ap)
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
 	ret = luaL_loadfile(L, "lua/aura/conf-loader.lua");
 	if (ret) {
-		slog(2, SLOG_INFO, "usbsimple: config file load error");
+		slog(0, SLOG_ERROR, lua_tostring(L, -1));
+		slog(0, SLOG_ERROR, "usbsimple: config file load error");
 		goto err_free_ct;
 	}
 
