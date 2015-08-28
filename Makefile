@@ -20,7 +20,7 @@ obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
-#obj-y+= transport-sysfs-gpio.o
+obj-y+= transport-sysfs-gpio.o
 obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o bindings-lua.o 
 
