@@ -11,6 +11,15 @@
 #define REF_ETABLE_CB      (1<<2)
 #define REF_EVENT_CB       (1<<3)
 
+#define TRACE_BCALLS
+
+#ifdef TRACE_BCALLS
+#define TRACE() slog(0, SLOG_DEBUG, "Bindings call: %s", __func__)
+#else 
+#define TRACE()
+#endif
+
+
 struct lua_bindingsdata { 
 	lua_State *L;
 	uint32_t refs;
@@ -115,7 +124,8 @@ static int l_etable_create (lua_State *L)
 	struct aura_node *node;
 	int count = 0;
 	struct aura_export_table *tbl; 
-
+	
+	TRACE();
 	aura_check_args(L, 2);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -139,6 +149,7 @@ static int l_etable_add (lua_State *L)
 	struct aura_export_table *tbl; 
 	const char *name, *arg, *ret; 
  
+	TRACE();
 	aura_check_args(L, 4);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -166,6 +177,8 @@ static int l_etable_add (lua_State *L)
 static int l_etable_activate(lua_State *L)
 {
 	struct aura_export_table *tbl; 
+	
+	TRACE();
 	aura_check_args(L, 1);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -182,7 +195,8 @@ static int l_close(lua_State *L)
 {
 	struct aura_node *node; 
 	struct lua_bindingsdata *bdata;
- 	
+
+	TRACE(); 	
 	aura_check_args(L, 1);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -221,6 +235,7 @@ static int l_handle_events(lua_State *L)
 	struct aura_eventloop *loop; 
 	int timeout = -1; 
 
+	TRACE();
 	aura_check_args(L, 1);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -355,6 +370,7 @@ static void calldone_cb(struct aura_node *node, int status, struct aura_buffer *
 	struct lua_bindingsdata *bdata = arg;
 	lua_State *L = bdata->L;
 
+	TRACE();
 	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->node_container);
 	lua_setfield_int(L, "__callresult", status);
 	lua_pop(L, 1);
@@ -370,6 +386,7 @@ static int l_start_call(lua_State *L)
 	struct aura_buffer *buf;
 	const char *fmt;
 
+	TRACE();
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
 	}
@@ -386,6 +403,7 @@ static int l_start_call(lua_State *L)
 
 	if (lua_gettop(L) - 2 != o->num_args)
 		return luaL_error(L, "Invalid argument count for ", o->name);
+
 
 	buf = aura_buffer_request(node, o->arglen);
 	if (!buf)
@@ -481,6 +499,7 @@ static int l_set_event_cb(lua_State *L)
 	struct aura_node *node; 
 	struct lua_bindingsdata *bdata; 
 
+	TRACE();
 	aura_check_args(L, 2);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -507,6 +526,8 @@ static int l_set_status_change_cb(lua_State *L)
 {
 	struct aura_node *node; 
 	struct lua_bindingsdata *bdata; 
+
+	TRACE();
 	aura_check_args(L, 2);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -534,6 +555,8 @@ static int l_set_etable_change_cb(lua_State *L)
 {
 	struct aura_node *node; 
 	struct lua_bindingsdata *bdata;
+
+	TRACE();
 	aura_check_args(L, 1);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -557,6 +580,8 @@ static int l_set_etable_change_cb(lua_State *L)
 static int l_get_exports(lua_State *L)
 {
 	struct aura_node *node; 
+
+	TRACE();
 	aura_check_args(L, 1);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -569,6 +594,8 @@ static int l_open_susb(lua_State *L)
 {
 	const char* cname;
 	struct aura_node *node; 
+
+	TRACE();
 	aura_check_args(L, 1);
 	cname = lua_tostring(L, 1); 
 	node = aura_open("simpleusb", cname);
@@ -578,6 +605,8 @@ static int l_open_susb(lua_State *L)
 static int l_open_dummy(lua_State *L)
 {
 	struct aura_node *node; 
+
+	TRACE();
 	aura_check_args(L, 0);
 	node = aura_open("dummy");
 	return check_node_and_push(L, node);
@@ -589,6 +618,7 @@ static int l_open_usb(lua_State *L)
 	int vid, pid; 
 	struct aura_node *node;
 
+	TRACE();
 	if (lua_gettop(L) < 2)
 		return luaL_error(L, "usb needs at least vid and pid to open");
 	vid   = lua_tonumber(L, 1);
@@ -606,6 +636,8 @@ static int l_slog_init(lua_State *L)
 {
 	const char *fname;
 	int level; 
+
+	TRACE();
 	aura_check_args(L, 2);
 	fname = lua_tostring(L, 1); 
 	level = lua_tonumber(L, 2); 
@@ -617,6 +649,8 @@ static int l_eventloop_create(lua_State *L)
 {
 	struct aura_node *node; 
 	struct aura_eventloop *loop; 
+
+	TRACE();
 	aura_check_args(L, 1);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -634,6 +668,8 @@ static int l_eventloop_add(lua_State *L)
 {
 	struct aura_node *node; 
 	struct aura_eventloop *loop; 
+
+	TRACE();
 	aura_check_args(L, 2);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata (loop)");
@@ -653,6 +689,7 @@ static int l_eventloop_del(lua_State *L)
 {
 	struct aura_node *node; 
 
+	TRACE();
 	aura_check_args(L, 1);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -668,6 +705,8 @@ static int l_eventloop_del(lua_State *L)
 static int l_eventloop_destroy(lua_State *L)
 {
 	struct aura_eventloop *loop; 
+
+	TRACE();
 	aura_check_args(L, 1);
 
 	if (!lua_islightuserdata(L, 1)) {
@@ -685,6 +724,7 @@ static int l_set_node_container(lua_State *L)
 	struct aura_node *node;
 	struct lua_bindingsdata *bdata; 
 
+	TRACE();
 	aura_check_args(L, 2);
 	if (!lua_islightuserdata(L, 1)) {
 		aura_typeerror(L, 1, "ludata");
@@ -701,6 +741,22 @@ static int l_set_node_container(lua_State *L)
 	return 0;
 }
 
+
+static int l_node_status(lua_State *L)
+{
+	struct aura_node *node;
+	struct lua_bindingsdata *bdata; 
+
+	TRACE();
+	aura_check_args(L, 1);
+	if (!lua_islightuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+	node = lua_touserdata(L, 1);
+	
+	lua_pushnumber(L, node->status);
+	return 1;
+}
 
 static const luaL_Reg openfuncs[] = {
 	{ "dummy",     l_open_dummy},
@@ -729,6 +785,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "etable_add",                l_etable_add                  },
 	{ "etable_activate",           l_etable_activate             },
 	{ "start_call",                l_start_call                  },
+	{ "node_status",               l_node_status                 },
 	{NULL,                         NULL}
 };
 
