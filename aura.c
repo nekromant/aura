@@ -143,6 +143,7 @@ void aura_close(struct aura_node *node)
  */
 
 
+/* This one is small, but tricky */
 static void aura_handle_inbound(struct aura_node *node)
 {
 	while(1) {
@@ -153,11 +154,15 @@ static void aura_handle_inbound(struct aura_node *node)
 		if (!buf)
 			break;
 		o = buf->userdata;
+
+		node->current_object = o; 
+
 		/* 
-		 * userdata will now contain pointer to node, to make
+		 * Userdata will now contain pointer to node, to make
 		 * aura_buffer_get calls simpler 
 		 */
-		buf->userdata = node; 
+		buf->userdata = node;
+		aura_buffer_rewind(node, buf);
 
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
 		     object_is_method(o) ? "response" : "event", 
@@ -201,7 +206,7 @@ static void aura_handle_inbound(struct aura_node *node)
 			} else {
 				/* Last resort - try the catch-all event callback */
 				if (node->unhandled_evt_cb)
-					node->unhandled_evt_cb(node, o, buf, node->unhandled_evt_arg);
+					node->unhandled_evt_cb(node, buf, node->unhandled_evt_arg);
 				else /* Or just drop it with a warning */
 					slog(0, SLOG_WARN, "Dropping event %d (%s)",
 					     o->id, o->name);
@@ -209,12 +214,37 @@ static void aura_handle_inbound(struct aura_node *node)
 			}
 		}
 	}
+
+	node->current_object = NULL; 
 }
 
 /**
  * \addtogroup async
  * @{
  */
+
+
+/** 
+ * \brief Obtain the pointer to the current aura_object
+ *  
+ * This function can be used while in the callback to get the pointer to the struct aura_object
+ * that caused this callback. 
+ *
+ * Calling this function outside the callback will return NULL and spit out a warning to the log
+ *
+ * @param node 
+ * 
+ * @return 
+ */
+const struct aura_object *aura_get_current_object(struct aura_node *node)
+{
+	/* Make some noise */
+	if (!node->current_object) { 
+		slog(0, SLOG_WARN, "Looks like you're calling aura_get_current_object() outside the callback");
+		slog(0, SLOG_WARN, "Don't do that!");
+	}
+	return node->current_object;
+}
 
 /** 
  * Get the eventloop associated with this node
@@ -289,7 +319,6 @@ void aura_etable_changed_cb(struct aura_node *node,
  */
 void aura_unhandled_evt_cb(struct aura_node *node, 
 			   void (*cb)(struct aura_node *node, 
-				      struct aura_object *o, 
 				      struct aura_buffer *buf, 
 				      void *arg),
 			   void *arg)

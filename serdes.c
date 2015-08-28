@@ -3,7 +3,8 @@
 
 
 /**
- * Returns the length of the buffer required to serialize the data of the following format including buffer overheads
+ * Returns the length of the buffer required to serialize the data of the following format
+ * This doesn't include any transport-specific overhead
  *
  * @param node
  * @param fmt
@@ -46,7 +47,7 @@ int  aura_fmt_len(struct aura_node *node, const char *fmt)
 			BUG(node, "Serializer failed at token: %s", fmt); 
 		}
 	}
- 	return len + node->tr->buffer_overhead;
+ 	return len;
 }
 
 /**
@@ -129,6 +130,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 	tmp = &tmp[shift];
 	return str;
 }
+
 
 
 //FixMe: This is likely to get messy due to integer promotion 
@@ -226,8 +228,6 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 	if (!buf)
 		return NULL;
 
-	aura_buffer_rewind(node, buf);
-
 #define PUT(n)							\
 	case URPC_ ## n:					\
 		va_put_ ## n(buf, ap, node->need_endian_swap);	\
@@ -243,7 +243,6 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 			PUT(S32);
 			PUT(U64);
 			PUT(S64);
-
 		case URPC_BIN:
 		{
 			int len = atoi(fmt);

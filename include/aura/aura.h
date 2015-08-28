@@ -75,7 +75,6 @@ struct aura_node {
 				  struct aura_export_table *new, 
 				  void *arg);
 	void (*unhandled_evt_cb)(struct aura_node *node, 
-				 struct aura_object *obj, 
 				 struct aura_buffer *ret, 
 				 void *arg);
 	void *unhandled_evt_arg;
@@ -93,6 +92,7 @@ struct aura_node {
 	unsigned int poll_timeout; 
 	uint64_t last_checked;
 	struct list_head eventloop_node_list;
+	const struct aura_object *current_object;
 };
 
 
@@ -317,6 +317,8 @@ struct aura_buffer {
 	int               pos;
 	/** userdata assosiated with this buffer */
 	void             *userdata;
+	/** The node that owns the buffer */
+	struct aura_node * owner;
 	/** list_entry. Used to queue/deueue buffers */
 	struct list_head  qentry;
 	/** The actual data in this buffer */
@@ -521,11 +523,113 @@ int32_t aura_buffer_get_s32(struct aura_buffer *buf);
 int64_t aura_buffer_get_s64(struct aura_buffer *buf);
 
 /**
+ * \brief Put an unsigned 8 bit integer to aura buffer
+ *
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void  aura_buffer_put_u8 (struct aura_buffer *buf, uint8_t value);
+
+/**
+ * \brief Put an unsigned 16 bit integer to aura buffer
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_u16(struct aura_buffer *buf, uint16_t value);
+
+/**
+ * \brief Put an unsigned 32 bit integer to aura buffer.
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_u32(struct aura_buffer *buf, uint32_t value);
+
+/**
+ * \brief Put an unsigned 64 bit integer to aura buffer
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_u64(struct aura_buffer *buf, uint64_t value);
+
+/**
+ * \brief Put a signed 8 bit integer to aura buffer.
+ *
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ * @param buf
+ * @param value
+ * @return
+ */
+void  aura_buffer_put_s8 (struct aura_buffer *buf, int8_t value);
+
+/**
+ * \brief Put a signed 16 bit integer to aura buffer
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_s16(struct aura_buffer *buf, int16_t value);
+
+/**
+ * \brief Put a signed 32 bit integer to aura buffer
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyound
+ * the buffer boundary.
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_s32(struct aura_buffer *buf, int32_t value);
+
+/**
+ * \brief Put a signed 64 bit integer to aura buffer
+ *
+ * This function will swap endianness if needed.
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ *
+ * @param buf
+ * @param value
+ * @return
+ */
+void aura_buffer_put_s64(struct aura_buffer *buf, int64_t value);
+
+
+/**
  * \brief Get a pointer to the binary data block within buffer and advance
  * internal pointer by len bytes. The data in the buffer is managed internally and should
  * not be freed by the caller.
  *
- * This function will swap endianness if needed.
  * This function will cause a panic if attempted to read beyond
  * the buffer boundary.
  *
@@ -533,6 +637,21 @@ int64_t aura_buffer_get_s64(struct aura_buffer *buf);
  * @param len data length
  */
 const void *aura_buffer_get_bin(struct aura_buffer *buf, int len);
+
+
+/**
+ * \brief Copy data of len bytes to aura buffer from a buffer pointed by data
+ *
+ * This function will advance internal aura_buffer pointer by len bytes.
+ *
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf aura buffer
+ * @param data data buffer
+ * @param len data length
+ */
+void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len);
 
 
 /**
@@ -564,10 +683,11 @@ void aura_fd_changed_cb(struct aura_node *node,
 
 void aura_unhandled_evt_cb(struct aura_node *node, 
 			   void (*cb)(struct aura_node *node, 
-				      struct aura_object *o, 
 				      struct aura_buffer *buf, 
 				      void *arg),
 			   void *arg);
+
+const struct aura_object *aura_get_current_object(struct aura_node *node);
 
 void aura_add_pollfds(struct aura_node *node, int fd, short events);
 void aura_del_pollfds(struct aura_node *node, int fd);

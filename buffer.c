@@ -11,7 +11,11 @@ void aura_buffer_internal_free(struct aura_buffer *buf);
 
 /**
  * Request an aura_buffer for this node big enough to contain at least size bytes of data.
- * If the node transport overrides buffer allocation - transport-specific allocation functions
+ *
+ * The buffer's userdata will be set to point to the  
+ *
+ * 
+ * If the node transport overrides buffer allocation - transport-specific allocation function
  * will be called.
  *
  * @param nd
@@ -21,10 +25,18 @@ void aura_buffer_internal_free(struct aura_buffer *buf);
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
 {
 	struct aura_buffer *ret; 
+	int act_size = sizeof(struct aura_buffer) + size;
+
+	act_size += nd->tr->buffer_overhead;
+
 	if (!nd->tr->buffer_request)
-		ret = aura_buffer_internal_request(size);	
+		ret = aura_buffer_internal_request(act_size);	
 	else
-		ret = nd->tr->buffer_request(nd, size);
+		ret = nd->tr->buffer_request(nd, act_size);
+
+	ret->size = size;
+	ret->owner = nd; 
+	aura_buffer_rewind(nd, ret);
 	return ret;
 }
 

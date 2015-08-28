@@ -147,6 +147,10 @@
  *  Aura buffers have internal pointer that is advanced by the number of bytes
  *  required when each argument is read out. Attempting to cross the buffer boundary will result
  *  in aura_panic() on the relevant node.
+ *  
+ *  Although you may normally never need those, for some cases (e.g. writing bindings) a set of 
+ *  functions is provided to put values into aura buffers.
+ *
  */
 
 /** @defgroup trapi Transport plugins API

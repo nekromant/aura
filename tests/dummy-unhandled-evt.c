@@ -13,10 +13,10 @@ void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, v
 
 static int numevt=0;
 void unhandled_cb(struct aura_node *dev, 
-		  struct aura_object *o, 
 		  struct aura_buffer *retbuf, 
 		  void *arg)
 {
+	const struct aura_object *o = aura_get_current_object(dev);
 	numevt++;
 	printf("Unhandled event name %s %d with arg %lld!\n",
 	       o->name, numevt, (long long unsigned int) arg);

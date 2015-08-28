@@ -17,9 +17,13 @@ end
 
 evloop = aura.eventloop(node)
 
-while true do
-   evloop:handle_events(8500);
-end
+print(node:echo_u16(34));
+
+--while true do
+   evloop:handle_events(1500);
+   --end
+   evloop:handle_events(1500);
+   evloop:handle_events(1500);
 
 aura.close(node);
 
