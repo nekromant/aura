@@ -153,15 +153,9 @@ static void aura_handle_inbound(struct aura_node *node)
 		buf = aura_dequeue_buffer(&node->inbound_buffers); 
 		if (!buf)
 			break;
+
 		o = buf->userdata;
-
 		node->current_object = o; 
-
-		/* 
-		 * Userdata will now contain pointer to node, to make
-		 * aura_buffer_get calls simpler 
-		 */
-		buf->userdata = node;
 		aura_buffer_rewind(node, buf);
 
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
