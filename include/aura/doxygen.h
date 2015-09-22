@@ -200,6 +200,11 @@
  * you will not need any temporary buffers.
  */
 
+
+/** @defgroup internals Internal API
+ *  This group contains advanced API that can be used by language bindings
+ */
+
 /** @defgroup misc Misc functions and routines
  *  This group contains misc utility functions
  */

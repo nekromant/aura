@@ -158,9 +158,9 @@ static void aura_handle_inbound(struct aura_node *node)
 		node->current_object = o; 
 		aura_buffer_rewind(node, buf);
 
-		slog(4, SLOG_DEBUG, "Handling %s id %d (%s)", 
+		slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d", 
 		     object_is_method(o) ? "response" : "event", 
-		     o->id, o->name);
+		     o->id, o->name, node->sync_call_running);
 
 		if (object_is_method(o) && !o->pending) { 
 			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)", 
@@ -235,7 +235,7 @@ const struct aura_object *aura_get_current_object(struct aura_node *node)
 	/* Make some noise */
 	if (!node->current_object) { 
 		slog(0, SLOG_WARN, "Looks like you're calling aura_get_current_object() outside the callback");
-		slog(0, SLOG_WARN, "Don't do that!");
+		slog(0, SLOG_WARN, "Don't do that - read the docs!");
 	}
 	return node->current_object;
 }
@@ -321,38 +321,45 @@ void aura_unhandled_evt_cb(struct aura_node *node,
 	node->unhandled_evt_arg = arg;
 }
 
+/**
+ * @}
+ * \addtogroup internals
+ * @{
+ */
+
 
 /**
- * Queue a call for object with id id to the node.
+ * Start a call for object obj for node @node.
  * Normally you do not need this function - use aura_call() and aura_call_raw()
  * synchronous calls and aura_start_call() and aura_start_call_raw() for async.
  *
  * @param node
- * @param id
+ * @param o
  * @param calldonecb
  * @param arg
  * @param buf
  * @return
  */
-int aura_queue_call(struct aura_node *node, 
-		    int id,
+int aura_core_start_call(struct aura_node *node, 
+		    struct aura_object *o,
 		    void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
 		    void *arg,
 		    struct aura_buffer *buf)
 {
-	struct aura_object *o;
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	int isfirst;
 
-	if(node->status != AURA_STATUS_ONLINE) 
-		return -ENOEXEC;
-
-	o = aura_etable_find_id(node->tbl, id);
 	if (!o)
 		return -EBADSLT;
+
+	if(node->status != AURA_STATUS_ONLINE) 
+		return -ENOEXEC;
 		
 	if (o->pending) 
 		return -EIO; 
+
+	if (!loop)
+		BUG(node, "Node has no assosiated event system. Fix your code!");
 
 	isfirst = list_empty(&node->outbound_buffers);
 
@@ -361,7 +368,7 @@ int aura_queue_call(struct aura_node *node,
 	buf->userdata = o;
 	o->pending++;
 	aura_queue_buffer(&node->outbound_buffers, buf);
-	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", id, o->name);
+	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", o->id, o->name);
 
 	if (isfirst) {
 		slog(4, SLOG_DEBUG, "Notifying transport of queue status change");
@@ -371,6 +378,48 @@ int aura_queue_call(struct aura_node *node,
 
 	return 0;
 }
+
+/** 
+ * Synchronously call an object. arguments should be placed in argbuf.
+ * The retbuf will be set to point to response buffer if the call succeeds. 
+ * 
+ * @param node 
+ * @param o 
+ * @param retbuf 
+ * @param argbuf 
+ * 
+ * @return 
+ */
+int aura_core_call(
+	struct aura_node *node, 
+	struct aura_object *o,
+	struct aura_buffer **retbuf,
+	struct aura_buffer *argbuf)
+{
+	int ret;
+	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	
+	if (node->sync_call_running) 
+		BUG(node, "Internal bug: Synchronos call within a synchronos call");
+	node->sync_call_running = true;
+ 
+	if ((ret=aura_core_start_call(node, o, NULL, NULL, argbuf)))
+		return ret;
+
+	while (o->pending) {
+		aura_handle_events(loop);
+	}	
+	*retbuf =  node->sync_ret_buf;
+	node->sync_call_running = false; 
+	return node->sync_call_result;
+}
+
+/**
+ * @}
+ * \addtogroup async
+ * @{
+ */
+ 
 
 /**
  * Start a call for the object identified by its id the export table.
@@ -393,6 +442,7 @@ int aura_start_call_raw(
 {
 	va_list ap;
 	struct aura_buffer *buf; 
+
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
 	if (!o)
 		return -EBADSLT;
@@ -400,10 +450,11 @@ int aura_start_call_raw(
 	va_start(ap, arg);
 	buf = aura_serialize(node, o->arg_fmt, ap);
 	va_end(ap);
+
 	if (!buf) 
 		return -EIO;
 	
-	return aura_queue_call(node, id, calldonecb, arg, buf);
+	return aura_core_start_call(node, o, calldonecb, arg, buf);
 }
 
 /**
@@ -498,7 +549,7 @@ int aura_start_call(
 	if (!buf) 
 		return -EIO;
 	
-	return aura_queue_call(node, o->id, calldonecb, arg, buf);
+	return aura_core_start_call(node, o, calldonecb, arg, buf);
 }
 
 /**
@@ -541,18 +592,14 @@ int aura_call_raw(
 {
 	va_list ap;
 	struct aura_buffer *buf; 
-	int ret; 
+
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
 
 	if (!o)
 		return -EBADSLT;
-
-	if (!loop)
-		BUG(node, "Node has no assosiated event system. Fix your code!");
 	
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, ap);
@@ -563,18 +610,7 @@ int aura_call_raw(
 		return -EIO;
 	}
 
-	node->sync_call_running = true; 
-	
-	ret = aura_queue_call(node, id, NULL, NULL, buf);
-	if (ret) 
-		return ret;
-	
-	while (node->tbl->objects[id].pending)
-		aura_handle_events(loop);
-	
-	*retbuf =  node->sync_ret_buf;
-	node->sync_call_running = false; 
-	return node->sync_call_result;
+	return aura_core_call(node, o, retbuf, buf);
 }
 
 /**
@@ -596,18 +632,13 @@ int aura_call(
 {
 	va_list ap;
 	struct aura_buffer *buf; 
-	int ret; 
 	struct aura_object *o = aura_etable_find(node->tbl, name);
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	
 	if (node->sync_call_running) 
 		BUG(node, "BUG: Synchronous call within a synchronous call - fix your code!");
 
 	if (!o)
 		return -EBADSLT;
-
-	if (!loop)
-		BUG(node, "Node has no associated event system - fix your code!");
 	
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, ap);
@@ -617,19 +648,8 @@ int aura_call(
 		slog(2, SLOG_WARN, "Serialization failed");
 		return -EIO;
 	}
-
-	node->sync_call_running = true; 
 	
-	ret = aura_queue_call(node, o->id, NULL, NULL, buf);
-	if (ret) 
-		return ret;
-	
-	while (o->pending)
-		aura_handle_events(loop);
-	
-	*retbuf =  node->sync_ret_buf;
-	node->sync_call_running = false; 
-	return node->sync_call_result;
+	return aura_core_call(node, o, retbuf, buf);
 }
 
 

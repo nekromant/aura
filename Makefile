@@ -20,7 +20,7 @@ obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
-obj-y+= transport-sysfs-gpio.o
+#obj-y+= transport-sysfs-gpio.o
 obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o bindings-lua.o 
 
@@ -34,7 +34,7 @@ endef
 $(eval $(call PKG_CONFIG,libusb-1.0))
 $(eval $(call PKG_CONFIG,lua5.2))
 
-all: libauracore.so $(subst .c,,$(unit-tests))
+all: libauracore.so $(subst .c,,$(unit-tests)) TAGS
 
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
@@ -88,6 +88,10 @@ clean:
 	-cd usb-test-fw && make mrproper
 	-cd usb-test-dummy-fw && make mrproper
 	-rm tests/*.o
+
+TAGS: $(obj-y)
+	etags `find . \
+        -name "*.c" -o -name "*.cpp" -o -name "*.h"`
 
 doxygen: 
 	-rm -Rfv doxygen/
