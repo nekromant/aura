@@ -32,7 +32,7 @@ int ncusb_match_string(libusb_device_handle *dev, int index, const char* string)
 {
 	unsigned char tmp[256];
 	libusb_get_string_descriptor_ascii(dev, index, tmp, 256);
-	dbg("cmp idx %d str %s vs %s", index, tmp, string);
+	slog(0, SLOG_DEBUG, "cmp idx %d str %s vs %s", index, tmp, string);
 	if (string == NULL)
 		return 1; /* NULL matches anything */
 	return (strcmp(string, (char*) tmp)==0);
@@ -50,7 +50,8 @@ struct libusb_device_handle *ncusb_try_device(struct libusb_context *ctx,
 	libusb_device_handle *handle;
 	struct libusb_device_descriptor desc;
 
-
+	slog(0, SLOG_DEBUG, "Trying a new USB device");
+	
 	err = libusb_open(device, &handle);
 	if (err)
 		return NULL;
@@ -125,6 +126,7 @@ struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx,
 
 static int hotplug_callback_fn(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event, void *user_data)
 {
+	slog(0, SLOG_DEBUG, "libusb hotplug event!");
 	struct ncusb_devwatch_data* d = user_data;
 	struct libusb_device_handle *hndl  = ncusb_try_device(ctx, device,
 							      d->vid, d->pid,

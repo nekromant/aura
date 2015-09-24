@@ -178,11 +178,12 @@ static int susb_open(struct aura_node *node, const char *conf)
 		goto err_free_lua;
 	}
 
-	inf->dev_descr.vid = lua_tonumber(L, 1);
-	inf->dev_descr.pid = lua_tonumber(L, 2);
-	inf->dev_descr.vendor = lua_strfromstack(L, 3);
-	inf->dev_descr.product = lua_strfromstack(L, 4);
-	inf->dev_descr.serial  = lua_strfromstack(L, 5);
+	lua_stackdump(L);
+	inf->dev_descr.vid = lua_tonumber(L, -5);
+	inf->dev_descr.pid = lua_tonumber(L, -4);
+	inf->dev_descr.vendor = lua_strfromstack(L, -3);
+	inf->dev_descr.product = lua_strfromstack(L, -2);
+	inf->dev_descr.serial  = lua_strfromstack(L, -1);
 	inf->dev_descr.device_found_func = usb_start_ops;
 	inf->dev_descr.arg = inf;
 	inf->node = node;
@@ -191,7 +192,9 @@ static int susb_open(struct aura_node *node, const char *conf)
 	aura_set_transportdata(node, inf);
 	
 	ncusb_start_descriptor_watching(node, inf->ctx);
-	slog(1, SLOG_INFO, "usb: Now looking for a matching device");
+	slog(1, SLOG_INFO, "usb: Now looking for a device %x:%x %s/%s/%s",
+	     inf->dev_descr.vid, inf->dev_descr.pid,
+	     inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
 	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 
 	return 0;
