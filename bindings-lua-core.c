@@ -14,7 +14,7 @@
 #define TRACE_BCALLS
 
 #ifdef TRACE_BCALLS
-#define TRACE() slog(0, SLOG_DEBUG, "Bindings call: %s", __func__)
+#define TRACE() slog(4, SLOG_DEBUG, "Bindings call: %s", __func__)
 #else 
 #define TRACE()
 #endif
@@ -211,7 +211,6 @@ static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, i
 	const char *fmt;
 
 	fmt = o->arg_fmt;
-	slog(0, SLOG_DEBUG, "fmt %s", fmt);
 	if (lua_gettop(L) - stackpos + 1 != o->num_args) {
 		slog(0, SLOG_ERROR, "Invalid argument count for %s: %d / %d", 
 		     o->name, lua_gettop(L) - stackpos, o->num_args);
@@ -344,7 +343,6 @@ static int laura_do_sync_call(lua_State *L){
 	if (!o)
 		luaL_error(L, "Attempt to call non-existend method");
 
-	lua_stackdump(L);
 	buf = lua_to_buffer(L, lnode->node, 2, o);
 	if (!buf)
 		luaL_error(L, "Serializer failed!");

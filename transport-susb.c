@@ -293,7 +293,7 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	};
 
 	libusb_handle_events_timeout(inf->ctx, &tv);
-	slog(0, SLOG_DEBUG, "susb: loop state %d", inf->state);
+	slog(4, SLOG_DEBUG, "susb: loop state %d", inf->state);
 	if (inf->cbusy)
 		return; 
 	

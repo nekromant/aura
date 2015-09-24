@@ -9,9 +9,16 @@ aura.slog_init(nil, 0);
 node = aura.open_node("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 aura.wait_status(node, 1);
 
+print("confg1")
 node:bit_set(bit32.lshift(12,8) + 1,1);
+print("confg2")
 node:bit_set(bit32.lshift(13,8) + 1,1);
+print("confg3")
 node:bit_set(bit32.lshift(14,8) + 1,1);
+print("start");
+node:bit_set(bit32.lshift(12,8),1);
+node:bit_set(bit32.lshift(13,8),1);
+node:bit_set(bit32.lshift(14,8),1);
 
 while true do 
    node:bit_set(bit32.lshift(12,8),0);
