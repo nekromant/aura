@@ -40,6 +40,7 @@ static int gpio_export(int gpio)
 		slog(0, SLOG_WARN, "sysfsgpio: GPIO%d already exported");
 		return 0;
 	}
+
 	sprintf(tmp, "%d", gpio);
 	if (0 < file_put("/sys/class/gpio/export", tmp)) 
 		return 0;
@@ -75,13 +76,11 @@ void  sysfs_gpio_export(struct aura_node *node, struct aura_buffer *in, struct a
 		fprintf(stderr, "Failed to open export for writing!\n");
 		return(-1);
 	}
-
 	bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
 	write(fd, buffer, bytes_written);
 	close(fd);
 	return(0);
 }
-
 
 static int gpio_open(struct aura_node *node, const char *opts)
 {
@@ -89,10 +88,10 @@ static int gpio_open(struct aura_node *node, const char *opts)
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
 	if (!etbl)
 		BUG(node, "Failed to create etable");
-	aura_etable_add(etbl, "gpio_write", "33", "");
-	aura_etable_add(etbl, "gpio_read", "3", "4");
-	aura_etable_add(etbl, "gpio_export", "3", "3");
-	aura_etable_add(etbl, "gpio_watch", "3", "");
+	aura_etable_add(etbl, "write", "33", "");
+	aura_etable_add(etbl, "read", "3", "4");
+	aura_etable_add(etbl, "export", "3", "3");
+	aura_etable_add(etbl, "watch", "3", "");
 	//Change notification
 	aura_etable_add(etbl, "gpio_changed", NULL, "333");
 	aura_etable_activate(etbl);

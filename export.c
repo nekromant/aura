@@ -141,8 +141,15 @@ static int migrate_object(struct aura_object *src, struct aura_object *dst)
 static void etable_migrate(struct aura_export_table *old, struct aura_export_table *new)
 {
 	int i;
-	if (!old) /* Nothing to migrate */
+	struct aura_node *node; 
+	/* Sanity checking */
+	if (!old || !new) /* Nothing to migrate */
 		return;
+	if (old->owner != new->owner)
+		BUG(old->owner, "BUG during export table migration: etable owners are not equal!");
+	
+	node = old->owner;
+
 	/* Migration is a complex process. We need to scan tables to see if there are any
 	 * differences (e.g. If the node was down for a firmware update) and move all the callbacks and
 	 * their arguments to the new table before nuking the old one.
@@ -169,7 +176,18 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 			continue;
 
 		if (src->calldonecb) { 
-			/* Migration failed, this is something we need to notify about */
+			/* Migration failed, object had a callback set. 
+			   We need to notify the application about a potential problem
+			 */
+			if (node->object_migration_failed_cb)
+				node->object_migration_failed_cb(node, src, 
+								 node->object_migration_failed_arg);
+			else {
+				slog(1, SLOG_WARN, 
+				     "Migration of callbacks for object %s failed\n", src->name);
+				slog(1, SLOG_WARN, 
+				     "Set aura_object_migration_failed_cb() callback to disable this warning\n");
+			}
 		}
 	}
 }

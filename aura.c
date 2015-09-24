@@ -311,6 +311,24 @@ void aura_unhandled_evt_cb(struct aura_node *node,
  * @{
  */
 
+/** 
+ * When a node goes offline and online aura will try to migrate all the callbacks to a 
+ * newly created export table
+ * Warning: This callback will not be called if you enable synchronous event processing
+ * 
+ * @param node 
+ * @param cb The callback function to call
+ * @param arg Argument that will be passed to the callback function
+ */
+void aura_object_migration_failed_cb(struct aura_node *node, 
+				     void (*cb)(struct aura_node *node, 
+						struct aura_object *failed, 
+						void *arg),
+				     void *arg)
+{
+	node->object_migration_failed_cb  = cb;
+	node->object_migration_failed_arg = arg;
+}
 
 /**
  * Start a call for object obj for node @node.

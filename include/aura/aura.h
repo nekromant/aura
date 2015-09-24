@@ -69,11 +69,18 @@ struct aura_node {
 	/* General callbacks */
 	void *status_changed_arg;
 	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
+
 	void *etable_changed_arg;
 	void (*etable_changed_cb)(struct aura_node *node, 
 				  struct aura_export_table *old, 
 				  struct aura_export_table *new, 
 				  void *arg);
+
+	void *object_migration_failed_arg;
+	void (*object_migration_failed_cb)(struct aura_node *node, 
+					struct aura_object *failed, 
+					void *arg);
+
 	void (*unhandled_evt_cb)(struct aura_node *node, 
 				 struct aura_buffer *ret, 
 				 void *arg);
@@ -686,6 +693,12 @@ void aura_unhandled_evt_cb(struct aura_node *node,
 				      struct aura_buffer *buf, 
 				      void *arg),
 			   void *arg);
+
+void aura_object_migration_failed_cb(struct aura_node *node, 
+				     void (*cb)(struct aura_node *node, 
+						struct aura_object *failed, 
+						void *arg),
+				     void *arg);
 
 const struct aura_object *aura_get_current_object(struct aura_node *node);
 
