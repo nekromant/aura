@@ -27,6 +27,7 @@
 struct laura_node { 
 	lua_State *L;
 	struct aura_node *node;
+	const char *current_call;
 	uint32_t refs;
 	int node_container; /* lua table representing this node */
 	int status_changed_ref;
@@ -37,22 +38,10 @@ struct laura_node {
 	int inbound_event_arg_ref;
 };
 
-
-static int l_node_gc(lua_State *L)
-{
-	slog(4, SLOG_DEBUG, "Lua GC on node object");
-	return 0;
-}
-
-static const struct luaL_Reg node_meta[] = {
-  {"__gc",   l_node_gc      },
-  {NULL,     NULL           }
-};
-
 static inline int check_node_and_push(lua_State *L, struct aura_node *node) 
 {
 	if (node) {
-		struct laura_node *bdata = lua_newuserdata(L, sizeof(void *));
+		struct laura_node *bdata = lua_newuserdata(L, sizeof(*bdata));
 		if (!bdata)
 			return luaL_error(L, "Memory allocation error");
 		bzero(bdata, sizeof(*bdata));
@@ -80,18 +69,6 @@ static inline int check_node_and_push(lua_State *L, struct aura_node *node)
 
 #define ARG(n) (lua_isstring(L, 1 + n) ? arg ## n ## _ptr : arg ## n ## _int)
 
-static int l_open_node(lua_State *L)
-{
-
-	int n;
-	struct aura_node *node;
-	TRACE();
-	if (lua_gettop(L) < 1)
-		return luaL_error(L, "Open needs at least 1 argument");
-
-	node = aura_open(lua_tostring(L, 1), lua_tostring(L, 2));
-	return check_node_and_push(L, node);
-}
 
 int aura_typeerror (lua_State *L, int narg, const char *tname) 
 {
@@ -161,6 +138,251 @@ static int lua_push_etable(lua_State *L, struct aura_export_table *tbl)
 	}
 	return 1;	
 }
+
+static int buffer_to_lua(lua_State *L, struct aura_node *node, struct aura_object *o, struct aura_buffer *buf)
+{
+	const char *fmt = o->ret_fmt;
+	int nargs = 0; 
+		
+	while (*fmt) { 
+		double tmp;
+		switch (*fmt++) { 
+		case URPC_U8:
+			tmp = aura_buffer_get_u8(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_S8:
+			tmp = aura_buffer_get_s8(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_U16:
+			tmp = aura_buffer_get_u16(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_S16:
+			tmp = aura_buffer_get_s16(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_U32:
+			tmp = aura_buffer_get_u32(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_S32:
+			tmp = aura_buffer_get_s32(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_U64:
+			tmp = aura_buffer_get_u64(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_S64:
+			tmp = aura_buffer_get_s64(buf);
+			lua_pushnumber(L, tmp);
+			break;
+		case URPC_BIN:
+		{
+			void *udata;
+			const void *srcdata; 
+			int len = atoi(fmt);
+
+			if (len == 0) 
+				BUG(node, "Internal deserilizer bug processing: %s", fmt);
+			udata = lua_newuserdata(L, len);
+			if (!udata)
+				BUG(node, "Failed to allocate userdata");
+			srcdata = aura_buffer_get_bin(buf, len);
+			memcpy(udata, srcdata, len);
+			break;
+			while (*fmt && (*fmt++ != '.'));
+		}
+		default:
+			BUG(node, "Unexpected format token: %s", --fmt);
+		}
+		nargs++;
+	};
+
+	return nargs;
+}
+
+static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, int stackpos, struct aura_object *o)
+{
+	int id, ret, i;
+	struct aura_buffer *buf;
+	const char *fmt;
+
+	fmt = o->arg_fmt;
+	slog(0, SLOG_DEBUG, "fmt %s", fmt);
+	if (lua_gettop(L) - stackpos + 1 != o->num_args) {
+		slog(0, SLOG_ERROR, "Invalid argument count for %s: %d / %d", 
+		     o->name, lua_gettop(L) - stackpos, o->num_args);
+		return NULL;
+	}
+	
+	buf = aura_buffer_request(node, o->arglen);
+	if (!buf) {
+		slog(0, SLOG_ERROR, "Epic fail during buffer allocation");
+		return NULL;
+	}
+	
+	/* Let's serialize the data, arguments are on the stack, 
+	 * Starting from #3.
+	 */
+
+	for (i=stackpos; i<=lua_gettop(L); i++) { 
+		double tmp; 
+		
+		switch (*fmt++) { 
+		case URPC_U8:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_u8(buf, tmp);
+			break;
+		case URPC_S8:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_s8(buf, tmp);
+			break;
+		case URPC_U16:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_u16(buf, (uint16_t) tmp);
+			break;
+		case URPC_S16:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_s16(buf, tmp);
+			break;
+		case URPC_U32:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_u32(buf, tmp);
+			break;
+		case URPC_S32:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_s32(buf, tmp);
+			break;
+		case URPC_S64:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_s64(buf, tmp);
+			break;
+		case URPC_U64:
+			tmp = lua_tonumber(L, i);
+			aura_buffer_put_u64(buf, tmp);
+			break;
+			
+			/* Binary is the tricky part. String or usata? */	
+		case URPC_BIN:
+		{
+			const char *srcbuf; 
+			int len = 0; 
+			int blen;
+			if (lua_isstring(L, i)) { 
+				srcbuf = lua_tostring(L, i);
+				len = strlen(srcbuf);
+			} else if (lua_isuserdata(L, i)) {
+				srcbuf = lua_touserdata(L, i);
+			}
+
+			blen = atoi(fmt);
+
+			if (blen == 0) {
+				slog(0, SLOG_ERROR, "Internal serilizer bug processing: %s", fmt);
+				goto err;
+			}
+
+			if (!srcbuf) {
+				slog(0, SLOG_ERROR, "Internal bug fetching src pointer");
+				goto err;
+			}
+
+			if (blen < len)
+				len = blen;
+
+			aura_buffer_put_bin(buf, srcbuf, len);
+			
+			while (*fmt && (*fmt++ != '.'));
+
+			break;
+		}
+		default: 
+			BUG(node, "Unknown token: %c\n", *(--fmt));
+			break;
+		}
+	}
+
+	return buf;
+err:
+	aura_buffer_release(node, buf);
+	return NULL;
+}
+
+
+/* --------------------------- */
+
+static int l_open_node(lua_State *L)
+{
+
+	int n;
+	struct aura_node *node;
+	TRACE();
+	aura_check_args(L, 2);
+	node = aura_open(lua_tostring(L, 1), lua_tostring(L, 2));
+	return check_node_and_push(L, node);
+}
+
+static int l_node_gc(lua_State *L)
+{
+	slog(4, SLOG_DEBUG, "Garbage-collecting a node");
+	lua_stackdump(L);
+	return 0;
+}
+
+static int laura_do_sync_call(lua_State *L){
+
+	struct laura_node *lnode = lua_touserdata(L, 1);
+	struct aura_buffer *buf, *retbuf;
+	struct aura_object *o;
+	int ret;
+	TRACE();
+
+	o = aura_etable_find(lnode->node->tbl, lnode->current_call); 
+	if (!o)
+		luaL_error(L, "Attempt to call non-existend method");
+
+	lua_stackdump(L);
+	buf = lua_to_buffer(L, lnode->node, 2, o);
+	if (!buf)
+		luaL_error(L, "Serializer failed!");
+
+	ret = aura_core_call(lnode->node, o, &retbuf, buf);
+	if (ret != 0) 
+		luaL_error(L, "Call for %s failed", o->name);
+
+	ret = buffer_to_lua(L, lnode->node, o, retbuf);
+	aura_buffer_release(lnode->node, retbuf);
+	return ret;
+}
+
+static laura_do_async_call(lua_State *L){
+	TRACE();
+	lua_stackdump(L);
+}
+
+static int l_node_index(lua_State *L)
+{
+	struct laura_node *lnode = lua_touserdata(L, 1);
+	const char *name = lua_tostring(L, -1);
+
+	TRACE();
+	/* FixMe: Can this get gc-d by the time we actually use it? */
+	lnode->current_call = name;
+	if (strcmp("__", name)==0)
+		lua_pushcfunction(L, laura_do_async_call);
+	else
+		lua_pushcfunction(L, laura_do_sync_call);
+	return 1;
+}
+
+static const struct luaL_Reg node_meta[] = {
+  {"__gc",      l_node_gc         },
+  {"__index",   l_node_index      },
+  {NULL,     NULL           }
+};
 
 
 static int l_etable_get(lua_State *L)

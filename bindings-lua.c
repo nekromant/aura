@@ -21,9 +21,6 @@
 
 
 
-
-
-
 static int l_close(lua_State *L)
 {
 	struct aura_node *node; 

@@ -5,6 +5,11 @@ package.path=package.path..";./lua/?.lua"
 aura = require("aura");
 aura.slog_init(nil, 88);
 
+
+node = aura.open_node("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
+node:bit_set(bit32.lshift(8,8),0);
+
+
 --node = aura.open("gpio", 0x1d50, 0x6032, "www.ncrmnt.org");
 node = aura.open("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 
