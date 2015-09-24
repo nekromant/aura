@@ -178,7 +178,6 @@ static int susb_open(struct aura_node *node, const char *conf)
 		goto err_free_lua;
 	}
 
-	lua_stackdump(L);
 	inf->dev_descr.vid = lua_tonumber(L, -5);
 	inf->dev_descr.pid = lua_tonumber(L, -4);
 	inf->dev_descr.vendor = lua_strfromstack(L, -3);
