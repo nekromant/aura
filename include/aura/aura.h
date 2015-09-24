@@ -192,10 +192,10 @@ struct aura_transport
 	 *
 	 *  Avoid doing any blocking stuff in open(), do in in loop instead in non-blocking fashion.
 	 *  @param node current node
-	 *  @param ap va_list from aura_open()
+	 *  @param opts string containing transport-specific options
 	 *  @return 0 if everything went fine, anything other will be considered an error.
 	 */
-	int    (*open)(struct aura_node *node, va_list ap);
+	int    (*open)(struct aura_node *node, const char *opts);
 	/**
 	 * \brief Required.
 	 *
@@ -363,7 +363,7 @@ struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
 					int id);
 void aura_etable_destroy(struct aura_export_table *tbl);
 
-struct aura_node *aura_open(const char* name, ...); 
+struct aura_node *aura_open(const char* name, const char *opts); 
 void aura_close(struct aura_node *dev); 
 
 

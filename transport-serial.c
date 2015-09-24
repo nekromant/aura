@@ -36,11 +36,9 @@ static void serpacket_pack(struct aura_node *node, struct aura_buffer *buf)
 	
 }
 */
-static int ser_open(struct aura_node *node, va_list ap)
+static int ser_open(struct aura_node *node, const char *opts)
 {
-	const char *port = va_arg(ap, const char *);
-	int spd  = va_arg(ap, int);
-	slog(0, SLOG_INFO, "Opening serial transport: %s @ %d bps", port, spd);
+	slog(0, SLOG_INFO, "Opening serial transport: %s", opts);
 	struct serialdata *sdt = calloc(1, sizeof(*sdt));
 	if (sdt) 
 		return -ENOMEM; 

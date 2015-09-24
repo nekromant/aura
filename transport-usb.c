@@ -51,6 +51,7 @@ enum device_state {
  */
 
 struct usb_dev_info { 
+	char *optbuf;
 	struct aura_node *node; 
 	uint8_t  flags;
 	struct aura_export_table *etbl;
@@ -346,7 +347,39 @@ static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	return 0;
 };
 
-int usb_open(struct aura_node *node, va_list ap)
+
+static void parse_params(struct usb_dev_info *inf)
+{
+	char *sptr;
+	char *tmp; 	
+
+	tmp = strtok_r(inf->optbuf, ":", &sptr);
+	if (!tmp)
+		return; 
+	inf->dev_descr.vid = strtoul(tmp, NULL, 16);
+
+	tmp = strtok_r(NULL, ";", &sptr);
+	if (!tmp)
+		return;
+	inf->dev_descr.pid = strtoul(tmp, NULL, 16);
+	
+	tmp = strtok_r(NULL, ";", &sptr);
+	if (!tmp)
+		return;
+	inf->dev_descr.vendor  = tmp;
+
+	tmp = strtok_r(NULL, ";", &sptr);
+	if (!tmp)
+		return;
+	inf->dev_descr.product = tmp;
+
+	tmp = strtok_r(NULL, ";", &sptr);
+	if (!tmp)
+		return;
+	inf->dev_descr.serial  = tmp;
+}
+
+int usb_open(struct aura_node *node, const char *opts)
 {
 	int ret; 
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
@@ -359,15 +392,12 @@ int usb_open(struct aura_node *node, va_list ap)
 		return -EIO;
 
 	inf->io_buf_size = 256;
-	inf->dev_descr.vid = va_arg(ap, int);
-	inf->dev_descr.pid = va_arg(ap, int);
-	inf->dev_descr.vendor  = va_arg(ap, char *);
-	inf->dev_descr.product = va_arg(ap, char *);
-	inf->dev_descr.serial  = va_arg(ap, char *);
+	inf->optbuf = strdup(opts);
 	inf->dev_descr.device_found_func = usb_start_ops;
 	inf->dev_descr.arg = inf;
 	inf->node = node;
-
+	parse_params(inf);
+	
 	ncusb_start_descriptor_watching(node, inf->ctx);
 	aura_set_transportdata(node, inf);	
 
@@ -420,6 +450,8 @@ static void usb_close(struct aura_node *node)
 	if (inf->handle)
 		libusb_close(inf->handle); 
 	libusb_exit(inf->ctx);
+	if (inf->optbuf)
+		free(inf->optbuf);
 	free(inf);
 }
 

@@ -112,12 +112,11 @@ static char *lua_strfromstack(lua_State *L, int n)
 }
 
 extern int luaopen_auracore (lua_State *L);
-static int susb_open(struct aura_node *node, va_list ap)
+static int susb_open(struct aura_node *node, const char *conf)
 {
 
 	struct libusb_context *ctx;
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
-	const char *conf = va_arg(ap, const char *);
 	int ret;
 	lua_State* L;
  

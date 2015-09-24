@@ -28,4 +28,8 @@ aura.close = function(node)
    node = nil;
 end
 
+aura.status = function(node)
+   return aura.node_status(node._handle);
+end
+
 return aura

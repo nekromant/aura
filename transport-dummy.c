@@ -1,7 +1,7 @@
 #include <aura/aura.h>
 #include <aura/private.h>
 
-int dummy_open(struct aura_node *node, va_list ap)
+int dummy_open(struct aura_node *node, const char *opts)
 {
 	slog(0, SLOG_INFO, "Opening dummy transport");
 	struct aura_export_table *etbl = aura_etable_create(node, 16);

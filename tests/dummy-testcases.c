@@ -4,7 +4,7 @@
 int main() {
 	int ret; 
 	slog_init(NULL, 8);
-	struct aura_node *n = aura_open("dummy", 1, 2, 3);
+	struct aura_node *n = aura_open("dummy", NULL);
 	struct aura_buffer *retbuf; 
 
 

@@ -22,7 +22,9 @@ obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
 #obj-y+= transport-sysfs-gpio.o
 obj-y+= transport-usb.o usb-helpers.o
-obj-y+= transport-susb.o bindings-lua.o 
+obj-y+= transport-susb.o 
+#Lua bindings
+obj-y+= bindings-lua-core.o 
 
 
 define PKG_CONFIG

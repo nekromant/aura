@@ -6,6 +6,62 @@
 
 
 
+static int file_get(const char *path, const char *dbuf)
+{
+	int ret; 
+	fd = open(path, O_RDONLY);
+	if (-1 == fd) {
+		slog(0, SLOG_ERROR, "sysfsgpio: Failed to open %s for reading", path);
+		return -1;
+	}
+	ret = read(fd, dbuf, strlen(dbuf));
+	close(fd);
+	return ret;
+}
+
+static int file_put(const char *path, const char *dbuf)
+{
+	int ret; 
+	fd = open(path, O_WRONLY);
+	if (-1 == fd) {
+		slog(0, SLOG_ERROR, "sysfsgpio: Failed to open %s for writing", path);
+		return -1;
+	}
+	ret = write(fd, dbuf, strlen(dbuf));
+	close(fd);
+	return ret;
+}
+
+static int gpio_export(int gpio)
+{
+	char tmp[128];
+	sprintf(tmp, "/sys/class/gpio/gpio%d", gpio);
+	if (0 == access(tmp, F_OK)) { 
+		slog(0, SLOG_WARN, "sysfsgpio: GPIO%d already exported");
+		return 0;
+	}
+	sprintf(tmp, "%d", gpio);
+	if (0 < file_put("/sys/class/gpio/export", tmp)) 
+		return 0;
+	return -1;
+}
+
+static int gpio_write(int gpio, int value)
+{
+	char tmp[256];
+	sprintf(tmp, "/sys/class/gpio/gpio%d/direction", gpio);
+	if (0 != access(tmp, F_OK)) { 
+		slog(0, SLOG_WARN, "sysfsgpio: GPIO%d not exported, exporting");
+		if (gpio_export(gpio)
+		return 0;
+	}
+	sprintf(tmp, "%d", gpio);
+	if (0 < file_put("/sys/class/gpio/export", tmp)) 
+		return 0;
+	return -1;
+}
+
+
 void  sysfs_gpio_export(struct aura_node *node, struct aura_buffer *in, struct aura_buffer *out)
 {
 #define BUFFER_MAX 8
@@ -27,7 +83,7 @@ void  sysfs_gpio_export(struct aura_node *node, struct aura_buffer *in, struct a
 }
 
 
-static int gpio_open(struct aura_node *node, va_list ap)
+static int gpio_open(struct aura_node *node, const char *opts)
 {
 	slog(0, SLOG_INFO, "Opening sysfs/gpio transport");
 	struct aura_export_table *etbl = aura_etable_create(node, 16);

@@ -25,13 +25,13 @@ static void *aura_eventsys_get_autocreate(struct aura_node *node)
  */
 
 /**
- * Open an aura node and return the instance.
- *
- * @param name the name of the transport (e.g. usb)
- * @param ap va_list of transport arguments. See transport docs.
- * @return pointer to the newly created node
+ * Open a remote node. Transport arguments are passed in a variadic fasion.
+ * The number and format is transport-dependent.
+ * @param name transport name
+ * @param opts transport-specific options. Refer to transport docs for details
+ * @return node instance or NULL
  */
-struct aura_node *aura_vopen(const char* name, va_list ap)
+struct aura_node *aura_open(const char *name, const char *opts)
 {
 	struct aura_node *node = calloc(1, sizeof(*node));
 	int ret = 0; 
@@ -55,7 +55,7 @@ struct aura_node *aura_vopen(const char* name, va_list ap)
 	 */
 
 	if (node->tr->open)
-		ret = node->tr->open(node, ap);
+		ret = node->tr->open(node, opts);
 
 	if (ret != 0) 
 		goto err_free_node;
@@ -67,22 +67,6 @@ err_free_node:
 	slog(0, SLOG_FATAL, "Error opening transport: %s", name);
 	free(node);
 	return NULL;
-}
-
-/**
- * Open a remote node. Transport arguments are passed in a variadic fasion.
- * The number and format is transport-dependent.
- * @param name transport name
- * @return node instance or NULL
- */
-struct aura_node *aura_open(const char *name, ...)
-{
-	struct aura_node *ret; 
-	va_list ap;
-	va_start(ap, name);	
-	ret = aura_vopen(name, ap);
-	va_end(ap);
-	return ret; 
 }
 
 

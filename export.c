@@ -112,17 +112,17 @@ static int object_is_equal(struct aura_object *one, struct aura_object *two)
 
 	/* Names match */
 	if (strcmp(one->name, two->name) != 0)
-		return 1; /* Nope */
+		return 0; /* Nope */
 
 	/* Argument formats match */
 	if (!format_matches(one->arg_fmt, two->arg_fmt))
-		return 1;
+		return 0;
 
 	/* Ret formats match */
 	if (!format_matches(one->ret_fmt, two->ret_fmt))
-		return 1;
+		return 0;
 
-	return 0;
+	return 1;
 }
 
 static int migrate_object(struct aura_object *src, struct aura_object *dst)
@@ -167,6 +167,10 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 		dst = aura_etable_find(new, src->name);
 		if (migrate_object(src, dst))
 			continue;
+
+		if (src->calldonecb) { 
+			/* Migration failed, this is something we need to notify about */
+		}
 	}
 }
 

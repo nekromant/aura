@@ -29,7 +29,7 @@ int main() {
 	slog_init(NULL, 18);
 
 	int ret; 
-	struct aura_node *n = aura_open("dummy", 1, 2, 3);
+	struct aura_node *n = aura_open("dummy", NULL);
 	ret = aura_start_call_raw(n, 2, calldonecb, (void *) ARG, 0x0102);
 	printf("call started with ret %d\n", ret);
 

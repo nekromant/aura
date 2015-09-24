@@ -6,7 +6,7 @@ int main() {
 
 	int count = 5;
 	int ret; 
-	struct aura_node *n = aura_open("dummy", 1, 2, 3);
+	struct aura_node *n = aura_open("dummy", NULL);
 	struct aura_buffer *retbuf; 
 	const struct aura_object *o; 
 

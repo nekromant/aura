@@ -5,7 +5,8 @@ package.path=package.path..";./lua/?.lua"
 aura = require("aura");
 aura.slog_init(nil, 88);
 
-node = aura.open("dummy", 0x1d50, 0x6032, "www.ncrmnt.org");
+--node = aura.open("gpio", 0x1d50, 0x6032, "www.ncrmnt.org");
+node = aura.open("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 
 function cb(arg) 
    print("whoohoo");
@@ -17,7 +18,7 @@ end
 
 evloop = aura.eventloop(node)
 
-print(node:echo_u16(34));
+--print(node:echo_u16(34));
 
 --while true do
    evloop:handle_events(1500);

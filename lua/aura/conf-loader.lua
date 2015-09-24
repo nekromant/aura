@@ -25,6 +25,8 @@ end
 device = dofile(simpleconf);
 tbl = aura.etable_create(node, #device.methods + 1);
 n = 0
+dofile("lua/aura/dumper.lua");
+dump(device);
 while nil ~= device.methods[n] do
    aura.etable_add(tbl, unpack(device.methods[n]));
    n = n + 1

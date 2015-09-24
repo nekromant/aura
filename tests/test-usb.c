@@ -5,7 +5,7 @@ int main() {
 	int ret; 
 	int i = 3200; 
 	slog_init(NULL, 88);
-	struct aura_node *n = aura_open("usb", 0x1d50, 0x6032, "www.ncrmnt.org", NULL, NULL);
+	struct aura_node *n = aura_open("usb", "1d50:6032;www.ncrmnt.org;;");
 
 
 	aura_wait_status(n, AURA_STATUS_ONLINE);
