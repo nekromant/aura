@@ -572,6 +572,14 @@ static int l_slog_init(lua_State *L)
 	return 0;
 }
 
+static int l_wait_status(lua_State *L)
+{
+	TRACE();
+	aura_check_args(L, 2);
+	struct laura_node *lnode = lua_touserdata(L, 1);
+	aura_wait_status(lnode->node, lua_tonumber(L,2));
+	return 0;
+}
 
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
@@ -580,6 +588,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "etable_add",                l_etable_add                  },
 	{ "etable_activate",           l_etable_activate             },
 	{ "open_node",                 l_open_node                   },
+	{ "wait_status",               l_wait_status                 },
 
 
 /*
