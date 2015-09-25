@@ -357,8 +357,33 @@ static int laura_do_sync_call(lua_State *L){
 }
 
 static laura_do_async_call(lua_State *L){
+/*
+	struct laura_node *lnode = lua_touserdata(L, 1);
+	const char *name; 
+	struct aura_buffer *buf, *retbuf;
+	struct aura_object *o;
+	int ret;
 	TRACE();
-	lua_stackdump(L);
+	
+	name = lua_tostring(L, 2); 
+
+	o = aura_etable_find(lnode->node->tbl, name); 
+	if (!o)
+		luaL_error(L, "Attempt to call non-existend method");
+
+	buf = lua_to_buffer(L, lnode->node, 2, o);
+	if (!buf)
+		luaL_error(L, "Serializer failed!");
+
+	ret = aura_core_call(lnode->node, o, &retbuf, buf);
+	if (ret != 0) 
+		luaL_error(L, "Call for %s failed", o->name);
+
+	ret = buffer_to_lua(L, lnode->node, o, retbuf);
+	aura_buffer_release(lnode->node, retbuf);
+	return ret;
+*/
+	return 0;
 }
 
 static int l_node_index(lua_State *L)

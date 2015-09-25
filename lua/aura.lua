@@ -3,12 +3,9 @@ local aura = require("auracore");
 
 aura.nodes = { }
 
-aura.open = function(name, ...)
-   local nhandle = aura.openfuncs[name](...);
-   if (nil == nhandle) then
-      return nil;
-   end
-   local node = require("aura/node")(aura, nhandle, {...});
+aura.open = function(name, params)
+   local node = aura.open_node(name, params);
+   local node_tbl = require("aura/node");
    table.insert(aura.nodes, node);
    return node;
 end
