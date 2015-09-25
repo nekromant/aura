@@ -68,6 +68,8 @@ static int check_control(struct libusb_transfer *transfer)
 	inf->cbusy = false; 
 		
 	if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+		slog(0, SLOG_ERROR, "usb: error completing control transfer");
+		ncusb_print_libusb_transfer(transfer);
 		usb_panic_and_reset_state(node);
 		ret = -EIO;
 	}
@@ -236,13 +238,17 @@ static void cb_call_done(struct libusb_transfer *transfer)
 {
 	struct aura_node *node = transfer->user_data;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	struct aura_buffer *buf = inf->current_buffer;
+	struct aura_buffer *buf;
 
-	check_control(transfer);
-	/* Put the buffer pointer at the start of the data we've got (if any) */
-	aura_buffer_rewind(node, buf);
-	aura_queue_buffer(&node->inbound_buffers, buf);
-	inf->current_buffer = NULL;
+	/* Put the buffer pointer at the start of the data we've got */
+	/* It only makes sense when we succeed */
+	if (0 == check_control(transfer)) {
+		slog(4, SLOG_DEBUG, "Requeuing!");
+		buf = aura_dequeue_buffer(&inf->node->outbound_buffers);
+		aura_buffer_rewind(node, buf);
+		aura_queue_buffer(&node->inbound_buffers, buf);
+		inf->current_buffer = NULL;
+	}
 }
 static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf) 
 { 
@@ -303,7 +309,7 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		inf->state = SUSB_DEVICE_SEARCHING;
 		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
-		buf = aura_dequeue_buffer(&node->outbound_buffers); 
+		buf = aura_peek_buffer(&node->outbound_buffers); 
 		if (!buf)
 			return;
 		slog(4, SLOG_DEBUG, "susb: outgoing...");

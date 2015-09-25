@@ -22,7 +22,7 @@ void ncusb_print_libusb_transfer(struct libusb_transfer *p_t)
 		slog(4, SLOG_INFO, "length =%d ", p_t->length);
 		slog(4, SLOG_INFO, "actual_length =%d ", p_t->actual_length);
 		slog(4, SLOG_INFO, "buffer =%p ", p_t->buffer);
-
+		slog(4, SLOG_INFO, "status =%d/%d ", p_t->status,  LIBUSB_TRANSFER_OVERFLOW);
 	}
 	return;
 }

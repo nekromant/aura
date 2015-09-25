@@ -16,19 +16,33 @@ void aura_queue_buffer(struct list_head *queue, struct aura_buffer *buf)
 	list_add_tail(&buf->qentry, queue);
 }
 
+
 /**
  * Dequeue the next buffer from a queue and
  * @param head
  * @return
  */
-struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
+struct aura_buffer *aura_peek_buffer(struct list_head *head)
 {
 	struct aura_buffer *ret;
 	
 	if (list_empty(head))
 		return NULL;
 	ret = list_entry(head->next, struct aura_buffer, qentry);
-	list_del(head->next);
+	return ret;
+}
+
+/**
+ * Dequeue the next buffer from a queue and return the pointer to it
+ * @param head
+ * @return
+ */
+struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
+{
+	struct aura_buffer *ret;
+	ret = aura_peek_buffer(head);
+	if (ret)
+		list_del(head->next);
 	return ret;
 }
 

@@ -3,36 +3,39 @@ package.cpath=package.cpath..";./lib?.so"
 package.path=package.path..";./lua/?.lua"
 
 aura = require("aura");
-aura.slog_init(nil, 0);
+aura.slog_init(nil, 88);
 
 
 node = aura.open_node("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 aura.wait_status(node, 1);
 
-print("confg1")
-node:bit_set(bit32.lshift(12,8) + 1,1);
-print("confg2")
-node:bit_set(bit32.lshift(13,8) + 1,1);
-print("confg3")
-node:bit_set(bit32.lshift(14,8) + 1,1);
-print("start");
 node:bit_set(bit32.lshift(12,8),1);
 node:bit_set(bit32.lshift(13,8),1);
 node:bit_set(bit32.lshift(14,8),1);
 
-while true do 
-   node:bit_set(bit32.lshift(12,8),0);
-   os.execute("sleep 1");
-   node:bit_set(bit32.lshift(13,8),0);
-   os.execute("sleep 1");
-   node:bit_set(bit32.lshift(14,8),0);
-   os.execute("sleep 1");
-   node:bit_set(bit32.lshift(12,8),1);
-   os.execute("sleep 1");
-   node:bit_set(bit32.lshift(13,8),1);
-   os.execute("sleep 1");
-   node:bit_set(bit32.lshift(14,8),1);
-   os.execute("sleep 1");
+function loop()
+   while true do 
+      node:bit_set(bit32.lshift(12,8) + 1,1);
+      node:bit_set(bit32.lshift(13,8) + 1,1);
+      node:bit_set(bit32.lshift(14,8) + 1,1);
+      
+      node:bit_set(bit32.lshift(12,8),0);
+      os.execute("sleep 1");
+      node:bit_set(bit32.lshift(13,8),0);
+      os.execute("sleep 1");
+      node:bit_set(bit32.lshift(14,8),0);
+      os.execute("sleep 1");
+      node:bit_set(bit32.lshift(12,8),1);
+      os.execute("sleep 1");
+      node:bit_set(bit32.lshift(13,8),1);
+      os.execute("sleep 1");
+      node:bit_set(bit32.lshift(14,8),1);
+      os.execute("sleep 1");
+   end
+end
+
+while true do
+   pcall(loop);
 end
 
 --node = aura.open("gpio", 0x1d50, 0x6032, "www.ncrmnt.org");

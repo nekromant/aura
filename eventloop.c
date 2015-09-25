@@ -259,6 +259,9 @@ void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfd
 {
 	struct aura_node *node; 
 	if (ap) { 
+		if (ap->magic != 0xdeadbeaf)
+			BUG(NULL, "bad APFD: %x", ap);
+//		slog(4, SLOG_DEBUG, "Event on descriptor %d", ap->fd);
 		node = ap->node;
 		aura_process_node_event(node, ap);
 	} else {

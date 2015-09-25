@@ -51,9 +51,11 @@ void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *a
 	struct aura_node *node = ap->node; 
 	struct epoll_event ev;
 	struct aura_epoll_data *epd = backend;
+	((struct aura_pollfds *)ap)->magic = 0xdeadbeaf;
 	int ret; 
 	int op = (action == AURA_FD_ADDED) ? EPOLL_CTL_ADD : EPOLL_CTL_DEL;
-	slog(4, SLOG_DEBUG, "epoll: Descriptor %d added to epoll", ap->fd);
+	slog(4, SLOG_DEBUG, "epoll: Descriptor %d %s to/from epoll", 
+	     ap->fd, (action == AURA_FD_ADDED) ? "added" : "removed");
 	ev.events = ap->events; 
 	ev.data.ptr = (void *) ap;
 	ret = epoll_ctl(epd->epollfd, op, ap->fd, &ev);
@@ -61,7 +63,7 @@ void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *a
 		BUG(node, "Event System failed to add/remove a descriptor");
 }
 
-#define NUM_EVTS 8
+#define NUM_EVTS 1
 int aura_eventsys_backend_wait(void *backend, int timeout_ms) 
 {
 	struct aura_epoll_data *epd = backend;

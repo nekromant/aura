@@ -403,15 +403,22 @@ int aura_core_call(
 	
 	if (node->sync_call_running) 
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
+
 	node->sync_call_running = true;
  
-	if ((ret=aura_core_start_call(node, o, NULL, NULL, argbuf)))
-		return ret;
+	if ((ret=aura_core_start_call(node, o, NULL, NULL, argbuf))) {
+		node->sync_call_result = ret;
+		goto bailout;
+	}
 
 	while (o->pending) {
 		aura_handle_events(loop);
+		slog(0, SLOG_DEBUG, "pending: %d", o->pending);
 	}	
+	slog(4, SLOG_DEBUG, "Call completed");
 	*retbuf =  node->sync_ret_buf;
+
+bailout:
 	node->sync_call_running = false; 
 	return node->sync_call_result;
 }
@@ -636,9 +643,6 @@ int aura_call(
 	struct aura_buffer *buf; 
 	struct aura_object *o = aura_etable_find(node->tbl, name);
 	
-	if (node->sync_call_running) 
-		BUG(node, "BUG: Synchronous call within a synchronous call - fix your code!");
-
 	if (!o)
 		return -EBADSLT;
 	
@@ -790,10 +794,10 @@ void aura_set_status(struct aura_node *node, int status)
 		for (i=0; i < node->tbl->next; i++) {
 			struct aura_object *o;
 			o=&node->tbl->objects[i];
-			if (o->pending && o->calldonecb) {
+			if (o->pending && o->calldonecb)
 				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
+			if (o->pending)
 				o->pending--;
-			}
 		}
 		/* If any of the synchronos calls are running - inform them */
 		node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;

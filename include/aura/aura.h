@@ -41,6 +41,7 @@ enum aura_fd_action {
 };
 
 struct aura_pollfds { 
+	int magic;
 	struct aura_node *node; 
 	int fd;
 	short events;
@@ -357,6 +358,7 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en);
 void aura_queue_buffer(struct list_head *list, struct aura_buffer *buf);
 struct aura_buffer *aura_dequeue_buffer(struct list_head *head);
 void aura_requeue_buffer(struct list_head *head, struct aura_buffer *buf);
+struct aura_buffer *aura_peek_buffer(struct list_head *head);
 
 struct aura_export_table *aura_etable_create(struct aura_node *owner, int n);
 void aura_etable_add(struct aura_export_table *tbl, 
