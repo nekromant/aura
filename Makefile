@@ -9,8 +9,6 @@ LUA_PKGCONFIG=lua5.2
 LUA_CPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua cpath $(PREFIX))
 LUA_LPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua path $(PREFIX))
 
-CFLAGS+=-DAURA_LUADIR='"$(LUA_LPATH)/"'
-
 CC?=clang
 unit-tests  = $(shell ls tests/*.c)
 dummy-tests = $(shell ls tests/dummy-*.c)
