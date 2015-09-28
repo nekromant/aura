@@ -6,7 +6,7 @@ aura.nodes = { }
 aura.open = function(name, params)
    local mt = {}
 
-   local node = aura.open_node(name, params);
+   local node = aura.core_open(name, params);
    local node_tbl = require("aura/node");
 
    mt.__index = function(self, idx)

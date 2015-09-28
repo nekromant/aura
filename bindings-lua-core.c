@@ -24,6 +24,8 @@
 #define laura_eventloop_type "laura_eventloop"
 #define laura_node_type      "laura_node"
 
+extern int lua_stackdump(lua_State *L);
+
 struct laura_node { 
 	lua_State *L;
 	struct aura_node *node;
@@ -282,7 +284,7 @@ static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, i
 			/* Binary is the tricky part. String or usata? */	
 		case URPC_BIN:
 		{
-			const char *srcbuf; 
+			const char *srcbuf = NULL; 
 			int len = 0; 
 			int blen;
 			if (lua_isstring(L, i)) { 
@@ -339,7 +341,7 @@ static int l_open_node(lua_State *L)
 
 static int l_node_gc(lua_State *L)
 {
-	slog(4, SLOG_DEBUG, "Garbage-collecting a node");
+	slog(0, SLOG_ERROR, "Garbage-collecting a node: This should not happen");
 	lua_stackdump(L);
 	return 0;
 }
@@ -354,15 +356,15 @@ static int laura_do_sync_call(lua_State *L){
 
 	o = aura_etable_find(lnode->node->tbl, lnode->current_call); 
 	if (!o)
-		luaL_error(L, "Attempt to call non-existend method");
+		return luaL_error(L, "Attempt to call non-existend method");
 
 	buf = lua_to_buffer(L, lnode->node, 2, o);
 	if (!buf)
-		luaL_error(L, "Serializer failed!");
+		return luaL_error(L, "Serializer failed!");
 
 	ret = aura_core_call(lnode->node, o, &retbuf, buf);
 	if (ret != 0) 
-		luaL_error(L, "Call for %s failed", o->name);
+		return luaL_error(L, "Call for %s failed", o->name);
 
 	ret = buffer_to_lua(L, lnode->node, o, retbuf);
 	aura_buffer_release(lnode->node, retbuf);
@@ -408,8 +410,6 @@ static int laura_do_async_call(lua_State *L){
 	int callback_ref; 
 
 	TRACE();
-
-	lua_stackdump(L);
 
 	/* Sanity */ 
 	lnode=lua_fetch_node(L, 1);
@@ -497,14 +497,23 @@ static const struct luaL_Reg node_meta[] = {
 
 static int l_etable_get(lua_State *L)
 {
-	struct aura_node *node; 
+	struct laura_node *lnode = NULL; 
+	struct aura_node *node = NULL; 
 
 	TRACE();
 	aura_check_args(L, 1);
-	if (!lua_islightuserdata(L, 1)) {
-		aura_typeerror(L, 1, "ludata");
+
+	if (lua_islightuserdata(L, 1)) {
+		node = lua_touserdata(L, 1);
+	} else {
+		lnode = lua_fetch_node(L, 1);
 	}
-	node = lua_touserdata(L, 1);
+	if (lnode)
+		node = lnode->node;
+	
+	if (!node)
+		return luaL_error(L, "Failed to fetch node");
+
 	return lua_push_etable(L, node->tbl);
 }
 
@@ -582,8 +591,6 @@ static int l_etable_activate(lua_State *L)
 
 
 /* --------------------------------------- */
-
-
 /*
 static int l_eventloop_create(lua_State *L)
 {
@@ -719,7 +726,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "etable_get",                l_etable_get                  },
 	{ "etable_add",                l_etable_add                  },
 	{ "etable_activate",           l_etable_activate             },
-	{ "open_node",                 l_open_node                   },
+	{ "core_open",                 l_open_node                   },
 	{ "wait_status",               l_wait_status                 },
 
 	{ "set_node_containing_table", l_set_node_container          }, 
