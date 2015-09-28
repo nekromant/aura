@@ -32,8 +32,7 @@ aura.dumpnodes = function()
 end
 
 aura.close = function(node) 
-   aura.core_close(node._handle);   
-   node = nil;
+   aura.core_close(node);   
 end
 
 aura.status = function(node)

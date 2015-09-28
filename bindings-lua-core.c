@@ -793,10 +793,10 @@ static void status_cb(struct aura_node *node, int newstatus, void *arg)
 {
 	struct laura_node *lnode = arg; 
 	lua_State *L = lnode->L;
-	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
-	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->node_container);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->status_changed_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
 	lua_pushnumber(L, newstatus);
-	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->status_changed_arg_ref);
 	lua_call(L, 3, 0);
 }
 
@@ -840,6 +840,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "etable_add",                l_etable_add                  },
 	{ "etable_activate",           l_etable_activate             },
 	{ "core_open",                 l_open_node                   },
+	{ "core_close",                l_close_node                  },
 	{ "wait_status",               l_wait_status                 },
 	{ "status",                    l_status                      },
 	{ "status_cb",                 l_set_status_change_cb        },
