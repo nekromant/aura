@@ -346,6 +346,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args);
 const struct aura_transport *aura_transport_lookup(const char *name);
 void aura_set_status(struct aura_node *node, int status);
 
+
 #define AURA_TRANSPORT(s)					   \
 	void __attribute__((constructor (101))) do_reg_##s(void) { \
 		aura_transport_register(&s);			   \
@@ -374,12 +375,6 @@ void aura_etable_destroy(struct aura_export_table *tbl);
 
 struct aura_node *aura_open(const char* name, const char *opts); 
 void aura_close(struct aura_node *dev); 
-
-
-static inline int aura_get_status(struct aura_node *node) 
-{
-	return node->status;
-}
 
 
 int aura_queue_call(struct aura_node *node, 
@@ -741,44 +736,13 @@ void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);
 void aura_handle_events_forever(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
-
-/**
- * \addtogroup node
- * @{
- */
-
- /** Set user data associated with this node.
-  *  Just a convenient way to attach an arbitary pointer to this node.
-  *  See aura_get_userdata()
-  *
-  * @param node
-  * @param udata
-  */
-static inline void  aura_set_userdata(struct aura_node *node, void *udata)
-{
-	node->user_data = udata;
-}
-
-/**
- * Get user data associated with this node.
- * See aura_set_userdata()
- *
- * @param node
- */
-static inline void *aura_get_userdata(struct aura_node *node)
-{
-	return node->user_data;
-}
-
-/**
- * @}
- */
-
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
 void aura_buffer_release(struct aura_node *nd, struct aura_buffer *buf);
 
 /* event system data access functions */
 struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node);
 
+
+#include <aura/inlines.h>
 
 #endif

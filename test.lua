@@ -8,13 +8,12 @@ aura.slog_init(nil, 88);
 
 node = aura.open("dummy", "./simpleusbconfigs/pw-ctl.conf");
 
-
 node.ping = function(self, farg)
    print("PING CB", farg)
 end
 
 
-aura.wait_status(node, 1);
+aura.wait_status(node, aura.STATUS_ONLINE);
 
 function callback(node, arg, ...)
    print("CALLBACK!")

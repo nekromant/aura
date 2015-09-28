@@ -771,10 +771,22 @@ static int l_set_node_container(lua_State *L)
 	lnode->refs |= REF_NODE_CONTAINER;
 
 	aura_unhandled_evt_cb(lnode->node, event_cb, lnode);
-
+	
 	return 0;
 }
 
+static int l_status(lua_State *L)
+{
+	struct laura_node *lnode;
+
+	TRACE();
+	aura_check_args(L, 1);
+	lnode = lua_fetch_node(L, 1);	
+	if (!lnode)
+		luaL_error(L, "Failed to retrieve lnode");
+	lua_pushnumber(L, aura_get_status(lnode->node));
+	return 1;
+}
 
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
@@ -784,6 +796,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "etable_activate",           l_etable_activate             },
 	{ "core_open",                 l_open_node                   },
 	{ "wait_status",               l_wait_status                 },
+	{ "status",                    l_status                      },
 
 	{ "set_node_containing_table", l_set_node_container          }, 
 	{ "eventloop_create",          l_eventloop_create            },
@@ -810,7 +823,12 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 	luaL_setfuncs(L, node_meta, 0);
 
 	luaL_newlib(L, libfuncs);
+	lua_setfield_int(L, "STATUS_OFFLINE", AURA_STATUS_OFFLINE);
+	lua_setfield_int(L, "STATUS_ONLINE", AURA_STATUS_ONLINE);
 
+	lua_setfield_int(L, "CALL_COMPLETED", AURA_CALL_COMPLETED);
+	lua_setfield_int(L, "CALL_TIMEOUT", AURA_CALL_TIMEOUT);
+	lua_setfield_int(L, "CALL_TRANSPORT_FAIL", AURA_CALL_TRANSPORT_FAIL);
 
 	/* 
 	 * Push open functions as aura["openfunc"]
