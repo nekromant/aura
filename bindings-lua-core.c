@@ -34,8 +34,6 @@ struct laura_node {
 	int node_container; /* lua table representing this node */
 	int status_changed_ref;
 	int status_changed_arg_ref;
-	int etable_changed_ref;
-	int etable_changed_arg_ref;
 	int inbound_event_ref;
 	int inbound_event_arg_ref;
 };
@@ -362,10 +360,12 @@ static int l_close_node(lua_State *L)
 		luaL_unref(L, LUA_REGISTRYINDEX, lnode->status_changed_arg_ref);
 	}
 
+/*
 	if (lnode->refs & REF_ETABLE_CB) { 
 		luaL_unref(L, LUA_REGISTRYINDEX, lnode->etable_changed_ref);
 		luaL_unref(L, LUA_REGISTRYINDEX, lnode->etable_changed_arg_ref);
 	}
+*/
 
 	aura_close(node);
 	lnode->node = NULL;
@@ -788,6 +788,51 @@ static int l_status(lua_State *L)
 	return 1;
 }
 
+
+static void status_cb(struct aura_node *node, int newstatus, void *arg)
+{
+	struct laura_node *lnode = arg; 
+	lua_State *L = lnode->L;
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->node_container);
+	lua_pushnumber(L, newstatus);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, bdata->status_changed_arg_ref);
+	lua_call(L, 3, 0);
+}
+
+static int l_set_status_change_cb(lua_State *L)
+{
+	struct laura_node *lnode;
+	struct aura_node *node; 
+
+	TRACE();
+	aura_check_args(L, 3);
+
+	lnode = lua_fetch_node(L, 1);
+	if (!lnode)
+		luaL_error(L, "Failed to retrieve node");
+
+	node = lnode->node;
+
+	if (!lua_isfunction(L, 2)) {
+		aura_typeerror(L, 2, "function");
+	}
+
+	if (lnode->refs & REF_STATUS_CB)
+	{
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->status_changed_arg_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->status_changed_ref);
+	}
+
+	lnode->refs |= REF_STATUS_CB;
+	lnode->status_changed_arg_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	lnode->status_changed_ref     = luaL_ref(L, LUA_REGISTRYINDEX);
+	aura_status_changed_cb(node, status_cb, lnode);
+
+	return 0;
+}
+
+
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
 	{ "etable_create",             l_etable_create               },
@@ -797,6 +842,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "core_open",                 l_open_node                   },
 	{ "wait_status",               l_wait_status                 },
 	{ "status",                    l_status                      },
+	{ "status_cb",                 l_set_status_change_cb        },
 
 	{ "set_node_containing_table", l_set_node_container          }, 
 	{ "eventloop_create",          l_eventloop_create            },
@@ -804,14 +850,11 @@ static const luaL_Reg libfuncs[] = {
 	{ "eventloop_del",             l_eventloop_del               },
 	{ "eventloop_destroy",         l_eventloop_destroy           },
 
+
 /*
 	{ "status_cb",                 l_set_status_change_cb        },
-	{ "etable_cb",                 l_set_etable_change_cb        },
 	{ "event_cb",                  l_set_event_cb                },
-	{ "core_close",                l_close                       },
 	{ "handle_events",             l_handle_events               },
-	{ "start_call",                l_start_call                  },
-	{ "node_status",               l_node_status                 },
 */
 	{NULL,                         NULL}
 };
@@ -829,17 +872,6 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 	lua_setfield_int(L, "CALL_COMPLETED", AURA_CALL_COMPLETED);
 	lua_setfield_int(L, "CALL_TIMEOUT", AURA_CALL_TIMEOUT);
 	lua_setfield_int(L, "CALL_TRANSPORT_FAIL", AURA_CALL_TRANSPORT_FAIL);
-
-	/* 
-	 * Push open functions as aura["openfunc"]
-	 */
-
-	/*
-	lua_pushstring(L, "openfuncs");
-	lua_newtable(L);
-	luaL_setfuncs(L, openfuncs, 0);	
-	lua_settable(L, -3);
-	*/
 
 	/* Return One result */
 	return 1;
