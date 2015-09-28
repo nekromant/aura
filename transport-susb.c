@@ -143,7 +143,10 @@ static int susb_open(struct aura_node *node, const char *conf)
 	lua_setglobal(L, "aura");
 
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
-	ret = luaL_loadfile(L, "lua/aura/conf-loader.lua");
+
+	const char scr[] = "return require(\"aura/conf-loader\")\n";
+	ret = luaL_loadbuffer (L, scr, strlen(scr), "ldr");
+	lua_call(L, 0, 1);
 	if (ret) {
 		slog(0, SLOG_ERROR, lua_tostring(L, -1));
 		slog(0, SLOG_ERROR, "usbsimple: config file load error");
@@ -172,12 +175,11 @@ static int susb_open(struct aura_node *node, const char *conf)
 
 	lua_settoken(L, "FMT_BIN",  URPC_BIN);
 
-	/* Ask Lua to run our little script */
 	ret = lua_pcall(L, 0, 5, 0);
 	if (ret) { 
 		const char* err = lua_tostring(L, -1);
 		slog(0, SLOG_FATAL, "usbsimple: %s", err);
-		goto err_free_lua;
+		goto err_free_ct;
 	}
 
 	inf->dev_descr.vid = lua_tonumber(L, -5);
