@@ -70,13 +70,28 @@ static inline int check_node_and_push(lua_State *L, struct aura_node *node)
 #define ARG(n) (lua_isstring(L, 1 + n) ? arg ## n ## _ptr : arg ## n ## _int)
 
 
-int aura_typeerror (lua_State *L, int narg, const char *tname) 
+static int aura_typeerror (lua_State *L, int narg, const char *tname) 
 {
 	const char *msg = lua_pushfstring(L, "%s expected, got %s",
 					  tname, luaL_typename(L, narg));
 	return luaL_argerror(L, narg, msg);
 }
 
+static struct laura_node *lua_fetch_node(lua_State *L, int idx) {
+	
+	struct laura_node *lnode = NULL;
+
+	if (lua_isuserdata(L, idx))
+		lnode = lua_touserdata(L, idx);
+	else if (lua_istable(L, idx)) { 
+		lua_pushstring(L, "__node");
+		lua_gettable(L, idx);
+		lnode = lua_touserdata(L, -1);
+	}
+	lua_pop(L, 1);
+	return lnode;
+}
+ 
 static void aura_do_check_args (lua_State *L, const char *func, int need) 
 {
 	int got = lua_gettop(L);
@@ -139,7 +154,7 @@ static int lua_push_etable(lua_State *L, struct aura_export_table *tbl)
 	return 1;	
 }
 
-static int buffer_to_lua(lua_State *L, struct aura_node *node, struct aura_object *o, struct aura_buffer *buf)
+static int buffer_to_lua(lua_State *L, struct aura_node *node, const struct aura_object *o, struct aura_buffer *buf)
 {
 	const char *fmt = o->ret_fmt;
 	int nargs = 0; 
@@ -206,7 +221,7 @@ static int buffer_to_lua(lua_State *L, struct aura_node *node, struct aura_objec
 
 static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, int stackpos, struct aura_object *o)
 {
-	int id, ret, i;
+	int i;
 	struct aura_buffer *buf;
 	const char *fmt;
 
@@ -315,8 +330,6 @@ err:
 
 static int l_open_node(lua_State *L)
 {
-
-	int n;
 	struct aura_node *node;
 	TRACE();
 	aura_check_args(L, 2);
@@ -333,7 +346,7 @@ static int l_node_gc(lua_State *L)
 
 static int laura_do_sync_call(lua_State *L){
 
-	struct laura_node *lnode = lua_touserdata(L, 1);
+	struct laura_node *lnode = lua_fetch_node(L, 1);
 	struct aura_buffer *buf, *retbuf;
 	struct aura_object *o;
 	int ret;
@@ -356,33 +369,107 @@ static int laura_do_sync_call(lua_State *L){
 	return ret;
 }
 
-static laura_do_async_call(lua_State *L){
-/*
-	struct laura_node *lnode = lua_touserdata(L, 1);
+
+static void calldone_cb(struct aura_node *node, int status, struct aura_buffer *retbuf, void *arg)
+{
+	struct laura_node *lnode;
+	lua_State *L;
+	const struct aura_object *o;
+
+	lnode = aura_get_userdata(node);
+	L = lnode->L;
+	o = aura_get_current_object(lnode->node); 
+	TRACE();
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, (long) arg); /* Fetch our callback params */
+	lua_pushnumber(L, 1); 
+ 	lua_gettable(L, -2);
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
+
+	lua_pushnumber(L, status);
+
+	lua_pushnumber(L, 2); 
+ 	lua_gettable(L, -5);
+
+	buffer_to_lua(L, lnode->node, o, retbuf);
+
+	lua_call(L, 3 + o->num_args, 0); /* Fire the callback! */
+
+	luaL_unref(L, LUA_REGISTRYINDEX, (long) arg); /* Remove the reference */
+}
+
+static int laura_do_async_call(lua_State *L){
+	struct laura_node *lnode = NULL;
 	const char *name; 
-	struct aura_buffer *buf, *retbuf;
+	struct aura_buffer *buf;
 	struct aura_object *o;
 	int ret;
+	int callback_ref; 
+
 	TRACE();
-	
+
+	lua_stackdump(L);
+
+	/* Sanity */ 
+	lnode=lua_fetch_node(L, 1);
+	if (!lnode) {
+		lua_stackdump(L);
+		return aura_typeerror(L, 1, "userdata (node)");
+	}
+
+	if (!lua_isstring(L, 2)) {
+		lua_stackdump(L);
+		return aura_typeerror(L, 2, "string (object name)");
+	}
+
+	if (!lua_isfunction(L, 3)) {
+		lua_stackdump(L);
+		return aura_typeerror(L, 3, "function (callback)");
+	}
+
 	name = lua_tostring(L, 2); 
 
 	o = aura_etable_find(lnode->node->tbl, name); 
 	if (!o)
-		luaL_error(L, "Attempt to call non-existend method");
+		return luaL_error(L, "Attempt to call non-existend method");
 
-	buf = lua_to_buffer(L, lnode->node, 2, o);
+	if (!object_is_method(o)) {
+		lua_stackdump(L);
+		return luaL_error(L, "Attempt to call an event");
+	}
+
+	
+	/* Now we're sane! */
+
+	buf = lua_to_buffer(L, lnode->node, 5, o);
 	if (!buf)
 		luaL_error(L, "Serializer failed!");
 
-	ret = aura_core_call(lnode->node, o, &retbuf, buf);
-	if (ret != 0) 
-		luaL_error(L, "Call for %s failed", o->name);
+	/* Let's create a table to store our callback and arg */
+	lua_newtable(L);
 
-	ret = buffer_to_lua(L, lnode->node, o, retbuf);
-	aura_buffer_release(lnode->node, retbuf);
-	return ret;
-*/
+	/* Push the callback function there */ 
+	lua_pushnumber(L, 1); 
+	lua_pushvalue(L, 3);
+ 	lua_settable(L, -3);
+
+	/* And the user argument */
+	lua_pushnumber(L, 2); 
+	lua_pushvalue(L, 4);	
+ 	lua_settable(L, -3);
+
+	/* And fetch the reference to out table that we'll use in callback */
+	callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	slog(4, SLOG_DEBUG, "Callback tbl reference: %d", callback_ref);
+	lua_stackdump(L);
+
+	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *) (long) callback_ref, buf);
+	if (ret != 0) { 
+		aura_buffer_release(lnode->node, buf);
+		return luaL_error(L, "Async call for %s failed", o->name);
+	}
+
 	return 0;
 }
 
@@ -597,12 +684,34 @@ static int l_slog_init(lua_State *L)
 
 static int l_wait_status(lua_State *L)
 {
+	struct laura_node *lnode;
 	TRACE();
 	aura_check_args(L, 2);
-	struct laura_node *lnode = lua_touserdata(L, 1);
+	lnode = lua_fetch_node(L, 1);
 	aura_wait_status(lnode->node, lua_tonumber(L,2));
 	return 0;
 }
+
+static int l_set_node_container(lua_State *L)
+{
+	struct laura_node *lnode;
+
+	TRACE();
+	aura_check_args(L, 2);
+	if (!lua_isuserdata(L, 1)) {
+		aura_typeerror(L, 1, "udata");
+	}
+	
+	if (!lua_istable(L, 2)) {
+		aura_typeerror(L, 2, "table");
+	}
+	
+	lnode = lua_touserdata(L, 1);
+	lnode->node_container = luaL_ref(L, LUA_REGISTRYINDEX);
+	lnode->refs |= REF_NODE_CONTAINER;
+	return 0;
+}
+
 
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
@@ -613,10 +722,9 @@ static const luaL_Reg libfuncs[] = {
 	{ "open_node",                 l_open_node                   },
 	{ "wait_status",               l_wait_status                 },
 
-
-/*
 	{ "set_node_containing_table", l_set_node_container          }, 
 
+/*
 	{ "status_cb",                 l_set_status_change_cb        },
 	{ "etable_cb",                 l_set_etable_change_cb        },
 	{ "event_cb",                  l_set_event_cb                },

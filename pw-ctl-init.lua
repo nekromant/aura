@@ -6,7 +6,7 @@ aura = require("aura");
 aura.slog_init(nil, 88);
 
 
-node = aura.open_node("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
+node = aura.open_node("simpleusb", "./simpleusbconfigs/iceshard.conf");
 aura.wait_status(node, 1);
 
 function gpout_one(g)
@@ -21,7 +21,6 @@ gpout_one(12);
 gpout_one(13);
 gpout_one(14);
 
-node:set_serial(0, 0, "sharhanas");
 node:save(0,0)
 os.exit(0);
 
