@@ -327,23 +327,55 @@ err:
 	return NULL;
 }
 
-
-/* --------------------------- */
-
 static int l_open_node(lua_State *L)
 {
 	struct aura_node *node;
+
 	TRACE();
 	aura_check_args(L, 2);
 	node = aura_open(lua_tostring(L, 1), lua_tostring(L, 2));
+	if (!node)
+		return luaL_error(L, "Failed to open node");
+
 	return check_node_and_push(L, node);
+
+}
+
+static int l_close_node(lua_State *L)
+{
+	lua_stackdump(L);
+	struct laura_node *lnode = lua_fetch_node(L, 1);
+	struct aura_node *node = lnode->node;
+
+	TRACE();
+
+	/* Handle weird cases when we've already cleaned up */
+	if (!node)
+		return 0;
+
+	/* Clear up references we've set up so far*/	
+	if (lnode->refs & REF_NODE_CONTAINER)
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->node_container);
+
+	if (lnode->refs & REF_STATUS_CB) { 
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->status_changed_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->status_changed_arg_ref);
+	}
+
+	if (lnode->refs & REF_ETABLE_CB) { 
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->etable_changed_ref);
+		luaL_unref(L, LUA_REGISTRYINDEX, lnode->etable_changed_arg_ref);
+	}
+
+	aura_close(node);
+	lnode->node = NULL;
+	return 0;
 }
 
 static int l_node_gc(lua_State *L)
 {
-	slog(0, SLOG_ERROR, "Garbage-collecting a node: This should not happen");
-	lua_stackdump(L);
-	return 0;
+	slog(0, SLOG_WARN, "GC on a node: This shouldn't normally happen, but we'll close the node anyway");
+	return l_close_node(L);
 }
 
 static int laura_do_sync_call(lua_State *L){
@@ -354,7 +386,7 @@ static int laura_do_sync_call(lua_State *L){
 	int ret;
 	TRACE();
 
-	o = aura_etable_find(lnode->node->tbl, lnode->current_call); 
+	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
 	if (!o)
 		return luaL_error(L, "Attempt to call non-existend method");
 
@@ -477,14 +509,22 @@ static int l_node_index(lua_State *L)
 {
 	struct laura_node *lnode = lua_touserdata(L, 1);
 	const char *name = lua_tostring(L, -1);
+	struct aura_object *o;
 
+	slog(0, SLOG_INFO, "++++++++");
+	lua_stackdump(L);
 	TRACE();
 	/* FixMe: Can this get gc-d by the time we actually use it? */
 	lnode->current_call = name;
+
+	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
+
 	if (strcmp("__", name)==0)
 		lua_pushcfunction(L, laura_do_async_call);
-	else
+	else if (object_is_method(o))
 		lua_pushcfunction(L, laura_do_sync_call);
+	else
+		lua_pushnil(L);
 	return 1;
 }
 
@@ -590,8 +630,6 @@ static int l_etable_activate(lua_State *L)
 }
 
 
-/* --------------------------------------- */
-/*
 static int l_eventloop_create(lua_State *L)
 {
 	struct aura_node *node; 
@@ -666,16 +704,6 @@ static int l_eventloop_destroy(lua_State *L)
 	return 0;
 }
 
-
-static const struct luaL_Reg evtloop_meta[] = {
-  {"__gc",   l_eventloop_gc},
-  {"__call", l_eventloop_create},
-  {NULL, NULL}
-};
-
-*/
-
-
 static int l_slog_init(lua_State *L)
 {
 	const char *fname;
@@ -699,6 +727,31 @@ static int l_wait_status(lua_State *L)
 	return 0;
 }
 
+static void event_cb(struct aura_node *node, struct aura_buffer *buf, void *arg)
+{
+	struct laura_node *lnode = arg; 
+	lua_State *L = lnode->L;
+	const struct aura_object *o = aura_get_current_object(node);
+	int nargs; 
+
+	TRACE();
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
+	lua_pushstring(L, o->name);
+	lua_gettable(L, -2);
+
+	lua_stackdump(L);
+	
+	if (!lua_isfunction(L, -1))
+		luaL_error(L, "Unhandled event: %s", o->name);
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
+	
+	nargs = buffer_to_lua(L, lnode->node, o, buf);
+	lua_stackdump(L);
+	lua_call(L, nargs + 1, 0);
+}
+
 static int l_set_node_container(lua_State *L)
 {
 	struct laura_node *lnode;
@@ -716,6 +769,9 @@ static int l_set_node_container(lua_State *L)
 	lnode = lua_touserdata(L, 1);
 	lnode->node_container = luaL_ref(L, LUA_REGISTRYINDEX);
 	lnode->refs |= REF_NODE_CONTAINER;
+
+	aura_unhandled_evt_cb(lnode->node, event_cb, lnode);
+
 	return 0;
 }
 
@@ -730,19 +786,17 @@ static const luaL_Reg libfuncs[] = {
 	{ "wait_status",               l_wait_status                 },
 
 	{ "set_node_containing_table", l_set_node_container          }, 
+	{ "eventloop_create",          l_eventloop_create            },
+	{ "eventloop_add",             l_eventloop_add               },
+	{ "eventloop_del",             l_eventloop_del               },
+	{ "eventloop_destroy",         l_eventloop_destroy           },
 
 /*
 	{ "status_cb",                 l_set_status_change_cb        },
 	{ "etable_cb",                 l_set_etable_change_cb        },
 	{ "event_cb",                  l_set_event_cb                },
 	{ "core_close",                l_close                       },
-
 	{ "handle_events",             l_handle_events               },
-	{ "eventloop_create",          l_eventloop_create            },
-	{ "eventloop_add",             l_eventloop_add               },
-	{ "eventloop_del",             l_eventloop_del               },
-	{ "eventloop_destroy",         l_eventloop_destroy           },
-	
 	{ "start_call",                l_start_call                  },
 	{ "node_status",               l_node_status                 },
 */

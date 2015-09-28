@@ -69,7 +69,7 @@ cppcheck:
 	-I/usr/include/x86_64-linux-gnu \
 	-I/usr/include \
 	$(INCFLAGS) $(obj-y:.o=.c) > /dev/null 2>cppcheck.log
-	@cat cppcheck.log | grep -v "information"
+	@cat cppcheck.log | grep -v "information" | grep -v "never used"
 
 clang-analyze:
 	make clean

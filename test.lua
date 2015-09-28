@@ -8,6 +8,12 @@ aura.slog_init(nil, 88);
 
 node = aura.open("dummy", "./simpleusbconfigs/pw-ctl.conf");
 
+
+node.ping = function(self, farg)
+   print("PING CB", farg)
+end
+
+
 aura.wait_status(node, 1);
 
 function callback(node, arg, ...)
@@ -20,9 +26,9 @@ node:__("echo_u16", callback, nil ,
 
 node:echo_u8(5);
 node = nil
+
 print("----");
 collectgarbage();
-
 
 os.exit(1);
 
@@ -62,7 +68,7 @@ function cb(arg)
    print("whoohoo");
 end
 
-node.ping = function(arg)
+node.ping = function(self, arg)
    print("ping",arg);
 end
 
