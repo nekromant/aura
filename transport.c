@@ -30,7 +30,13 @@ void aura_transport_register(struct aura_transport *tr)
 	list_add_tail(&tr->registry, &transports);
 }
 
-/* No fancy hash table, we won't have that many. Really. */
+/** 
+ * Find a transport identified by it's name
+ * 
+ * @param name 
+ * 
+ * @return struct aura_transport or NULL
+ */
 const struct aura_transport *aura_transport_lookup(const char *name)
 {
 	struct aura_transport *pos;
