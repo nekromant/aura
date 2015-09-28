@@ -341,14 +341,13 @@ static int l_open_node(lua_State *L)
 
 static int l_close_node(lua_State *L)
 {
-	lua_stackdump(L);
 	struct laura_node *lnode = lua_fetch_node(L, 1);
 	struct aura_node *node = lnode->node;
 
 	TRACE();
 
 	/* Handle weird cases when we've already cleaned up */
-	if (!node)
+	if (!node) 
 		return 0;
 
 	/* Clear up references we've set up so far*/	
@@ -374,7 +373,6 @@ static int l_close_node(lua_State *L)
 
 static int l_node_gc(lua_State *L)
 {
-	slog(0, SLOG_WARN, "GC on a node: This shouldn't normally happen, but we'll close the node anyway");
 	return l_close_node(L);
 }
 
@@ -494,7 +492,6 @@ static int laura_do_async_call(lua_State *L){
 	/* And fetch the reference to out table that we'll use in callback */
 	callback_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	slog(4, SLOG_DEBUG, "Callback tbl reference: %d", callback_ref);
-	lua_stackdump(L);
 
 	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *) (long) callback_ref, buf);
 	if (ret != 0) { 
@@ -511,8 +508,6 @@ static int l_node_index(lua_State *L)
 	const char *name = lua_tostring(L, -1);
 	struct aura_object *o;
 
-	slog(0, SLOG_INFO, "++++++++");
-	lua_stackdump(L);
 	TRACE();
 	/* FixMe: Can this get gc-d by the time we actually use it? */
 	lnode->current_call = name;
@@ -739,16 +734,15 @@ static void event_cb(struct aura_node *node, struct aura_buffer *buf, void *arg)
 	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
 	lua_pushstring(L, o->name);
 	lua_gettable(L, -2);
-
-	lua_stackdump(L);
 	
-	if (!lua_isfunction(L, -1))
-		luaL_error(L, "Unhandled event: %s", o->name);
+	if (!lua_isfunction(L, -1)) { 
+		slog(0, SLOG_WARN, "Dropping unhandled event: %s");
+		return;
+	}
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, lnode->node_container);
 	
 	nargs = buffer_to_lua(L, lnode->node, o, buf);
-	lua_stackdump(L);
 	lua_call(L, nargs + 1, 0);
 }
 

@@ -14,10 +14,11 @@ function split(inputstr, sep)
         return t
 end
 
-prefix = arg[1];
+pth = arg[1]
+prefix = arg[2];
 candidate = nil;
 
-p = split(package.path, ";");
+p = split(package[pth], ";");
 for i,j in ipairs(p) do
    local t = split(j,"?")[1];
    if (nil ~= string.find(t, prefix)) then

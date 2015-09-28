@@ -1,6 +1,16 @@
 .SUFFIXES:
 -include blackjack.mk
 
+SHELL:=/bin/bash
+PREFIX?=/usr
+LUA?=lua5.2
+DESTDIR?=
+LUA_PKGCONFIG=lua5.2
+LUA_CPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua cpath $(PREFIX))
+LUA_LPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua path $(PREFIX))
+
+CFLAGS+=-DAURA_LUADIR='"$(LUA_LPATH)/"'
+
 CC?=clang
 unit-tests  = $(shell ls tests/*.c)
 dummy-tests = $(shell ls tests/dummy-*.c)
@@ -105,5 +115,27 @@ doxygen:
 	git commit -m "documentation-for-gh-pages";\
 	git remote add origin git@github.com:nekromant/aura.git;\
 	git push -u -f origin gh-pages
+
+install-check:
+	@echo "lua interpreter: $(LUA)"
+	@echo "Install prefix : $(PREFIX)"
+	@echo "root dir:        $(DESTDIR)"
+	@echo "lua .so dir:     $(LUA_CPATH)"
+	@echo "lua lib dir:     $(LUA_LPATH)"
+
+
+remove-lua:
+	[ -d $(DESTDIR)/$(LUA_LPATH)/aura ] && rm -Rfv $(DESTDIR)/$(LUA_LPATH)/aura
+
+#FixMe: This install receipe is very naive
+install-lua: install-lib
+	[ -d $(DESTDIR)/$(LUA_CPATH) ] || mkdir -p $(DESTDIR)/$(LUA_CPATH)
+	[ -d $(DESTDIR)/$(LUA_LPATH) ] || mkdir -p $(DESTDIR)/$(LUA_LPATH)
+	cp -Rfv lua/* $(DESTDIR)/$(LUA_LPATH)
+	ln -sf $(DESTDIR)/$(PREFIX)/lib/libauracore.so $(DESTDIR)/$(LUA_CPATH)/auracore.so
+
+install-lib:
+	cp -f libauracore.so $(DESTDIR)/$(PREFIX)/lib/
+
 
 .PHONY: doxygen
