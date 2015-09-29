@@ -796,7 +796,7 @@ static int l_status(lua_State *L)
 	aura_check_args(L, 1);
 	lnode = lua_fetch_node(L, 1);	
 	if (!lnode)
-		luaL_error(L, "Failed to retrieve lnode");
+		return luaL_error(L, "Failed to retrieve lnode");
 	lua_pushnumber(L, aura_get_status(lnode->node));
 	return 1;
 }
@@ -823,7 +823,7 @@ static int l_set_status_change_cb(lua_State *L)
 
 	lnode = lua_fetch_node(L, 1);
 	if (!lnode)
-		luaL_error(L, "Failed to retrieve node");
+		return luaL_error(L, "Failed to retrieve node");
 
 	node = lnode->node;
 
