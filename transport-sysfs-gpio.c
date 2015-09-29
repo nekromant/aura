@@ -124,26 +124,6 @@ static int gpio_out(int gpio)
 	return -EIO;
 }
 
-
-void  sysfs_gpio_export(struct aura_node *node, struct aura_buffer *in, struct aura_buffer *out)
-{
-#define BUFFER_MAX 8
-	int pin = 0;
-	char buffer[BUFFER_MAX];
-	ssize_t bytes_written;
-	int fd;
-
-	fd = open("/sys/class/gpio/export", O_WRONLY);
-	if (-1 == fd) {
-		fprintf(stderr, "Failed to open export for writing!\n");
-		return(-1);
-	}
-	bytes_written = snprintf(buffer, BUFFER_MAX, "%d", pin);
-	write(fd, buffer, bytes_written);
-	close(fd);
-	return(0);
-}
-
 static int gpio_open(struct aura_node *node, const char *opts)
 {
 	slog(0, SLOG_INFO, "Opening sysfs/gpio transport");
@@ -151,7 +131,7 @@ static int gpio_open(struct aura_node *node, const char *opts)
 	if (!etbl)
 		BUG(node, "Failed to create etable");
 	aura_etable_add(etbl, "write", "33", "");
-	aura_etable_add(etbl, "read", "3", "4");
+	aura_etable_add(etbl, "read", "3", "3");
 	aura_etable_add(etbl, "out", "3", "");
 	aura_etable_add(etbl, "in", "3", "");
 	aura_etable_add(etbl, "export", "3", "3");
@@ -184,13 +164,23 @@ static void handle_outbound(struct aura_node *node, struct aura_object *o, struc
 		slog(4, SLOG_DEBUG, "gpio: write gpio %d value %d", gpio, value);
 		ret = gpio_write(gpio, value);
 	} else if (OPCODE("in")) {
-		
+		int gpio = aura_buffer_get_u32(buf);
+		ret = gpio_in(gpio);
+	} else if (OPCODE("out")) {
+		int gpio = aura_buffer_get_u32(buf);
+		ret = gpio_in(gpio);		
+	} else if (OPCODE("read")) {
+		int gpio = aura_buffer_get_u32(buf);
+		ret = gpio_read(gpio, &gpio);
+		aura_buffer_rewind(buf);
+		aura_buffer_put_u32(buf, gpio);
 	}
 	slog(0, SLOG_DEBUG, "gpio ret = %d", ret);
 	if (ret) {
 		aura_call_fail(node, o);
 		return;
 	}
+	aura_queue_buffer(&node->inbound_buffers, buf);
 }
 
 static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
