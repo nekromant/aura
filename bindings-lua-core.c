@@ -11,7 +11,7 @@
 #define REF_ETABLE_CB      (1<<2)
 #define REF_EVENT_CB       (1<<3)
 
-#define TRACE_BCALLS
+//#define TRACE_BCALLS
 
 #ifdef TRACE_BCALLS
 #define TRACE() slog(4, SLOG_DEBUG, "Bindings call: %s", __func__)
