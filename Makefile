@@ -32,7 +32,7 @@ obj-y+= transport-sysfs-gpio.o
 obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o 
 #Lua bindings
-obj-y+= bindings-lua-core.o 
+obj-y+= bindings-lua.o 
 
 
 define PKG_CONFIG
