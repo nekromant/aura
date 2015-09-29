@@ -33,7 +33,7 @@ void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfd
 void aura_transport_register(struct aura_transport *tr);
 void aura_transport_dump_usage();
 void aura_transport_release(const struct aura_transport *tr);
-
+void aura_call_fail(struct aura_node *node, struct aura_object *o);
 void aura_eventloop_set_data(struct aura_node *node, struct aura_eventloop *);
 
 #endif

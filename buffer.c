@@ -36,7 +36,7 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
 
 	ret->size = act_size - sizeof(struct aura_buffer);
 	ret->owner = nd; 
-	aura_buffer_rewind(nd, ret);
+	aura_buffer_rewind(ret);
 	return ret;
 }
 

@@ -90,7 +90,8 @@ static inline void *aura_get_transportdata(struct aura_node *node)
  * @param node
  * @param buf
  */
-static inline void aura_buffer_rewind(struct aura_node *node, struct aura_buffer *buf) {
+static inline void aura_buffer_rewind(struct aura_buffer *buf) {
+	struct aura_node *node = buf->owner;
 	buf->pos = node->tr->buffer_offset;
 }
 

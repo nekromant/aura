@@ -6,7 +6,9 @@
  */
 
 /**
- * Add an aura_buffer to a queue specified.
+ * Add an aura_buffer to a queue. 
+ * This functions sets buffer's internal data pointer
+ * to the beginning of serialized data by calling aura_buffer_rewind() internally
  *
  * @param queue
  * @param buf
@@ -14,6 +16,7 @@
 void aura_queue_buffer(struct list_head *queue, struct aura_buffer *buf)
 { 
 	list_add_tail(&buf->qentry, queue);
+	aura_buffer_rewind(buf);
 }
 
 
@@ -33,7 +36,9 @@ struct aura_buffer *aura_peek_buffer(struct list_head *head)
 }
 
 /**
- * Dequeue the next buffer from a queue and return the pointer to it
+ * Dequeue the next buffer from a queue and return it.
+ * This functions sets buffer's internal data pointer
+ * to the beginning of serialized data by calling aura_buffer_rewind() internally
  * @param head
  * @return
  */
@@ -41,10 +46,18 @@ struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
 {
 	struct aura_buffer *ret;
 	ret = aura_peek_buffer(head);
-	if (ret)
+	if (ret) {
 		list_del(head->next);
+		aura_buffer_rewind(ret);
+	}
 	return ret;
 }
+
+/**
+ * Put the buffer back to the start of the queue. 
+ * @param head
+ * @return
+ */
 
 void aura_requeue_buffer(struct list_head *list, struct aura_buffer *buf)
 {

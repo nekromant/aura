@@ -247,11 +247,11 @@ static void cb_call_done(struct libusb_transfer *transfer)
 	if (0 == check_control(transfer)) {
 		slog(4, SLOG_DEBUG, "Requeuing!");
 		buf = aura_dequeue_buffer(&inf->node->outbound_buffers);
-		aura_buffer_rewind(node, buf);
 		aura_queue_buffer(&node->inbound_buffers, buf);
 		inf->current_buffer = NULL;
 	}
 }
+
 static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf) 
 { 
 	struct aura_object *o = buf->userdata;
@@ -265,7 +265,6 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	else
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
 
-	aura_buffer_rewind(node, buf);
 	ptr = (uint16_t *) &buf->data[buf->pos]; 
 	wValue = *ptr++;
 	wIndex = *ptr++;

@@ -140,7 +140,7 @@ static void aura_handle_inbound(struct aura_node *node)
 
 		o = buf->userdata;
 		node->current_object = o; 
-		aura_buffer_rewind(node, buf);
+		aura_buffer_rewind(buf);
 
 		slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d", 
 		     object_is_method(o) ? "response" : "event", 
@@ -369,6 +369,7 @@ int aura_core_start_call(struct aura_node *node,
 	o->arg = arg; 
 	buf->userdata = o;
 	o->pending++;
+
 	aura_queue_buffer(&node->outbound_buffers, buf);
 	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", o->id, o->name);
 
@@ -415,6 +416,7 @@ int aura_core_call(
 		aura_handle_events(loop);
 		slog(0, SLOG_DEBUG, "pending: %d", o->pending);
 	}	
+
 	slog(4, SLOG_DEBUG, "Call completed");
 	*retbuf =  node->sync_ret_buf;
 
@@ -748,6 +750,24 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
  * @{
  */
 
+/** 
+ * Report this call as failed to the core 
+ * 
+ * 
+ * @param node 
+ * @param o 
+ * @param buf 
+ */
+void aura_call_fail(struct aura_node *node, struct aura_object *o)
+{
+	if (o->pending && o->calldonecb)
+		o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
+	if (o->pending)
+		o->pending--;
+
+	node->sync_call_result = AURA_CALL_TRANSPORT_FAIL;
+	node->sync_ret_buf = NULL;
+}
 
 /**
  * Change node status.
