@@ -28,7 +28,7 @@ obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
 obj-y+= transport-serial.o
-#obj-y+= transport-sysfs-gpio.o
+obj-y+= transport-sysfs-gpio.o
 obj-y+= transport-usb.o usb-helpers.o
 obj-y+= transport-susb.o 
 #Lua bindings
@@ -132,8 +132,9 @@ install-lua: install-lib
 	cp -Rfv lua/* $(DESTDIR)/$(LUA_LPATH)
 	ln -sf $(DESTDIR)/$(PREFIX)/lib/libauracore.so $(DESTDIR)/$(LUA_CPATH)/auracore.so
 
-install-lib:
+install-lib: libauracore.so
 	cp -f libauracore.so $(DESTDIR)/$(PREFIX)/lib/
 
+install: install-lua
 
 .PHONY: doxygen
