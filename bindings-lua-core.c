@@ -26,6 +26,11 @@
 
 extern int lua_stackdump(lua_State *L);
 
+/* Lightuserdata can't have an attached metatable so we have to resort to
+   using full userdata here. 
+   Bindings take care to close nodes and destroy eventloops when 
+   garbage-collecting
+*/
 struct laura_node { 
 	lua_State *L;
 	struct aura_node *node;
@@ -36,6 +41,11 @@ struct laura_node {
 	int status_changed_arg_ref;
 	int inbound_event_ref;
 	int inbound_event_arg_ref;
+};
+
+struct laura_eventloop
+{
+	struct aura_eventloop *loop;
 };
 
 static inline int check_node_and_push(lua_State *L, struct aura_node *node) 
@@ -341,7 +351,7 @@ static int l_open_node(lua_State *L)
 
 static int l_close_node(lua_State *L)
 {
-	struct laura_node *lnode = lua_fetch_node(L, 1);
+	struct laura_node *lnode = lua_fetch_node(L, -1);
 	struct aura_node *node = lnode->node;
 
 	TRACE();
@@ -413,6 +423,7 @@ static void calldone_cb(struct aura_node *node, int status, struct aura_buffer *
 	o = aura_get_current_object(lnode->node); 
 	TRACE();
 
+
 	lua_rawgeti(L, LUA_REGISTRYINDEX, (long) arg); /* Fetch our callback params */
 	lua_pushnumber(L, 1); 
  	lua_gettable(L, -2);
@@ -426,7 +437,9 @@ static void calldone_cb(struct aura_node *node, int status, struct aura_buffer *
 
 	buffer_to_lua(L, lnode->node, o, retbuf);
 
-	lua_call(L, 3 + o->num_args, 0); /* Fire the callback! */
+	lua_stackdump(L);
+
+	lua_call(L, 3 + o->num_rets, 0); /* Fire the callback! */
 
 	luaL_unref(L, LUA_REGISTRYINDEX, (long) arg); /* Remove the reference */
 }
@@ -496,7 +509,7 @@ static int laura_do_async_call(lua_State *L){
 	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *) (long) callback_ref, buf);
 	if (ret != 0) { 
 		aura_buffer_release(lnode->node, buf);
-		return luaL_error(L, "Async call for %s failed", o->name);
+		return luaL_error(L, "Async call for %s failed: %d:%s", o->name, ret, strerror(ret));
 	}
 
 	return 0;
@@ -523,11 +536,6 @@ static int l_node_index(lua_State *L)
 	return 1;
 }
 
-static const struct luaL_Reg node_meta[] = {
-  {"__gc",      l_node_gc         },
-  {"__index",   l_node_index      },
-  {NULL,     NULL           }
-};
 
 
 static int l_etable_get(lua_State *L)
@@ -627,74 +635,85 @@ static int l_etable_activate(lua_State *L)
 
 static int l_eventloop_create(lua_State *L)
 {
-	struct aura_node *node; 
-	struct aura_eventloop *loop; 
+	struct laura_node *lnode; 
+	struct laura_eventloop *lloop;
 
 	TRACE();
-	aura_check_args(L, 1);
-	if (!lua_islightuserdata(L, 1)) {
-		aura_typeerror(L, 1, "ludata");
-	}
-	node = lua_touserdata(L, 1);
-	loop = aura_eventloop_create(node);
-	if (!loop) 
+
+	lnode = lua_fetch_node(L, 1);
+	if (!lnode)
+		return luaL_error(L, "Failed to fetch node");
+
+	lloop = lua_newuserdata(L, sizeof(*lloop));
+	if (!lloop)
+		return luaL_error(L, "Userdata allocation failed");
+	luaL_setmetatable(L, laura_eventloop_type);
+
+	lloop->loop = aura_eventloop_create(lnode->node);
+	if (!lloop->loop)
 		lua_pushnil(L);
-	else
-		lua_pushlightuserdata(L, loop);
+	
 	return 1;
 }
 
 static int l_eventloop_add(lua_State *L)
 {
-	struct aura_node *node; 
-	struct aura_eventloop *loop; 
+	struct laura_node *lnode; 
+	struct laura_eventloop *lloop; 
 
 	TRACE();
 	aura_check_args(L, 2);
-	if (!lua_islightuserdata(L, 1)) {
-		aura_typeerror(L, 1, "ludata (loop)");
-	}
-	if (!lua_islightuserdata(L, 2)) {
-		aura_typeerror(L, 2, "ludata (node)");
-	}
 
-	loop = lua_touserdata(L, 1);
-	node = lua_touserdata(L, 2);
-	
-	aura_eventloop_add(loop, node);
+	if (!lua_isuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata (eventloop)");
+	}
+	lnode = lua_fetch_node(L, 2);
+
+	lloop = lua_touserdata(L, 1);
+	if (!lloop || !lnode)
+		return luaL_error(L, "Failed to retrive arguments");
+
+	aura_eventloop_add(lloop->loop, lnode->node);
+
 	return 0;
 }
 
 static int l_eventloop_del(lua_State *L)
 {
-	struct aura_node *node; 
+	struct laura_node *lnode; 
 
 	TRACE();
 	aura_check_args(L, 1);
 
-	if (!lua_islightuserdata(L, 1)) {
-		aura_typeerror(L, 1, "ludata (node)");
-	}
+	lnode = lua_fetch_node(L, 1);
 
-	node = lua_touserdata(L, 2);
+	if (!lnode)
+		return luaL_error(L, "Failed to retrive arguments");
 	
-	aura_eventloop_del(node);
+	aura_eventloop_del(lnode->node);
 	return 0;
 }
 
 static int l_eventloop_destroy(lua_State *L)
 {
-	struct aura_eventloop *loop; 
+	struct laura_eventloop *lloop; 
 
 	TRACE();
 	aura_check_args(L, 1);
 
-	if (!lua_islightuserdata(L, 1)) {
-		aura_typeerror(L, 1, "ludata (loop)");
+	if (!lua_isuserdata(L, 1)) {
+		aura_typeerror(L, 2, "ludata (eventloop)");
 	}
 
-	loop = lua_touserdata(L, 1);
-	aura_eventloop_destroy(loop);
+	lloop = lua_touserdata(L, 1);
+	if (!lloop)
+		return luaL_error(L, "Failed to retrive arguments");
+	
+	if (!lloop->loop)
+		return 0;
+
+	aura_eventloop_destroy(lloop->loop);
+	lloop->loop = NULL;
 
 	return 0;
 }
@@ -736,7 +755,7 @@ static void event_cb(struct aura_node *node, struct aura_buffer *buf, void *arg)
 	lua_gettable(L, -2);
 	
 	if (!lua_isfunction(L, -1)) { 
-		slog(0, SLOG_WARN, "Dropping unhandled event: %s");
+		slog(0, SLOG_WARN, "Dropping unhandled event: %s", o->name);
 		return;
 	}
 
@@ -826,6 +845,29 @@ static int l_set_status_change_cb(lua_State *L)
 	return 0;
 }
 
+static int l_handle_events(lua_State *L)
+{
+	struct laura_eventloop *lloop; 
+	int timeout = -1; 
+
+	TRACE();
+	aura_check_args(L, 1);
+
+	if (!lua_isuserdata(L, 1)) {
+		aura_typeerror(L, 1, "ludata");
+	}
+
+	lloop = lua_touserdata(L, 1);
+
+	if (lua_gettop(L) == 2) { 
+		timeout = lua_tonumber(L, 2);
+		aura_handle_events_timeout(lloop->loop, timeout);
+	} else { 
+		aura_handle_events_forever(lloop->loop);
+	}
+
+	return 0;
+}
 
 static const luaL_Reg libfuncs[] = {
 	{ "slog_init",                 l_slog_init                   },	
@@ -836,6 +878,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "core_open",                 l_open_node                   },
 	{ "core_close",                l_close_node                  },
 	{ "wait_status",               l_wait_status                 },
+
 	{ "status",                    l_status                      },
 	{ "status_cb",                 l_set_status_change_cb        },
 
@@ -845,13 +888,35 @@ static const luaL_Reg libfuncs[] = {
 	{ "eventloop_del",             l_eventloop_del               },
 	{ "eventloop_destroy",         l_eventloop_destroy           },
 
+	{ "handle_events",             l_handle_events               },
 
 /*
 	{ "status_cb",                 l_set_status_change_cb        },
 	{ "event_cb",                  l_set_event_cb                },
-	{ "handle_events",             l_handle_events               },
+
 */
 	{NULL,                         NULL}
+};
+
+
+static const struct luaL_Reg node_meta[] = {
+  {"__gc",      l_node_gc         },
+  {"__index",   l_node_index      },
+  {NULL,     NULL           }
+};
+
+
+static int l_loop_gc(lua_State *L)
+{
+	slog(0, SLOG_WARN, "GC on a evtloop: This shouldn't normally happen, but we'll close the node anyway");
+	lua_stackdump(L);
+//	return l_close_node(L);
+}
+
+
+static const struct luaL_Reg loop_meta[] = {
+  {"__gc",      l_loop_gc         },
+  {NULL,     NULL           }
 };
 
 
@@ -859,6 +924,9 @@ LUALIB_API int luaopen_auracore (lua_State *L)
 {
 	luaL_newmetatable(L, laura_node_type);
 	luaL_setfuncs(L, node_meta, 0);
+
+	luaL_newmetatable(L, laura_eventloop_type);
+	luaL_setfuncs(L, loop_meta, 0);
 
 	luaL_newlib(L, libfuncs);
 	lua_setfield_int(L, "STATUS_OFFLINE", AURA_STATUS_OFFLINE);

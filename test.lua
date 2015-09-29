@@ -6,29 +6,39 @@ aura = require("aura");
 aura.slog_init(nil, 88);
 
 
-node = aura.open("dummy", "./simpleusbconfigs/pw-ctl.conf");
+dummy = aura.open("dummy", "./simpleusbconfigs/pw-ctl.conf");
+node = aura.open("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 
+l = aura.eventloop(node, dummy)
+
+aura.wait_status(node, aura.STATUS_ONLINE);
 
 function status_cb(node, status, arg)
    print("status cb", node, status, arg);
 end
 
 aura.status_cb(node, status_cb, 45);
+aura.status_cb(dummy, status_cb, 45);
 
-node.ping = function(self, farg)
-   print("PING CB", farg)
-end
-
-
-aura.wait_status(node, aura.STATUS_ONLINE);
 
 function callback(node, arg, ...)
    print("CALLBACK!")
    print(node, status, arg, ...);
 end
 
-node:__("echo_u16", callback, nil , 
+n=1;
+
+dummy.ping = function(self, farg)
+   print("PING CB", farg)
+   n = not n
+end
+
+dummy:__("echo_u16", callback, nil , 
 	567);
+node:__("bit_set", callback, nil, bit32.lshift(12,8),0);
+
+l:handle_events();
+
 
 node:echo_u8(5);
 

@@ -1,21 +1,44 @@
-require("aura/class");
-local loop = class();
+local loop = { }
 
-loop.__init = function(self, aura, fnode, ...)
-   self._aura   = aura;
-   self._handle = aura.eventloop_create(fnode._handle)
-   print(self._handle);
+local aura = require("aura");
+
+loop.init = function(self, fnode, ...)
+   self._nodes = { }
+   self._handle = aura.eventloop_create(fnode)
+
    if (self._handle == nil) then
       error("Eventloop creation failed");
    end
 
+   table.insert(self._nodes, fnode);
    for i,j in ipairs({...}) do
-      aura.eventloop_add(j)
+      self:add(j);
    end
 end
 
-loop.handle_events = function(self, timeout)
-   self._aura.handle_events(self._handle, timeout);
+loop.add = function(self, node)
+   aura.eventloop_add(self._handle, node)
+   table.insert(self._nodes, node);
+end
+
+loop.del = function(self, node)
+   for i,j in ipairs(self._nodes) do
+      if (j==node) then
+	 self._nodes[i] = nil
+	 aura.eventloop_del(node);
+	 return;
+      end
+   end
+   error("Node removal from eventloop failed");
+end
+
+loop.destroy = function(self)
+   self._nodes = nil
+   aura.eventloop_destroy(self._handle);
+end
+
+loop.handle_events = function(self, ...)
+   aura.handle_events(self._handle, ...);
 end
 
 return loop;
