@@ -308,6 +308,7 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		slog(4, SLOG_DEBUG, "usb: transport offlined, starting to look for a device");
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		libusb_close(inf->handle);
+		inf->handle = NULL;
 		inf->state = SUSB_DEVICE_SEARCHING;
 		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
