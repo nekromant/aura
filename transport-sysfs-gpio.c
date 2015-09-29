@@ -168,7 +168,7 @@ static void handle_outbound(struct aura_node *node, struct aura_object *o, struc
 		ret = gpio_in(gpio);
 	} else if (OPCODE("out")) {
 		int gpio = aura_buffer_get_u32(buf);
-		ret = gpio_in(gpio);		
+		ret = gpio_out(gpio);		
 	} else if (OPCODE("read")) {
 		int gpio = aura_buffer_get_u32(buf);
 		ret = gpio_read(gpio, &gpio);
