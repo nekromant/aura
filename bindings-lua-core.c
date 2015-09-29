@@ -909,8 +909,7 @@ static const struct luaL_Reg node_meta[] = {
 static int l_loop_gc(lua_State *L)
 {
 	slog(0, SLOG_WARN, "GC on a evtloop: This shouldn't normally happen, but we'll close the node anyway");
-	lua_stackdump(L);
-//	return l_close_node(L);
+	return l_eventloop_destroy(L);
 }
 
 
