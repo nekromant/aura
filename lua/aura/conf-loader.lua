@@ -25,7 +25,6 @@ end
 
 function do_load()
    device = dofile(simpleconf);
-   print("OOT", simpleconf);
    tbl = aura.etable_create(node, #device.methods + 1);
    n = 0
 

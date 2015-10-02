@@ -414,7 +414,6 @@ int aura_core_call(
 
 	while (o->pending) {
 		aura_handle_events(loop);
-		slog(0, SLOG_DEBUG, "pending: %d", o->pending);
 	}	
 
 	slog(4, SLOG_DEBUG, "Call completed");
