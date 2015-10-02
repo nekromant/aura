@@ -50,8 +50,4 @@ aura.close = function(node)
    aura.core_close(node);
 end
 
-aura.status = function(node)
-   return aura.node_status(node._handle);
-end
-
 return aura
