@@ -26,6 +26,36 @@
 
 extern int lua_stackdump(lua_State *L);
 
+
+#if LUA_VERSION_NUM < 520
+#warning Building with lua-5.1-compat hacks 
+
+
+#define luaL_setmetatable(L, name) \
+  luaL_getmetatable(L, name); \
+  lua_setmetatable(L, -2)
+
+#define setfuncs(L, l) luaL_setfuncs(L, l, 0)
+
+static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
+  luaL_checkstack(L, nup+1, "too many upvalues");
+  for (; l->name != NULL; l++) {  /* fill the table with given functions */
+    int i;
+    lua_pushstring(L, l->name);
+    for (i = 0; i < nup; i++)  /* copy upvalues to the top */
+      lua_pushvalue(L, -(nup+1));
+    lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
+    lua_settable(L, -(nup + 3));
+  }
+  lua_pop(L, nup);  /* remove upvalues */
+}
+
+#define luaL_newlib(L, l) \
+  (lua_newtable((L)),luaL_setfuncs((L), (l), 0))
+
+#endif
+
+
 /* Lightuserdata can't have an attached metatable so we have to resort to
    using full userdata here. 
    Bindings take care to close nodes and destroy eventloops when 
