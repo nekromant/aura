@@ -5,18 +5,13 @@ SHELL:=/bin/bash
 PREFIX?=/usr
 LUA?=lua5.2
 DESTDIR?=
-LUA_PKGCONFIG=lua5.2
+LUA_PKG?=$(LUA)
 LUA_CPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua cpath $(PREFIX))
 LUA_LPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua path $(PREFIX))
 
 CC?=clang
 unit-tests  = $(shell ls tests/*.c)
 dummy-tests = $(shell ls tests/dummy-*.c)
-
-#Handle case when we're not cross-compiling
-ifneq ($(GNU_TARGET_NAME),)
-CROSS_COMPILE?=$(GNU_TARGET_NAME)-
-endif
 
 CFLAGS+=-Iinclude/ -g -Wall -fPIC
 LDFLAGS+=-rdynamic -g
@@ -35,19 +30,28 @@ obj-y+= transport-susb.o
 obj-y+= bindings-lua.o 
 
 
+
 define PKG_CONFIG
+$$(info Fetching pkg-config for $(1))
 CFLAGS   += $$(shell pkg-config --cflags  $(1))
 LDFLAGS  += $$(shell pkg-config --libs $(1))
 INCFLAGS += $$(shell pkg-config --cflags-only-I $(1)) 
 endef
 
+ifneq ($(SKIP_PKGCONFIG),y)
 $(eval $(call PKG_CONFIG,libusb-1.0))
-$(eval $(call PKG_CONFIG,lua5.2))
+$(eval $(call PKG_CONFIG,$(LUA_PKG)))
+endif
+
+ifeq ($(AURA_DISABLE_BACKTRACE),y)
+CFLAGS+=-DAURA_DISABLE_BACKTRACE
+endif
+
 
 all: libauracore.so $(subst .c,,$(unit-tests)) TAGS
 
 libauracore.so: $(obj-y)
-	$(SILENT_LD)$(CROSS_COMPILE)gcc -lusb-1.0 -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
+	$(SILENT_LD)$(CC) -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
 define unit_test_rule
 $(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
@@ -90,7 +94,7 @@ checkpatch:
 	./checkpatch.pl --no-tree -f $(obj-y:.o=.c) include/aura/*.h
 
 %.o: %.c 
-	$(SILENT_CC)$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $(@) $(<)
+	$(SILENT_CC)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
 	-rm *.o test.dummy test.usb libauracore.som

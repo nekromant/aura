@@ -1,7 +1,10 @@
 #include <aura/aura.h>
 #include <aura/private.h>
-#include <execinfo.h>
 #include <signal.h>
+
+#ifndef AURA_DISABLE_BACKTRACE
+#include <execinfo.h>
+#endif
 
 #define TRACE_LEN 36
 
@@ -25,14 +28,18 @@ void __attribute__((noreturn)) aura_panic(struct aura_node *node)
   char **strings;
   size_t i;
 
+  aura_transport_dump_usage();
+
+#ifndef AURA_DISABLE_BACKTRACE
   size = backtrace (array, TRACE_LEN);
   strings = backtrace_symbols (array, size);
-
-  aura_transport_dump_usage();
 
   slog(0, SLOG_DEBUG, "--- Dumping aura stack ---");
   for (i = 0; i < size; i++)
 	  slog(0, SLOG_DEBUG, "%s", strings[i]);
+#else
+  slog(0, SLOG_DEBUG, "Stackdump disabled. Perhaps your C library sucks");
+#endif
 
   /* TODO: Dump interesting stuff from node var */
   
