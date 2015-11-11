@@ -86,8 +86,16 @@ int aura_eventsys_backend_wait(void *backend, int timeout_ms)
 			uint64_t tmp; 
 			ap = NULL;
 			read(epd->evtfd.fd, &tmp, sizeof(uint64_t));
-		}
-		aura_eventloop_report_event(epd->loopdata, ap); 	
+		} else 
+			ap->events = ev[i].events;
+			
+		slog(4, SLOG_LIVE, "events: %s %s %s", 
+		     (ev[i].events & EPOLLIN) ? "IN" : "",
+		     (ev[i].events & EPOLLOUT) ? "OUT" : "",
+		     (ev[i].events & EPOLLPRI) ? "PRI" : ""
+			);
+
+		aura_eventloop_report_event(epd->loopdata, ap);
 	}
 	return ret;
 }
