@@ -138,7 +138,7 @@ static void aura_handle_inbound(struct aura_node *node)
 		if (!buf)
 			break;
 
-		o = buf->userdata;
+		o = buf->object;
 		node->current_object = o; 
 		aura_buffer_rewind(buf);
 
@@ -367,7 +367,7 @@ int aura_core_start_call(struct aura_node *node,
 
 	o->calldonecb = calldonecb; 
 	o->arg = arg; 
-	buf->userdata = o;
+	buf->object = o;
 	o->pending++;
 
 	aura_queue_buffer(&node->outbound_buffers, buf);
@@ -733,7 +733,7 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
 	if (!(*retbuf))
 		aura_panic(node);
 
-	*obj = (const struct aura_object *)(*retbuf)->userdata;
+	*obj = (const struct aura_object *)(*retbuf)->object;
 	node->sync_event_count--;
 	return 0;
 }

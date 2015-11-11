@@ -379,7 +379,7 @@ static void parse_params(struct usb_dev_info *inf)
 	inf->dev_descr.serial  = tmp;
 }
 
-int usb_open(struct aura_node *node, const char *opts)
+static int usb_open(struct aura_node *node, const char *opts)
 {
 	int ret; 
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
@@ -487,7 +487,7 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	inf->pending--;
 	slog(4, SLOG_DEBUG, "Event readout completed, %d bytes, %d evt left", 
 	     transfer->actual_length, inf->pending);
-	buf->userdata = o; 
+	buf->object = o; 
 	/* Position the buffer at the start of the responses */
 	buf->pos = LIBUSB_CONTROL_SETUP_SIZE + sizeof(struct usb_event_packet);
 	aura_queue_buffer(&node->inbound_buffers, buf);
@@ -549,7 +549,7 @@ requeue:
 
 static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
 {
-	struct aura_object *o = buf->userdata;
+	struct aura_object *o = buf->object;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	
 	slog(4, SLOG_DEBUG, "Writing call %s data to device, %d bytes", o->name, buf->size);
@@ -605,4 +605,5 @@ static struct aura_transport usb = {
 	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE, /* Offset for usb SETUP structure */  
 	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE
 };
+
 AURA_TRANSPORT(usb);

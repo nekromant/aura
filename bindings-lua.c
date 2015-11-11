@@ -27,8 +27,8 @@
 extern int lua_stackdump(lua_State *L);
 
 
-#if LUA_VERSION_NUM < 520
-#warning Building with lua-5.1-compat hacks 
+#if LUA_VERSION_NUM < 502
+#warning Building with lua-5.1-compat hacks
 
 
 #define luaL_setmetatable(L, name) \

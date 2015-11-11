@@ -254,11 +254,10 @@ static void cb_call_done(struct libusb_transfer *transfer)
 
 static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf) 
 { 
-	struct aura_object *o = buf->userdata;
+	struct aura_object *o = buf->object;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	uint8_t rqtype;
 	uint16_t wIndex, wValue, *ptr;
-
 
 	if (o->ret_fmt)
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
@@ -328,4 +327,5 @@ static struct aura_transport tusb = {
 	.buffer_overhead = LIBUSB_CONTROL_SETUP_SIZE, 
 	.buffer_offset = LIBUSB_CONTROL_SETUP_SIZE
 };
+
 AURA_TRANSPORT(tusb);

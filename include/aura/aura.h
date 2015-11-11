@@ -44,7 +44,7 @@ struct aura_pollfds {
 	int magic;
 	struct aura_node *node; 
 	int fd;
-	short events;
+	uint32_t events;
 };
 
 struct aura_object;
@@ -315,22 +315,25 @@ struct aura_transport
 
 /** Represents a buffer (surprize!) that is used for serialization/deserialization
  *
- *  The data is stored in NODE endianness.
- *  The buffer also has an internal data pointer
+ *  * The data is stored in NODE endianness.
+ *  * The buffer has an internal data pointer
+ *  * The buffer has an associated object
  */
 struct aura_buffer {
 	/** Size of the data in this buffer */
-	int               size;
+	int                 size;
 	/** Pointer to the next element */
-	int               pos;
-	/** userdata assosiated with this buffer */
-	void             *userdata;
+	int                 pos;
+	/** object assosiated with this buffer */
+	struct aura_object *object;
+	/** Transport-specific data associated with this buffer */
+	void               *transportdata;
 	/** The node that owns the buffer */
-	struct aura_node * owner;
+	struct aura_node   *owner;
 	/** list_entry. Used to queue/deueue buffers */
-	struct list_head  qentry;
+	struct list_head    qentry;
 	/** The actual data in this buffer */
-	char              data[];
+	char                data[];
 };
 
 /**
@@ -699,7 +702,7 @@ void aura_object_migration_failed_cb(struct aura_node *node,
 
 const struct aura_object *aura_get_current_object(struct aura_node *node);
 
-void aura_add_pollfds(struct aura_node *node, int fd, short events);
+void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events);
 void aura_del_pollfds(struct aura_node *node, int fd);
 int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
 

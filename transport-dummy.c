@@ -1,7 +1,7 @@
 #include <aura/aura.h>
 #include <aura/private.h>
 
-int dummy_open(struct aura_node *node, const char *opts)
+static int dummy_open(struct aura_node *node, const char *opts)
 {
 	slog(0, SLOG_INFO, "Opening dummy transport");
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
@@ -18,12 +18,12 @@ int dummy_open(struct aura_node *node, const char *opts)
 	return 0;
 }
 
-void dummy_close(struct aura_node *node)
+static void dummy_close(struct aura_node *node)
 {
 	slog(0, SLOG_INFO, "Closing dummy transport");
 }
 
-void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;
@@ -31,14 +31,14 @@ void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	/* queue an event */
 	buf = aura_buffer_request(node, 32);
 	memset(buf->data, 12, buf->size);
-	buf->userdata = aura_etable_find(node->tbl, "ping");
+	buf->object = aura_etable_find(node->tbl, "ping");
 	aura_queue_buffer(&node->inbound_buffers, buf);
 
 	while(1) { 
 		buf = aura_dequeue_buffer(&node->outbound_buffers); 
 		if (!buf)
 			break;
-		o = buf->userdata;
+		o = buf->object;
 		slog(0, SLOG_DEBUG, "Dequeued/requeued obj id %d (%s)", o->id, o->name);
 		aura_queue_buffer(&node->inbound_buffers, buf);
 		aura_eventloop_interrupt(aura_eventloop_get_data(node));

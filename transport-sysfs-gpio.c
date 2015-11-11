@@ -192,7 +192,7 @@ static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		buf = aura_dequeue_buffer(&node->outbound_buffers); 
 		if (!buf)
 			break;
-		o = buf->userdata;
+		o = buf->object;
 		handle_outbound(node, o, buf);
 		aura_buffer_release(node, buf);
 		aura_eventloop_interrupt(aura_eventloop_get_data(node));
@@ -205,4 +205,5 @@ static struct aura_transport gpio = {
 	.close = gpio_close,
 	.loop  = gpio_loop,
 };
+
 AURA_TRANSPORT(gpio);
