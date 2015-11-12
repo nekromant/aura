@@ -1,6 +1,79 @@
 #include <aura/aura.h>
 
+void test_u32(struct aura_node *n)
+{
+	int ret;
+	struct aura_buffer *retbuf; 
+	ret = aura_call(n, "echo32", &retbuf, 0xbeefc0de);
+	if (ret != 0) 
+		BUG(n, "Call failed!");
+
+	uint32_t v = aura_buffer_get_u32(retbuf);
+	if (v != 0xbeefc0de) {
+		slog(0, SLOG_ERROR, "U32 test NOT ok: %llx vs %llx", v, 0xbeefc0de); 
+	}
+	aura_buffer_release(n, retbuf);
+	slog(0, SLOG_INFO, "U32 echo test passed");
+}
+
+void test_bin(struct aura_node *n)
+{
+	char buf[64];
+	int ret;
+	FILE *fd = fopen("/dev/urandom", "r+");
+	fread(buf, 64, 1, fd);
+	fclose(fd);
+	struct aura_buffer *retbuf; 
+
+	ret = aura_call(n, "echobin", &retbuf, buf);
+	if (ret != 0) 
+		BUG(n, "Call failed!");
+
+	if (0 != memcmp(buf, retbuf->data, 64))
+		slog(0, SLOG_ERROR, "BIN test NOT ok"); 		
+	aura_hexdump("Out buffer", buf, 64);
+	aura_hexdump("In buffer", retbuf->data, 64);
+	slog(0, SLOG_INFO, "BIN test passed");
+}
+
+void test_u64(struct aura_node *n)
+{
+	int ret;
+	struct aura_buffer *retbuf; 
+	ret = aura_call(n, "echo64", &retbuf, 0xbeefc0deb00bc0de);
+	if (ret != 0) 
+		BUG(n, "Call failed!");
+
+	uint64_t v = aura_buffer_get_u64(retbuf);
+	if (v != 0xbeefc0deb00bc0de)
+		slog(0, SLOG_ERROR, "U64 test NOT ok: %llx vs %llx", v, 0xbeefc0deb00bc0de); 
+	aura_buffer_release(n, retbuf);
+	slog(0, SLOG_INFO, "U64 echo test passed");
+}
+
+void test_u32u32(struct aura_node *n)
+{
+	int ret;
+	struct aura_buffer *retbuf; 
+	ret = aura_call(n, "echou32u32", &retbuf, 0xbeefc0de, 0xdeadc0de);
+	if (ret != 0) 
+		BUG(n, "Call failed!");
+
+	uint32_t v1 = aura_buffer_get_u32(retbuf);
+	uint32_t v2 = aura_buffer_get_u32(retbuf);
+
+	if ((v1 != 0xbeefc0de) && (v2 != 0xdeadc0de)) {
+		slog(0, SLOG_ERROR, "U32 test NOT ok: %llx,%llx vs %llx,%llx", 
+		     v1, v2, 0xbeefc0de, 0xdeadc0de); 
+	}
+
+	aura_buffer_release(n, retbuf);
+	slog(0, SLOG_INFO, "U32U32 echo test passed");
+}
+
+
 int main() {
+
 	slog_init(NULL, 18);
 
 	int ret; 
@@ -9,15 +82,16 @@ int main() {
 		slog (0, SLOG_ERROR, "Failed to open node");
 		exit(1);
 	}
-
 	aura_wait_status(n, AURA_STATUS_ONLINE);
-	struct aura_buffer *retbuf; 
 
-	ret = aura_call(n, "echo32", &retbuf, 0xdeadc0de);
-	slog(0, SLOG_DEBUG, "call ret %d", ret);
-	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
-	aura_buffer_release(n, retbuf);
+	test_u32(n);
+	test_u64(n);
+	test_u32u32(n);
+	test_bin(n);
+
 	aura_close(n);
 
 	return 0;
 }
+
+

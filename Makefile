@@ -1,6 +1,11 @@
 .SUFFIXES:
 -include blackjack.mk
 
+CONFIG_TRANSPORT_NMC=y
+CONFIG_BINDINGS_LUA=n
+CONFIG_TRANSPORT_USB=n
+CONFIG_TRANSPORT_SERIAL=y
+
 SHELL:=/bin/bash
 PREFIX?=/usr
 LUA?=lua5.2
@@ -8,6 +13,7 @@ DESTDIR?=
 LUA_PKG?=$(LUA)
 LUA_CPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua cpath $(PREFIX))
 LUA_LPATH?=$(shell $(LUA) lua-guess-lib-install-path.lua path $(PREFIX))
+
 
 CC?=clang
 unit-tests  = $(shell ls tests/*.c)
@@ -22,13 +28,12 @@ obj-y+= transport.o eventloop.o aura.o export.o serdes.o
 obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
-obj-y+= transport-serial.o
-obj-y+= transport-sysfs-gpio.o
-obj-y+= transport-usb.o usb-helpers.o
-obj-y+= transport-susb.o 
-#Lua bindings
-obj-y+= bindings-lua.o 
 
+obj-y+= transport-sysfs-gpio.o
+
+obj-$(CONFIG_TRANSPORT_USB)+= transport-usb.o transport-susb.o usb-helpers.o
+obj-$(CONFIG_BINDINGS_LUA)+= bindings-lua.o 
+obj-$(CONFIG_TRANSPORT_SERIAL)+= transport-serial.o
 
 
 define PKG_CONFIG
@@ -38,13 +43,30 @@ LDFLAGS  += $$(shell pkg-config --libs $(1))
 INCFLAGS += $$(shell pkg-config --cflags-only-I $(1)) 
 endef
 
-ifneq ($(SKIP_PKGCONFIG),y)
+ifeq ($(CONFIG_TRANSPORT_USB),y)
 $(eval $(call PKG_CONFIG,libusb-1.0))
+endif
+
+ifeq ($(CONFIG_BINDINGS_LUA),y)
 $(eval $(call PKG_CONFIG,$(LUA_PKG)))
 endif
 
 ifeq ($(AURA_DISABLE_BACKTRACE),y)
 CFLAGS+=-DAURA_DISABLE_BACKTRACE
+endif
+
+###########################################
+# HACK: Fill in path to rcm kernel this to build easynmc transport
+#
+ifeq ($(CONFIG_TRANSPORT_NMC),y)
+CFLAGS+=-Inmc-utils/include/ -DLIBEASYNMC_VERSION=\"0.1.1\"
+CFLAGS+=-I/home/necromant/work/linux-mainline/include/uapi
+CFLAGS+=-I/home/necromant/work/linux-mainline/drivers/staging/android/uapi
+LDFLAGS+=-lelf
+obj-y+=nmc-utils/easynmc-core.o
+obj-y+=nmc-utils/easynmc-filters.o
+obj-y+=transport-nmc.o ion.o
+$(eval $(call PKG_CONFIG,libelf))
 endif
 
 
@@ -55,7 +77,7 @@ libauracore.so: $(obj-y)
 
 define unit_test_rule
 $(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
-	$$(SILENT_LD)$$(CROSS_COMPILE)$$(CC) -o $$(@) $$(LDFLAGS) $$(^)
+	$$(SILENT_LD)$$(CC) -o $$(@) $$(^) $$(LDFLAGS)
 endef
 
 
@@ -141,4 +163,12 @@ install-lib: libauracore.so
 
 install: install-lua
 
+
+devtest: all
+	cd nmc-utils && make clean && make
+	scp ./nmc-utils/nmc-examples/aura-rpc/aura-test.abs root@192.168.20.9:
+	scp tests/dummy-async root@192.168.20.9:
+	scp tests/test-nmc root@192.168.20.9:
+	scp nmc-utils/nmrun root@192.168.20.9:
+	scp nmc-utils/nmctl root@192.168.20.9:
 .PHONY: doxygen

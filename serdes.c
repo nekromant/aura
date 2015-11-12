@@ -180,7 +180,7 @@ static inline void va_put_U32(struct aura_buffer *buf, va_list ap, bool swap)
 
 static inline void va_put_S32(struct aura_buffer *buf, va_list ap, bool swap)
 {
-	int32_t v = (int32_t) va_arg(ap, uint32_t);
+	int32_t v = (int32_t) va_arg(ap, int32_t);
 	if (swap) 
 		v = __swap32(v);
 	memcpy(&buf->data[buf->pos], &v, sizeof(v));	

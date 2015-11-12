@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <ion/ion.h>
 
 #define MAGIC 0xbeefbabe
 #define AURA_MAGIC_HDR     0xdeadf00d
@@ -28,8 +29,14 @@ struct nmc_aura_header {
 	uint32_t strlen;
 };
 
+enum { 
+	SYNCBUF_IDLE = 0,
+	SYNCBUF_ARGOUT = 1,
+	SYNCBUF_RETIN = 2
+};
+
 struct nmc_aura_syncbuffer { 
-	uint32_t owner;
+	uint32_t state;
 	uint32_t id;
 	uint32_t inbound_buffer_ptr;
 	uint32_t outbound_buffer_ptr;
@@ -45,6 +52,15 @@ enum {
 	NMC_EVENT_TRANSPORT=1<<1
 };
 
+struct ion_buffer_descriptor { 
+	int map_fd;
+	int share_fd;
+	int size; 
+	ion_user_handle_t hndl; 
+	struct aura_buffer *mapped_buf;
+};
+
+
 struct nmc_private {
 	struct easynmc_handle *h; 
 	uint32_t eaddr;
@@ -57,6 +73,9 @@ struct nmc_private {
 	struct aura_buffer *reading;
 	int inbufsize;
 	struct nmc_aura_syncbuffer *sbuf; 
+	int ion_fd; 
+	struct aura_buffer *current_in;
+	struct aura_buffer *current_out;
 };
 
 char *nmc_fetch_str(void *nmstr)
@@ -184,9 +203,8 @@ static int parse_and_register_exports(struct nmc_private *pv)
 	}
 
 	pv->inbufsize = max_buf_sz;
-
 	aura_etable_activate(etbl);
-	
+
 	return 0;
 }
 
@@ -221,6 +239,7 @@ static void nonblock(int fd, int state)
 
 }
 
+
 static int nmc_open(struct aura_node *node, const char *filepath)
 {
 	int ret = -ENOMEM;
@@ -233,16 +252,27 @@ static int nmc_open(struct aura_node *node, const char *filepath)
 		ret = -ENOMEM;
 		goto errclose;
 	}
+	pv->ion_fd = -1; /* Default to invalid */
+	
+	if (pv->ion_fd < 0)
+		pv->ion_fd = ion_open();	
+	if (pv->ion_fd < 0) { 
+		slog(0, SLOG_ERROR, "Failed to init ion");
+		goto errfreemem;
+	}
+
+	if ((sizeof(struct aura_buffer) % 4))
+		BUG(node, "Internal BUG: aura_buffer header must be 4-byte aligned")
 
 	pv->node = node;
 	pv->h = h;
 
 	easynmc_userdata_set(h, pv);
 
-	easynmc_register_section_filter(h, &rpc_filter);
-	
+	easynmc_register_section_filter(h, &rpc_filter);	
+
 	ret = easynmc_load_abs(h, filepath, &pv->ep, ABSLOAD_FLAG_DEFAULT);
-	if (!pv->eaddr) { 
+	if ((ret != 0) || (!pv->eaddr)) { 
 		slog(0, SLOG_ERROR, "transport-nmc: abs file doesn't have a valid aura_rpc_exports section");
 		ret = -EIO;
 		goto errfreemem;
@@ -271,11 +301,84 @@ errclose:
 	return ret;
 }
 
-static void nmc_close(struct aura_node *node)
+static void fetch_stdout(struct aura_node *node)
 {
-	slog(0, SLOG_INFO, "Closing dummy transport");
+	struct nmc_private *pv = aura_get_userdata(node);
+	while (1) { 
+		char tmp[128];
+		int count; 
+		slog(4, SLOG_DEBUG, "transport-nmc: We can read stdout!");
+		count = read(pv->h->iofd, tmp, 128);  
+		if (count <= 0)
+			break; /* Fuckup? Try later! */
+		fwrite(tmp, count, 1, stdout);
+		if (count < 128) /* No more data */
+			break;
+	}
+		
 }
 
+static void nmc_close(struct aura_node *node)
+{
+	struct nmc_private *pv = aura_get_userdata(node);
+	fetch_stdout(node);
+	aura_del_pollfds(node, pv->h->iofd);
+	aura_del_pollfds(node, pv->h->memfd);
+	easynmc_close(pv->h);
+	if (pv->current_out)
+		aura_buffer_release(node, pv->current_out);
+	if (pv->current_in)
+		aura_buffer_release(node, pv->current_in);
+	free(pv);
+}
+
+static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)
+{
+	struct aura_node *node = buf->owner;
+	struct nmc_private *pv = aura_get_userdata(node);
+	struct ion_buffer_descriptor *dsc = buf->transportdata;
+	uint32_t nmaddress;
+
+	if (dsc->share_fd == -1) { /* Already shared? */
+		int ret = ion_share(pv->ion_fd, dsc->hndl, &dsc->share_fd);
+		if (ret) 
+			BUG(node, "ion_share() failed");
+	}
+	
+	nmaddress = easynmc_ion2nmc(pv->h, dsc->share_fd);
+	if (!nmaddress)
+		BUG(node, "Failed to obtain nm address handle");
+
+	return nmaddress;
+}
+
+static inline void do_issue_next_call(struct aura_node *node)
+{
+	struct aura_buffer *in_buf, *out_buf;
+	struct nmc_private *pv = aura_get_userdata(node);
+	struct aura_object *o;
+
+	int data_offset = (sizeof(struct aura_buffer) / 4);
+
+	out_buf = aura_dequeue_buffer(&node->outbound_buffers); 
+	if (!out_buf)
+		return;
+
+	o = out_buf->object;
+	in_buf = aura_buffer_request(node, o->retlen);
+	if (!in_buf)
+		BUG(node, "Buffer allocation faield");
+
+	in_buf->object = o; 
+	pv->current_out = out_buf;
+	pv->current_in  = in_buf;
+	pv->sbuf->id = o->id;
+	
+
+	pv->sbuf->outbound_buffer_ptr = aura_buffer_to_nmc(out_buf) + data_offset;
+	pv->sbuf->inbound_buffer_ptr  = aura_buffer_to_nmc(in_buf) + data_offset;
+	pv->sbuf->state = SYNCBUF_ARGOUT;
+}
 
 static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
@@ -293,93 +396,76 @@ static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		pv->is_online = 0;
 	};
-
-	if (fd && (fd->fd == pv->h->iofd)) { 
-		while (1) { 
-			char tmp[128];
-			int count; 
-			slog(4, SLOG_DEBUG, "transport-nmc: We can read stdout!");
-			count = read(fd->fd, tmp, 128);  
-			if (count <= 0)
-				break; /* Fuckup? Try later! */
-			fwrite(tmp, 128, 1, stdout);
-			if (count < 128) /* No more data */
-				break;
-		}
-	}
 	
-	if (pv->sbuf && pv->sbuf->owner == 0) { 
-		slog(4, SLOG_DEBUG, "transport-nmc: We can issue a call!");
-		
-	}
-
-		/*
-		if (outbound_pending(pv)) {
-			struct aura_buffer *b = pv->writing; 
-			ssize_t written = write(h->iofd, 
-					       &b->data[b->pos],
-					       b->size - b->pos);
-
-			slog(4, SLOG_DEBUG, "%d bytes written", written);
-
-			if (written >= 0) { 
-				b->pos += written;
-			} else if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) { 
-				pv->flags &= ~NMC_CAN_WRITE;
-			} else {
-				BUG(node, "transport-nmc: Something nasty happened while writing");
-			}
-
-			if (b->pos == b->size) { 
-				aura_buffer_release(node, b);
-				pv->writing = NULL;
-			}
+	if (fd && (fd->fd == pv->h->iofd))
+		fetch_stdout(node);
+	
+	if (pv->sbuf) 
+		switch (pv->sbuf->state) { 
+		case SYNCBUF_IDLE:
+			slog(4, SLOG_DEBUG, "transport-nmc: We can issue our call");
+			do_issue_next_call(node);
+			break;
+		case SYNCBUF_ARGOUT:
+			slog(4, SLOG_DEBUG, "transport-nmc: NMC is still working");
+			break;
+		case SYNCBUF_RETIN:
+			aura_buffer_release(node, pv->current_out);
+			aura_queue_buffer(&node->inbound_buffers, pv->current_in);
+			pv->current_out = NULL;
+			pv->current_in  = NULL;
+			pv->sbuf->state = SYNCBUF_IDLE;
+			slog(4, SLOG_DEBUG, "transport-nmc: We got something from nmc");
+			break;
+		default:
+			BUG(node, "Unexpected syncbuf state");
+			break;
 		}
-
-		if (inbound_pending(pv)) {
-			struct aura_buffer *b = pv->reading;
-			int ret, toread;
-			struct aura_object *o;  
-			struct nmc_aura_msg_hdr *msg = (struct nmc_aura_msg_hdr *) pv->reading->data;
-			if (b->pos < sizeof(struct nmc_aura_msg_hdr))
-				toread = sizeof(struct nmc_aura_msg_hdr) - b->pos;
-			else {
-				o = aura_etable_find_id(node->tbl, msg->objid);
-				if (!o)
-					BUG(node, "Invalid object id in message from NMC");
-				toread = o->retlen + sizeof(struct nmc_aura_msg_hdr) - b->pos;
-			}
-			ret = read(h->iofd, &b->data[b->pos], toread);
-			aura_hexdump("buf", b->data, b->size);
-
-			if (ret >= 0) { 
-				b->pos += ret;
-			} else if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) { 
-				pv->flags &= ~NMC_CAN_READ;
-			} else {
-				BUG(node, "transport-nmc: Something nasty happened while reading");
-			}
-
-			slog(4, SLOG_DEBUG, "%d/%d bytes read pos %d", ret, toread, b->pos);
-
-			if (b->pos == toread) {
-				b->userdata = o;
-				aura_queue_buffer(&node->inbound_buffers, b);
-				aura_eventloop_interrupt(aura_eventloop_get_data(node));
-				pv->reading = NULL;
-			}
-		}
-		*/
 }
+
 
 struct aura_buffer *ion_buffer_request(struct aura_node *node, int size)
 {
+	int ret;
+	int map_fd;
+	ion_user_handle_t hndl;
+	struct aura_buffer *buf;
+	struct nmc_private *pv = aura_get_userdata(node);
+	struct ion_buffer_descriptor *dsc = malloc(sizeof(*dsc));
 
+	if (!dsc)
+		BUG(node, "malloc failed!");
+
+	ret = ion_alloc(pv->ion_fd, size, 0x10, 0xf, 0,  &hndl);	
+	if (ret) 
+		BUG(node, "ION allocation failed");
+	
+	ret = ion_map(pv->ion_fd, hndl, size, (PROT_READ | PROT_WRITE), 
+		      MAP_SHARED, 0, (void *) &buf, &map_fd);
+	if (ret)
+		BUG(node, "ION mmap failed");
+	
+	dsc->map_fd = map_fd; 
+	dsc->hndl = hndl;
+	dsc->mapped_buf = buf; 
+	dsc->size = size;
+	dsc->share_fd = -1;
+	buf->transportdata = dsc;
+	return buf;
 }
 
-void ion_buffer_release(struct aura_node *node, struct aura_buffer *buf)
+static void ion_buffer_release(struct aura_node *node, struct aura_buffer *buf)
 {
-	
+	struct nmc_private *pv = aura_get_userdata(node);
+	struct ion_buffer_descriptor *dsc = buf->transportdata;
+	int ret;
+
+	ret = ion_free(pv->ion_fd, dsc->hndl);
+	if (ret)
+		BUG(node, "Shit happened when doing ion_free(): %d", ret);
+	munmap(buf, dsc->size);
+	close(dsc->map_fd);
+	free(dsc);
 }
 
 static struct aura_transport nmc = { 
@@ -387,9 +473,10 @@ static struct aura_transport nmc = {
 	.open = nmc_open,
 	.close = nmc_close,
 	.loop  = nmc_loop,
+	.buffer_offset = 0,
+	.buffer_overhead =0,
 	.buffer_request = ion_buffer_request,
 	.buffer_release = ion_buffer_release
 };
 
 AURA_TRANSPORT(nmc);
-
