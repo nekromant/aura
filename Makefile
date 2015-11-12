@@ -28,11 +28,10 @@ obj-y+= transport.o eventloop.o aura.o export.o serdes.o
 obj-y+= retparse.o queue.o utils-linux.o
 obj-y+= eventsys-epoll.o
 obj-y+= transport-dummy.o
-
 obj-y+= transport-sysfs-gpio.o
 
 obj-$(CONFIG_TRANSPORT_USB)+= transport-usb.o transport-susb.o usb-helpers.o
-obj-$(CONFIG_BINDINGS_LUA)+= bindings-lua.o 
+obj-$(CONFIG_BINDINGS_LUA)+= bindings-lua.o utils-lua.o
 obj-$(CONFIG_TRANSPORT_SERIAL)+= transport-serial.o
 
 
