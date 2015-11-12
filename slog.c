@@ -253,7 +253,7 @@ void slog(int level, int flag, const char *msg, ...)
         }
 
         /* Print output */
-        printf("%s", slog_sprintf("%s\n", prints));
+        fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
 
         /* Save log in file */
         if (slg.to_file)
