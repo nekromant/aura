@@ -76,7 +76,7 @@ libauracore.so: $(obj-y)
 
 define unit_test_rule
 $(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
-	$$(SILENT_LD)$$(CC) -o $$(@) $$(^) $$(LDFLAGS)
+	$$(SILENT_LD)$$(CC) -o $$(@) $$(LDFLAGS) $$(^) 
 endef
 
 
