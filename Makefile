@@ -20,7 +20,7 @@ unit-tests  = $(shell ls tests/*.c)
 dummy-tests = $(shell ls tests/dummy-*.c)
 
 CFLAGS+=-Iinclude/ -g -Wall -fPIC
-LDFLAGS+=-rdynamic -g
+LDFLAGS+=-rdynamic -g -lrt
 
 obj-y+= buffer.o buffer-dummy.o 
 obj-y+= slog.o panic.o utils.o 
@@ -61,7 +61,7 @@ ifeq ($(CONFIG_TRANSPORT_NMC),y)
 CFLAGS+=-Inmc-utils/include/ -DLIBEASYNMC_VERSION=\"0.1.1\"
 CFLAGS+=-I/home/necromant/work/linux-mainline/include/uapi
 CFLAGS+=-I/home/necromant/work/linux-mainline/drivers/staging/android/uapi
-LDFLAGS+=-lelf -lrt
+LDFLAGS+=-lelf
 obj-y+=nmc-utils/easynmc-core.o
 obj-y+=nmc-utils/easynmc-filters.o
 obj-y+=transport-nmc.o ion.o
@@ -76,7 +76,7 @@ libauracore.so: $(obj-y)
 
 define unit_test_rule
 $(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
-	$$(SILENT_LD)$$(CC) -o $$(@) $$(LDFLAGS) $$(^) 
+	$$(SILENT_LD)$$(CC) -o $$(@) $$(^) $$(LDFLAGS)
 endef
 
 
