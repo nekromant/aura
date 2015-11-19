@@ -11,6 +11,10 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	aura_etable_add(etbl, "echo_u8", "1", "1");
 	aura_etable_add(etbl, "echo_u16", "2", "2");
 	aura_etable_add(etbl, "echo_i16", "7", "7");
+	aura_etable_add(etbl, "echo_u32", "3", "3");
+	aura_etable_add(etbl, "echo_i32", "8", "8");
+	aura_etable_add(etbl, "echo_seq", "321", "321");
+	aura_etable_add(etbl, "echo_bin", "s32.s32.", "s32.s32.");
 	aura_etable_add(etbl, "noargs_func", "", "");
 	aura_etable_add(etbl, "ping", NULL, "1");
 	aura_etable_activate(etbl);
