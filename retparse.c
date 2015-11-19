@@ -78,3 +78,11 @@ void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len)
 	memcpy(&buf->data[pos], data, len);
 	buf->pos += len;
 }
+
+struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf)
+{
+	struct aura_node *node = buf->owner; 
+	if (!node->tr->buffer_get)
+		BUG(node, "This node doesn't support aura_buffer as argument");
+	return node->tr->buffer_get(buf);
+}

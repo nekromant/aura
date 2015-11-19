@@ -14,5 +14,6 @@
 
 #define URPC_BIN  's'
 
+#define URPC_BUF  'b'
 
 #endif

@@ -34,6 +34,7 @@ int  aura_fmt_len(struct aura_node *node, const char *fmt)
 			break;
 		case URPC_U64:
  		case URPC_S64:
+		case URPC_BUF:
 			len += 8;
 			break;
 		case URPC_BIN: 
@@ -109,6 +110,9 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 			break;
 		case URPC_S64:
 			shift = sprintf(tmp, " int64_t");
+			break;
+		case URPC_BUF:
+			shift = sprintf(tmp, " buf");
 			break;
 		case URPC_BIN: 
 			len = atoi(fmt);
@@ -212,6 +216,15 @@ static inline void va_put_BIN(struct aura_buffer *buf, int len, va_list ap)
 	buf->pos+=len;
 }
 
+static inline void va_put_BUF(struct aura_buffer *buf, va_list ap, bool swap)
+{
+	struct aura_buffer *out = va_arg(ap, void *);
+	struct aura_node *node = buf->owner; 
+	if (!node->tr->buffer_put)
+		BUG(node, "This node doesn't support aura_buffer as argument");
+	node->tr->buffer_put(buf, out);
+}
+
 
 /**
  * Serialize a va_list ap of arguments according to format in an allocated aura_buffer
@@ -244,6 +257,7 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 			PUT(S32);
 			PUT(U64);
 			PUT(S64);
+			PUT(BUF);
 		case URPC_BIN:
 		{
 			int len = atoi(fmt);
@@ -255,6 +269,5 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 		}
 		};
 	};
-
 	return buf;
 }

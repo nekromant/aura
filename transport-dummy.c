@@ -12,11 +12,12 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	aura_etable_add(etbl, "echo_u16", "2", "2");
 	aura_etable_add(etbl, "echo_i16", "7", "7");
 	aura_etable_add(etbl, "echo_u32", "3", "3");
+	aura_etable_add(etbl, "ping", NULL, "1");
 	aura_etable_add(etbl, "echo_i32", "8", "8");
+	aura_etable_add(etbl, "noargs_func", "", "");
 	aura_etable_add(etbl, "echo_seq", "321", "321");
 	aura_etable_add(etbl, "echo_bin", "s32.s32.", "s32.s32.");
-	aura_etable_add(etbl, "noargs_func", "", "");
-	aura_etable_add(etbl, "ping", NULL, "1");
+	aura_etable_add(etbl, "echo_buf", "b", "b");
 	aura_etable_activate(etbl);
 	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
@@ -49,12 +50,27 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	}
 }
 
+void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
+{
+	slog(0, SLOG_DEBUG, "dummy: serializing buf 0x%x", buf);
+	aura_buffer_put_u64(dst, (uint64_t) buf);
+}
+
+struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
+{
+	struct aura_buffer *ret = (struct aura_buffer *) aura_buffer_get_u64(buf);
+	slog(0, SLOG_DEBUG, "dummy: deserializing buf 0x%x", ret);
+	return ret;
+}
+
 static struct aura_transport dummy = { 
 	.name = "dummy",
 	.open = dummy_open,
 	.close = dummy_close,
 	.loop  = dummy_loop,
 	.buffer_overhead = 16, 
-	.buffer_offset = 8
+	.buffer_offset = 8,
+	.buffer_get = dummy_buffer_get,
+	.buffer_put = dummy_buffer_put,
 };
 AURA_TRANSPORT(dummy);

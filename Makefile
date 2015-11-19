@@ -1,9 +1,9 @@
 .SUFFIXES:
 -include blackjack.mk
 
-CONFIG_TRANSPORT_NMC=y
-CONFIG_BINDINGS_LUA=n
-CONFIG_TRANSPORT_USB=n
+CONFIG_TRANSPORT_NMC=n
+CONFIG_BINDINGS_LUA=y
+CONFIG_TRANSPORT_USB=y
 CONFIG_TRANSPORT_SERIAL=y
 
 SHELL:=/bin/bash
@@ -87,7 +87,8 @@ $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 test: all
 	echo "Running test suite"
 	$(foreach u,$(dummy-tests),\
-	valgrind --show-leak-kinds=all --leak-check=full $(subst .c,,$(u)) && ) \
+	valgrind --error-exitcode=1 --undef-value-errors=no \
+		 --show-leak-kinds=all --leak-check=full $(subst .c,,$(u)) && ) \
 		echo "...Passed"
 
 cppcheck:

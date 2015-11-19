@@ -238,22 +238,27 @@ struct aura_transport
 	/**
 	 * \brief Optional.
 	 *
-	 * If your transport supplies any advanced work with custom pointers
-	 * this function will be called to get a pointer out of the buffer.
+	 * Your transport may implement passing aura_buffers as arguments. 
+	 * This may be extremely useful for DSP applications, where you also 
+	 * implement your own buffer_request and buffer_release to take care of
+	 * allocating memory on the DSP side. This function should serialize buffer buf
+	 * into buffer dst. Buffer pointer/handle must be cast to uint64_t.
 	 *
 	 * @param buf
 	 */
-	void               *(*ptr_pull)(struct aura_buffer *buf);
+	void               (*buffer_put)(struct aura_buffer *dst, struct aura_buffer *buf);
 	/**
 	 * \brief Optional
 	 *
-	 * If your transport supplies any advanced work with custom pointers
-	 * this function will be called to put a pointer to the buffer.
+	 * Your transport may implement passing aura_buffers as arguments. 
+	 * This may be extremely useful for DSP applications, where you also 
+	 * implement your own buffer_request and buffer_release to take care of
+	 * allocating memory on the DSP side. 
+	 * This function should deserialize and return aura_buffer from buffer buf
 	 * @param buf
 	 * @param ptr
 	 */
-	void                (*ptr_push)(struct aura_buffer *buf, void *ptr);
-
+	struct aura_buffer *(*buffer_get)(struct aura_buffer *buf);
 	/**
 	 * \brief Optional
 	 *
