@@ -3,6 +3,10 @@ sudo: false
 script: make test
 addons:
   apt:
-    sources:
+    packages:
     - libusb-1.0-dev
     - libelf-dev
+    - liblua5.2-dev
+    - pkg-config
+
+
