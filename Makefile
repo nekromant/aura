@@ -88,7 +88,7 @@ test: all
 	echo "Running test suite"
 	$(foreach u,$(dummy-tests),\
 	valgrind --error-exitcode=1 --undef-value-errors=no \
-		 --show-leak-kinds=all --leak-check=full $(subst .c,,$(u)) && ) \
+		 --leak-check=full $(subst .c,,$(u)) && ) \
 		echo "...Passed"
 
 cppcheck:
