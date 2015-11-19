@@ -1,5 +1,8 @@
 language: c
+sudo: false
 script: make test
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libusb1.0-dev libelf-dev
+addons:
+  apt:
+    sources:
+    - libusb-1.0-dev
+    - libelf-dev
