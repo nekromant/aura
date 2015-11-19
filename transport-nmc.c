@@ -468,6 +468,31 @@ static void ion_buffer_release(struct aura_node *node, struct aura_buffer *buf)
 	free(dsc);
 }
 
+/* 
+ * TODO: 
+ * This buffer passing mechanism is very hacky and will not work on 64 bit
+ * A total refactor is required, perhaps altering the aura core
+ */
+
+void nmc_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
+{
+	if (sizeof(void*) != 4)
+		BUG(dst->owner, "You know why we are screwed here");
+
+	uint64_t buf_addrs = aura_buffer_to_nmc(buf);
+	buf_addrs |= (((uint32_t) buf) << 32);
+	aura_buffer_put_u64(dst, buf_addrs);
+	slog(4, SLOG_DEBUG, "nmc: serialized buf 0x%x to 0x%llx ", buf, buf_addrs);
+}
+
+struct aura_buffer *nmc_buffer_get(struct aura_buffer *buf)
+{
+	uint64_t addrs = aura_buffer_get_u64(buf);
+	struct aura_buffer *ret = (struct aura_buffer *) (addrs >> 32);
+	slog(4, SLOG_DEBUG, "nmc: deserialized buf 0x%x from 0x%llx ", buf, addrs);
+	return ret;
+}
+
 static struct aura_transport nmc = { 
 	.name = "nmc",
 	.open = nmc_open,
@@ -476,7 +501,10 @@ static struct aura_transport nmc = {
 	.buffer_offset = 0,
 	.buffer_overhead =0,
 	.buffer_request = ion_buffer_request,
-	.buffer_release = ion_buffer_release
+	.buffer_release = ion_buffer_release,
+	.buffer_get = nmc_buffer_get,
+	.buffer_put = mmc_buffer_put,
+
 };
 
 AURA_TRANSPORT(nmc);
