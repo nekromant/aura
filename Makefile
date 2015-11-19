@@ -61,7 +61,7 @@ ifeq ($(CONFIG_TRANSPORT_NMC),y)
 CFLAGS+=-Inmc-utils/include/ -DLIBEASYNMC_VERSION=\"0.1.1\"
 CFLAGS+=-I/home/necromant/work/linux-mainline/include/uapi
 CFLAGS+=-I/home/necromant/work/linux-mainline/drivers/staging/android/uapi
-LDFLAGS+=-lelf
+LDFLAGS+=-lelf -lrt
 obj-y+=nmc-utils/easynmc-core.o
 obj-y+=nmc-utils/easynmc-filters.o
 obj-y+=transport-nmc.o ion.o
