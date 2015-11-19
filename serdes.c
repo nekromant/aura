@@ -209,6 +209,7 @@ static inline void va_put_BIN(struct aura_buffer *buf, int len, va_list ap)
 {
 	void *ptr = va_arg(ap, void *);
 	memcpy(&buf->data[buf->pos], ptr, len);
+	buf->pos+=len;
 }
 
 
