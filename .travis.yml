@@ -1,6 +1,6 @@
 language: c
 sudo: false
-script: make test
+script: make CONFIG_TRANSPORT_USB=n test 
 addons:
   apt:
     packages:
