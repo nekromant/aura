@@ -1,6 +1,6 @@
 language: c
 sudo: false
-script: make CONFIG_TRANSPORT_USB=n test 
+script: make CONFIG_TRANSPORT_USB=n DEBUG=y test
 addons:
   apt:
     packages:
@@ -8,5 +8,6 @@ addons:
     - libelf-dev
     - liblua5.2-dev
     - pkg-config
+    - valgrind
 
 
