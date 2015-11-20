@@ -11,6 +11,7 @@ static LIST_HEAD(transports);
 	return;								\
 	}
 
+
 void aura_transport_register(struct aura_transport *tr)
 {
 	/* Check if we have all that is required */
@@ -19,6 +20,12 @@ void aura_transport_register(struct aura_transport *tr)
 	required(close);
 	required(loop);
 
+	if ((tr->buffer_get) || (tr->buffer_put))
+	{
+		required(buffer_get);
+		required(buffer_put)
+	}
+
 	/* Warn against erroneous config */
 	if (tr->buffer_overhead < tr->buffer_offset) {
 		slog(0, SLOG_WARN,
@@ -26,6 +33,7 @@ void aura_transport_register(struct aura_transport *tr)
 		     tr->buffer_overhead, tr->buffer_offset);
 		return;
 	}
+
 	/* Add it! */
 	list_add_tail(&tr->registry, &transports);
 }
