@@ -78,7 +78,7 @@ struct nmc_private {
 	struct aura_buffer *current_out;
 };
 
-char *nmc_fetch_str(void *nmstr)
+static char *nmc_fetch_str(void *nmstr)
 {
 	uint32_t *n = nmstr; 
 	int len=0;
