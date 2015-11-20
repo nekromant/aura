@@ -374,7 +374,6 @@ static inline void do_issue_next_call(struct aura_node *node)
 	pv->current_in  = in_buf;
 	pv->sbuf->id = o->id;
 	
-
 	pv->sbuf->outbound_buffer_ptr = aura_buffer_to_nmc(out_buf) + data_offset;
 	pv->sbuf->inbound_buffer_ptr  = aura_buffer_to_nmc(in_buf) + data_offset;
 	pv->sbuf->state = SYNCBUF_ARGOUT;
@@ -382,7 +381,6 @@ static inline void do_issue_next_call(struct aura_node *node)
 
 static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
-	struct aura_object *o;
 	struct nmc_private *pv = aura_get_userdata(node);
 	struct easynmc_handle *h = pv->h;
 
