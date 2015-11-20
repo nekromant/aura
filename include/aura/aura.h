@@ -667,6 +667,20 @@ void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len);
 
 
 /**
+ * \brief Retrieve aura_buffer pointer from within the buffer and advance
+ * internal pointer by it's size. 
+ * 
+ * The underlying transport must support passing aura_buffer as arguments
+ *
+ * This function will cause a panic if attempted to read beyond
+ * the buffer boundary.
+ *
+ * @param buf aura buffer
+ * @param len data length
+ */
+struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf);
+
+/**
  * Retrieve transport-specific pointer from aura buffer.
  * Handling of this data-type is transport specific.
  *
