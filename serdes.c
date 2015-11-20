@@ -140,90 +140,90 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 //FixMe: This is likely to get messy due to integer promotion 
 //       on different platforms
 
-static void va_put_U8(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	uint8_t v = (uint8_t) va_arg(*ap, unsigned int);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));
-	buf->pos+=sizeof(v);
-}
+#define va_put_U8(buf, ap, swap)				\
+	{							\
+		uint8_t v = (uint8_t) va_arg(ap, unsigned int); \
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}
 
-static void va_put_S8(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	int8_t v = (int8_t) va_arg(*ap, int);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));
-	buf->pos+=sizeof(v);
-}
+#define va_put_S8(buf, ap, swap)				\
+	{							\
+		int8_t v = (int8_t) va_arg(ap, int);		\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}							\
 
-static void va_put_U16(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	uint16_t v = (uint16_t) va_arg(*ap, unsigned int);
-	if (swap) 
-		v = __swap16(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));	
-	buf->pos+=sizeof(v);
-}
+#define va_put_U16(buf, ap, swap)					\
+	{								\
+		uint16_t v = (uint16_t) va_arg(ap, unsigned int);	\
+		if (swap)						\
+			v = __swap16(v);				\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));		\
+		buf->pos+=sizeof(v);					\
+	}
 
-static void va_put_S16(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	int16_t v = (int16_t) va_arg(*ap, int);
-	if (swap) 
-		v = __swap16(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));	
-	buf->pos+=sizeof(v);
-}
+#define va_put_S16(buf, ap, swap)				\
+	{							\
+		int16_t v = (int16_t) va_arg(ap, int);		\
+		if (swap)					\
+			v = __swap16(v);			\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}
 
 /* FixMe: Portability, we assume no promotion here for now */
-static void va_put_U32(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	uint32_t v = (uint32_t) va_arg(*ap, uint32_t);
-	if (swap) 
-		v = __swap32(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));	
-	buf->pos+=sizeof(v);
-}
+#define va_put_U32(buf, ap, swap)				\
+	{							\
+		uint32_t v = (uint32_t) va_arg(ap, uint32_t);	\
+		if (swap)					\
+			v = __swap32(v);			\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}
 
-static void va_put_S32(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	int32_t v = (int32_t) va_arg(*ap, int32_t);
-	if (swap) 
-		v = __swap32(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));	
-	buf->pos+=sizeof(v);
-}
+#define va_put_S32(buf, ap, swap)				\
+	{							\
+		int32_t v = (int32_t) va_arg(ap, int32_t);	\
+		if (swap)					\
+			v = __swap32(v);			\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}
 
-static void va_put_U64(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	uint64_t v = (uint64_t) va_arg(*ap, uint64_t);
-	if (swap) 
-		v = __swap64(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));	
-	buf->pos+=sizeof(v);
-}
+#define va_put_U64(buf, ap, swap)				\
+	{							\
+		uint64_t v = (uint64_t) va_arg(ap, uint64_t);	\
+		if (swap)					\
+			v = __swap64(v);			\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}
 
-static void va_put_S64(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	int64_t v = (int64_t) va_arg(*ap, uint64_t);
-	if (swap) 
-		v = __swap64(v);
-	memcpy(&buf->data[buf->pos], &v, sizeof(v));
-	buf->pos+=sizeof(v);	
-}
+#define va_put_S64(buf, ap, swap)				\
+	{							\
+		int64_t v = (int64_t) va_arg(ap, uint64_t);	\
+		if (swap)					\
+			v = __swap64(v);			\
+		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
+		buf->pos+=sizeof(v);				\
+	}							\
 
-static void va_put_BIN(struct aura_buffer *buf, int len, va_list *ap)
-{
-	void *ptr = va_arg(*ap, void *);
-	memcpy(&buf->data[buf->pos], ptr, len);
-	buf->pos+=len;
-}
+#define va_put_BIN(buf, len, ap)			\
+	{						\
+		void *ptr = va_arg(ap, void *);		\
+		memcpy(&buf->data[buf->pos], ptr, len);	\
+		buf->pos+=len;				\
+	}
 
-static void va_put_BUF(struct aura_buffer *buf, va_list *ap, bool swap)
-{
-	struct aura_buffer *out = va_arg(*ap, void *);
-	struct aura_node *node = buf->owner; 
-	if (!node->tr->buffer_put)
-		BUG(node, "This node doesn't support aura_buffer as argument");
-	node->tr->buffer_put(buf, out);
-}
+#define va_put_BUF(buf, ap, swap)					\
+	{								\
+		struct aura_buffer *out = va_arg(ap, void *);		\
+		struct aura_node *node = buf->owner;			\
+		if (!node->tr->buffer_put)				\
+			BUG(node, "This node doesn't support aura_buffer as argument");	\
+		node->tr->buffer_put(buf, out);				\
+	}
 
 
 /**
@@ -244,7 +244,7 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 
 #define PUT(n)							\
 	case URPC_ ## n:					\
-		va_put_ ## n(buf, &ap, node->need_endian_swap);	\
+		va_put_ ## n(buf, ap, node->need_endian_swap);	\
 		break;						\
 		
 	while (*fmt) {
@@ -263,7 +263,7 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_l
 			int len = atoi(fmt);
 			if (len == 0) 
 				BUG(NULL, "Internal serilizer bug processing: %s", fmt);
-			va_put_BIN(buf, len, &ap);
+			va_put_BIN(buf, len, ap);
 			while (*fmt && (*fmt++ != '.'));
 			break;
 		}
