@@ -323,8 +323,11 @@ struct aura_transport
  *  * The data is stored in NODE endianness.
  *  * The buffer has an internal data pointer
  *  * The buffer has an associated object
+ *  * The buffer can be allocated in transport-specific way
  */
 struct aura_buffer {
+	/** Magic value, used for additional sanity-checking */
+	uint32_t magic;
 	/** Size of the data in this buffer */
 	int                 size;
 	/** Pointer to the next element */

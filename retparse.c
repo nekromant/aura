@@ -1,4 +1,5 @@
 #include <aura/aura.h>
+#include <aura/private.h>
 
 #define DECLARE_GETFUNC(tp, name, swapfunc)				\
 	tp aura_buffer_get_##name(struct aura_buffer *buf)		\
@@ -82,7 +83,11 @@ void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len)
 struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf)
 {
 	struct aura_node *node = buf->owner; 
+	struct aura_buffer *ret; 
 	if (!node->tr->buffer_get)
 		BUG(node, "This node doesn't support aura_buffer as argument");
-	return node->tr->buffer_get(buf);
+	ret = node->tr->buffer_get(buf);
+	if (ret->magic != AURA_BUFFER_MAGIC_ID)
+		BUG(node, "Fetched an aura_buffer with invalid magic - check your code!");
+	return ret;
 }

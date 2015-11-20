@@ -33,7 +33,7 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
 		ret = aura_buffer_internal_request(act_size);	
 	else
 		ret = nd->tr->buffer_request(nd, act_size);
-
+	ret->magic = AURA_BUFFER_MAGIC_ID;
 	ret->size = act_size - sizeof(struct aura_buffer);
 	ret->owner = nd; 
 	aura_buffer_rewind(ret);
@@ -50,6 +50,10 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
  */
 void aura_buffer_release(struct aura_node *nd, struct aura_buffer *buf)
 {
+	if (buf->magic != AURA_BUFFER_MAGIC_ID)
+		BUG(nd, "FATAL: Attempting to free a buffer with invalid magic OR double free an aura_buffer");
+	buf->magic = 0;
+
 	if (nd && nd->tr->buffer_release)
 		nd->tr->buffer_release(nd, buf);
 	else

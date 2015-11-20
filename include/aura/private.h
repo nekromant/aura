@@ -1,6 +1,8 @@
 #ifndef AURA_PRIVATE_H
 #define AURA_PRIVATE_H
 
+
+#define AURA_BUFFER_MAGIC_ID 0xdeadc0de
 /* raw calls */
 int aura_core_start_call (struct aura_node *node, 
 			  struct aura_object *o, 
