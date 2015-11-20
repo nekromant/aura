@@ -51,6 +51,28 @@ void test_u64(struct aura_node *n)
 	slog(0, SLOG_INFO, "U64 echo test passed");
 }
 
+void test_buf(struct aura_node *n)
+{
+	int ret;
+	struct aura_buffer *retbuf; 
+	struct aura_buffer *iobuf = aura_buffer_request(n, 80);
+	uint32_t test = 0xdeadf00d;
+	memcpy(iobuf->data, &test, sizeof(test));
+
+	ret = aura_call(n, "echo_buf", &retbuf, iobuf);
+	slog(0, SLOG_DEBUG, "call ret %d", ret);
+	if (ret)
+		BUG(n, "call failed");
+
+	struct aura_buffer *tmp = aura_buffer_get_buf(retbuf);
+	if (tmp != iobuf)
+		BUG(n, "test not ok");
+
+	aura_buffer_release(n, retbuf);
+	aura_buffer_release(n, tmp);
+	slog(0, SLOG_INFO, "BUF test passed");	
+}
+
 void test_u32u32(struct aura_node *n)
 {
 	int ret;
@@ -88,6 +110,7 @@ int main() {
 	test_u64(n);
 	test_u32u32(n);
 	test_bin(n);
+	test_buf(n);
 
 	aura_close(n);
 
