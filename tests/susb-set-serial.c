@@ -5,7 +5,6 @@
 
 void write_serial(struct aura_node *node, const char *str)
 {
-	int len = strlen(str);
 	int ret;
 	uint16_t *data = malloc(32); 
 	int i = 0;

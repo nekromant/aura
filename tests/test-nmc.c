@@ -98,7 +98,6 @@ int main() {
 
 	slog_init(NULL, 18);
 
-	int ret; 
 	struct aura_node *n = aura_open("nmc", "./aura-test.abs");
 	if (!n) {
 		slog (0, SLOG_ERROR, "Failed to open node");

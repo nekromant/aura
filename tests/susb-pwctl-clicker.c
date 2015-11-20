@@ -5,6 +5,7 @@ int main() {
         int ret; 
         int i = 2; 
         slog_init(NULL, 88);
+
         struct aura_node *n = aura_open("simpleusb", "./simpleusbconfigs/pw-ctl.conf");
 
         if (!n) { 
