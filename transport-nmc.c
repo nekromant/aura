@@ -321,7 +321,11 @@ static void fetch_stdout(struct aura_node *node)
 static void nmc_close(struct aura_node *node)
 {
 	struct nmc_private *pv = aura_get_userdata(node);
-	fetch_stdout(node);
+	/* 
+	   TODO: Uncomment when driver's fixed
+	   fetch_stdout(node);
+	*/
+
 	aura_del_pollfds(node, pv->h->iofd);
 	aura_del_pollfds(node, pv->h->memfd);
 	easynmc_close(pv->h);
