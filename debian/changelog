@@ -1,0 +1,5 @@
+aura (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Andrew 'Necromant' Andrianov <andrew@ncrmnt.org>  Sat, 21 Nov 2015 21:18:32 +0300
