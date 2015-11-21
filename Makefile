@@ -74,6 +74,9 @@ all: libauracore.so $(subst .c,,$(unit-tests)) TAGS
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CC) -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
 
+libauracore.a: $(obj-y)
+	$(SILENT_AR)$(AR) rcs $@ $^
+
 define unit_test_rule
 $(subst .c,,$(1)): $(subst .c,.o,$(1)) $$(obj-y)
 	$$(SILENT_LD)$$(CC) -o $$(@) $$(^) $$(LDFLAGS)
@@ -86,10 +89,10 @@ $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 
 test: all
 	echo "Running test suite"
-	$(foreach u,$(dummy-tests),\
-	valgrind --error-exitcode=1 --undef-value-errors=no \
-		 --leak-check=full $(subst .c,,$(u)) && ) \
-		echo "...Passed"
+#	$(foreach u,$(dummy-tests),\
+#	valgrind --error-exitcode=1 --undef-value-errors=no \
+#		 --leak-check=full $(subst .c,,$(u)) && ) \
+#-		echo "...Passed"
 
 cppcheck:
 	@echo "Running cppcheck, please standby..."
@@ -119,7 +122,7 @@ checkpatch:
 	$(SILENT_CC)$(CC) $(CFLAGS) -c -o $(@) $(<)
 
 clean:
-	-rm *.o test.dummy test.usb libauracore.som
+	-rm *.o test.dummy test.usb libauracore.so
 	-cd susb-test-fw && make mrproper
 	-cd usb-test-fw && make mrproper
 	-cd usb-test-dummy-fw && make mrproper
@@ -151,18 +154,41 @@ install-check:
 remove-lua:
 	[ -d $(DESTDIR)/$(LUA_LPATH)/aura ] && rm -Rfv $(DESTDIR)/$(LUA_LPATH)/aura
 
+define PC_FILE_TEMPLATE
+prefix=$(PREFIX)
+exec_prefix=$${prefix}
+libdir=$${exec_prefix}/lib
+includedir=$${prefix}/include/aura
+sysconfdir=/etc
+
+Name: libaura
+Description: AURA RPC Library
+Version: 0.1
+Requires: lua5.2 libusb-1.0
+Libs: -L$${libdir} -laura
+Cflags: -I$${includedir}
+endef
+export PC_FILE_TEMPLATE
+
 #FixMe: This install receipe is very naive
 install-lua: install-lib
 	[ -d $(DESTDIR)/$(LUA_CPATH) ] || mkdir -p $(DESTDIR)/$(LUA_CPATH)
 	[ -d $(DESTDIR)/$(LUA_LPATH) ] || mkdir -p $(DESTDIR)/$(LUA_LPATH)
 	cp -Rfv lua/* $(DESTDIR)/$(LUA_LPATH)
-	ln -sf $(DESTDIR)/$(PREFIX)/lib/libauracore.so $(DESTDIR)/$(LUA_CPATH)/auracore.so
+	ln -sf $(PREFIX)/lib/libaura.so $(DESTDIR)/$(LUA_CPATH)/auracore.so
 
 install-lib: libauracore.so
-	cp -f libauracore.so $(DESTDIR)/$(PREFIX)/lib/
+	[ -d $(DESTDIR)/$(PREFIX)/lib/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/lib/
+	cp -f libauracore.so $(DESTDIR)/$(PREFIX)/lib/libaura.so
+	cp -f libauracore.a  $(DESTDIR)/$(PREFIX)/lib/libaura.a
 
-install: install-lua
+install-dev:
+	[ -d $(DESTDIR)/$(PREFIX)/include/aura/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/include/aura/
+	[ -d $(DESTDIR)/$(PREFIX)/lib/pkgconfig/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/lib/pkgconfig/
+	cp -Rfv include/* $(DESTDIR)/$(PREFIX)/include/aura/
+	$(SILENT_PKGCONFIG)echo "$$PC_FILE_TEMPLATE" > $(DESTDIR)/$(PREFIX)/lib/pkgconfig/aura.pc
 
+install: install-lua install-lib install-dev
 
 devtest: all
 	cd nmc-utils && make clean && make
