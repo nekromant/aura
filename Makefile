@@ -168,6 +168,7 @@ devtest: all
 	cd nmc-utils && make clean && make
 	scp ./nmc-utils/nmc-examples/aura-rpc/aura-test.abs root@192.168.20.9:
 	scp tests/dummy-async root@192.168.20.9:
+	scp tests/dummy-serdes-test root@192.168.20.9:
 	scp tests/test-nmc root@192.168.20.9:
 	scp nmc-utils/nmrun root@192.168.20.9:
 	scp nmc-utils/nmctl root@192.168.20.9:
