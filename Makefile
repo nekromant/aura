@@ -89,10 +89,10 @@ $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 
 test: all
 	echo "Running test suite"
-#	$(foreach u,$(dummy-tests),\
-#	valgrind --error-exitcode=1 --undef-value-errors=no \
-#		 --leak-check=full $(subst .c,,$(u)) && ) \
-#-		echo "...Passed"
+	$(foreach u,$(dummy-tests),\
+	valgrind --error-exitcode=1 --undef-value-errors=no \
+		 --leak-check=full $(subst .c,,$(u)) && ) \
+		echo "...Passed"
 
 cppcheck:
 	@echo "Running cppcheck, please standby..."
@@ -177,7 +177,7 @@ install-lua: install-lib
 	cp -Rfv lua/* $(DESTDIR)/$(LUA_LPATH)
 	ln -sf $(PREFIX)/lib/libaura.so $(DESTDIR)/$(LUA_CPATH)/auracore.so
 
-install-lib: libauracore.so
+install-lib: libauracore.so libauracore.a
 	[ -d $(DESTDIR)/$(PREFIX)/lib/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/lib/
 	cp -f libauracore.so $(DESTDIR)/$(PREFIX)/lib/libaura.so
 	cp -f libauracore.a  $(DESTDIR)/$(PREFIX)/lib/libaura.a
