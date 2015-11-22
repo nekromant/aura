@@ -69,7 +69,7 @@ $(eval $(call PKG_CONFIG,libelf))
 endif
 
 
-all: libauracore.so $(subst .c,,$(unit-tests)) TAGS
+all: libauracore.so $(subst .c,,$(unit-tests))
 
 libauracore.so: $(obj-y)
 	$(SILENT_LD)$(CC) -O -shared -fpic -o $(@) $(^) $(LDFLAGS) 
@@ -87,12 +87,15 @@ $(foreach u,$(unit-tests),$(eval $(call unit_test_rule,$(u))))
 
 # Hint: Use gcc -E -x c++ - -v < /dev/nul to find out the paths
 
-test: all
-	echo "Running test suite"
+valgrind-test: all
+	echo "Running test suite under valgrind"
 	$(foreach u,$(dummy-tests),\
 	valgrind --error-exitcode=1 --undef-value-errors=no \
 		 --leak-check=full $(subst .c,,$(u)) && ) \
 		echo "...Passed"
+
+test:
+	$(foreach u,$(dummy-tests), ./$(subst .c,,$(u)))
 
 cppcheck:
 	@echo "Running cppcheck, please standby..."
