@@ -12,6 +12,7 @@ addons:
     - libusb-1.0-dev
     - libelf-dev
     - liblua5.2-dev
+    - lua5.2
     - pkg-config
     - valgrind
     - cmake
