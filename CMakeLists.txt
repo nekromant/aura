@@ -1,12 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
 PROJECT(aura)
+SET(PROJECT_VERSION   0.1.2)
+SET(AURA_API_VERSION  1)
 
 Include(CTest)
 find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
 
-SET(AURA_LIB_VERSION  0.1.1)
-SET(AURA_API_VERSION  1)
+
 
 #TODO: Move out linux-specific stuff
 SET(SRCS   
@@ -22,7 +24,7 @@ SET(SRCS
 SET(TRANSPORTS dummy sysfs-gpio serial)
 
 file(GLOB TESTS
-    "tests/*.c"
+    "${CMAKE_SOURCE_DIR}/tests/*.c"
 )
 
 
@@ -45,6 +47,7 @@ if(LUA52_FOUND)
   EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX}
     OUTPUT_VARIABLE LUA_LPATH
     )
+  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.2")
 elseif(${LUA51_FOUND})
   SET(LUA_INCLUDE_DIRS ${LUA51_INCLUDE_DIRS})
   SET(LUA_LIBRARIES ${LUA51_LIBRARIES})
@@ -55,11 +58,13 @@ elseif(${LUA51_FOUND})
   EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX}
     OUTPUT_VARIABLE LUA_LPATH
     )
+  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.1")
 endif()
 
 if(LIBUSB_FOUND)
   SET(TRANSPORTS ${TRANSPORTS} usb)
   SET(SRCS ${SRCS} transport-usb.c usb-helpers.c)
+  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libusb-1.0")
 endif()
 
 if(LIBUSB_FOUND AND LUA_FOUND)
@@ -75,6 +80,7 @@ ENDIF()
 IF(EASYNMC_FOUND)
   SET(TRANSPORTS ${TRANSPORTS} nmc)
   SET(SRCS ${SRCS} transport-nmc.c ion.c)
+  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} easynmc-0.1.1")
 ENDIF()
 
 INCLUDE_DIRECTORIES(
@@ -110,7 +116,7 @@ foreach(file ${TESTS})
   ADD_TEST(${f} ${f})
 endforeach(file)
 
-SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${AURA_LIB_VERSION}
+SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
   VERSION ${AURA_API_VERSION})
 
 message("Enabled transports:        ${TRANSPORTS}")
@@ -123,13 +129,15 @@ endif()
 
 INSTALL(TARGETS aurashared LIBRARY
         DESTINATION lib)
+
 INSTALL(TARGETS aurastatic ARCHIVE
         DESTINATION lib)
 
 file(GLOB LUA_SCRIPTS
-    "lua/aura/*"
+    "${CMAKE_SOURCE_DIR}/lua/aura/*"
 )
 
+# If we have lua - let's install all the lua stuff
 if (LUA_FOUND)
 INSTALL(FILES ${LUA_SCRIPTS}
        DESTINATION ${LUA_LPATH}/aura)
@@ -141,3 +149,41 @@ INSTALL(TARGETS aurashared LIBRARY
         DESTINATION ${LUA_CPATH} NAMELINK_ONLY
 	RENAME libauracore)
 endif()
+
+# Now, let's install headers
+file(GLOB AURA_HEADERS
+    "${CMAKE_SOURCE_DIR}/include/aura/*"
+)
+
+file(GLOB ION_HEADERS
+    "${CMAKE_SOURCE_DIR}/include/ion/*"
+)
+
+INSTALL(FILES ${AURA_HEADERS}
+       DESTINATION include/aura-${PROJECT_VERSION}/aura)
+
+INSTALL(FILES ${ION_HEADERS}
+       DESTINATION include/ion)
+
+#Finally, the pkg-config file
+
+SET(PKG_CONFIG_LIBDIR
+    "\${prefix}/lib"
+)
+SET(PKG_CONFIG_INCLUDEDIR
+    "\${prefix}/include/aura-${PROJECT_VERSION}"
+)
+SET(PKG_CONFIG_LIBS
+    "-L\${libdir} -l:libaura.so.${PROJECT_VERSION}"
+)
+SET(PKG_CONFIG_CFLAGS
+    "-I\${includedir}"
+)
+
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+)
+
+INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+       DESTINATION lib/pkgconfig/)
