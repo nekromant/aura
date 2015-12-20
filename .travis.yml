@@ -14,7 +14,6 @@ script:
 addons:
   apt:
     packages:
-    - libusb-1.0-0-dev
     - libelf-dev
     - liblua5.2-dev
     - lua5.2
