@@ -33,5 +33,6 @@ if (nil == candidate) then
    os.exit(1);
 end
 
-print(candidate);
+candidate = candidate:gsub(prefix.."/", "")
+io.write(candidate);
 os.exit(0);
