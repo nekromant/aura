@@ -1,5 +1,6 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <linux/easynmc.h>
 #include <easynmc.h>
 #include <stdint.h>
 #include <sys/epoll.h>
