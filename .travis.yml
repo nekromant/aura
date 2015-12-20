@@ -1,6 +1,11 @@
 language: c
-sudo: false
+sudo: required
+before_install:
+  - sudo apt-add-repository -y ppa:kalakris/cmake
+  - sudo apt-get update 
+  - sudo apt-get install -y cmake
 script:
+  - cmake --version
   - mkdir build
   - cd build 
   - cmake ..
@@ -9,10 +14,9 @@ script:
 addons:
   apt:
     packages:
-    - libusb-1.0-dev
+    - libusb-1.0-0-dev
     - libelf-dev
     - liblua5.2-dev
     - lua5.2
     - pkg-config
     - valgrind
-    - cmake
