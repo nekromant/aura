@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura)
+
 # AURA: Another Universal RPC, Actually
 
 Aura is a simple and fast universal RPC library that allows you to quickly interface
