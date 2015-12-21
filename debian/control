@@ -1,7 +1,7 @@
 Source: aura
 Priority: optional
 Maintainer: Andrew 'Necromant' Andrianov <andrew@ncrmnt.org>
-Build-Depends: debhelper (>= 9), liblua5.2-dev, libusb-1.0-0-dev, cmake
+Build-Depends: debhelper (>= 9), liblua5.2-dev, libusb-1.0-0-dev, cmake, lua5.2
 Standards-Version: 3.9.5
 Section: libs
 Homepage: http://github.com/nekromant/aura
