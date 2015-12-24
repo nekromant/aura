@@ -1,3 +1,4 @@
+deb_host_multiarch=${CMAKE_LIBRARY_PATH}
 Name: ${PROJECT_NAME}
 Description: ${PROJECT_DESCRIPTION}
 Version: ${PROJECT_VERSION}

@@ -41,10 +41,10 @@ if(LUA52_FOUND)
   SET(LUA_INCLUDE_DIRS ${LUA52_INCLUDE_DIRS})
   SET(LUA_LIBRARIES ${LUA52_LIBRARIES})
   SET(LUA_FOUND y)
-  EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX}
+  EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
     OUTPUT_VARIABLE LUA_CPATH
     )
-  EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX}
+  EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
     OUTPUT_VARIABLE LUA_LPATH
     )
   SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.2")
@@ -52,10 +52,10 @@ elseif(${LUA51_FOUND})
   SET(LUA_INCLUDE_DIRS ${LUA51_INCLUDE_DIRS})
   SET(LUA_LIBRARIES ${LUA51_LIBRARIES})
   SET(LUA_FOUND y)
-  EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX}
+  EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
     OUTPUT_VARIABLE LUA_CPATH
     )
-  EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX}
+  EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
     OUTPUT_VARIABLE LUA_LPATH
     )
   SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.1")
@@ -129,10 +129,10 @@ if(LUA_FOUND)
 endif()
 
 INSTALL(TARGETS aurashared LIBRARY
-        DESTINATION lib)
+        DESTINATION lib/${CMAKE_LIBRARY_PATH})
 
 INSTALL(TARGETS aurastatic ARCHIVE
-        DESTINATION lib)
+        DESTINATION lib/${CMAKE_LIBRARY_PATH})
 
 file(GLOB LUA_SCRIPTS
     "${CMAKE_SOURCE_DIR}/lua/aura/*"
@@ -161,18 +161,18 @@ file(GLOB ION_HEADERS
 )
 
 INSTALL(FILES ${AURA_HEADERS}
-       DESTINATION include/aura-${PROJECT_VERSION}/aura)
+       DESTINATION include/${CMAKE_LIBRARY_PATH}/aura-${PROJECT_VERSION}/aura)
 
 INSTALL(FILES ${ION_HEADERS}
-       DESTINATION include/ion)
+       DESTINATION include/${CMAKE_LIBRARY_PATH}/ion)
 
 #Finally, the pkg-config file
 
 SET(PKG_CONFIG_LIBDIR
-    "\${prefix}/lib"
+    "\${prefix}/lib/\${deb_host_multiarch}"
 )
 SET(PKG_CONFIG_INCLUDEDIR
-    "\${prefix}/include/aura-${PROJECT_VERSION}"
+    "\${prefix}/include/\${deb_host_multiarch}/aura-${PROJECT_VERSION}"
 )
 SET(PKG_CONFIG_LIBS
     "-L\${libdir} -l:libaura.so.${PROJECT_VERSION}"
@@ -187,4 +187,4 @@ CONFIGURE_FILE(
 )
 
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
-       DESTINATION lib/pkgconfig/)
+       DESTINATION lib/${CMAKE_LIBRARY_PATH}/pkgconfig/)

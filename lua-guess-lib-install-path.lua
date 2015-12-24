@@ -16,15 +16,24 @@ end
 
 pth = arg[1]
 prefix = arg[2];
+triplet = arg[3];
+if (nil ~= triplet) then
+   triplet = triplet:gsub("%-", "%%-")
+end
 candidate = nil;
+
+found_multiarch=false;
 
 p = split(package[pth], ";");
 for i,j in ipairs(p) do
    local t = split(j,"?")[1];
    if (nil ~= string.find(t, prefix)) then
-	  if (candidate == nil) or (#candidate > #t) then
-	     candidate = t 
-	  end
+      if (nil ~= triplet) and (nil ~= string.find(t, triplet)) then
+	 candidate = t 
+	 found_multiarch = true;
+      elseif ((candidate == nil) or (#candidate > #t)) and not found_multiarch then
+	 candidate = t
+      end
    end
 end
 

@@ -15,8 +15,15 @@ Depends: aura (= ${binary:Version}), ${misc:Depends}
 Description: Universal RPC library to interface with different hardware (headers)
  This library can kick ass ;)
 
+Package: aura-scripts
+Section: libdevel
+Architecture: all
+Depends: aura (= ${binary:Version}), ${misc:Depends}
+Description: Universal RPC library to interface with different hardware (lua scripts)
+ This library can kick ass ;)
+
 Package: aura
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},  lua5.2, libusb-1.0-0
+Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.2, libusb-1.0-0, aura-scripts
 Description: Universal RPC library to interface with different hardware (binary files)
  This library can kick ass ;)
