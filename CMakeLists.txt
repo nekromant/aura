@@ -167,7 +167,6 @@ INSTALL(FILES ${ION_HEADERS}
        DESTINATION include/${CMAKE_LIBRARY_PATH}/ion)
 
 #Finally, the pkg-config file
-
 SET(PKG_CONFIG_LIBDIR
     "\${prefix}/lib/\${deb_host_multiarch}"
 )

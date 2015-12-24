@@ -1,4 +1,4 @@
-Source: aura
+Source: libaura
 Priority: optional
 Maintainer: Andrew 'Necromant' Andrianov <andrew@ncrmnt.org>
 Build-Depends: debhelper (>= 9), liblua5.2-dev, libusb-1.0-0-dev, cmake, lua5.2
@@ -8,22 +8,22 @@ Homepage: http://github.com/nekromant/aura
 #Vcs-Git: git://anonscm.debian.org/collab-maint/aura.git
 #Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/aura.git;a=summary
 
-Package: aura-dev
+Package: libaura-dev
 Section: libdevel
 Architecture: any
-Depends: aura (= ${binary:Version}), ${misc:Depends}
+Depends: aura (= ${binary:Version}), ${misc:Depends} libaura
 Description: Universal RPC library to interface with different hardware (headers)
  This library can kick ass ;)
 
-Package: aura-scripts
+Package: libaura-scripts
 Section: libdevel
 Architecture: all
 Depends: aura (= ${binary:Version}), ${misc:Depends}
 Description: Universal RPC library to interface with different hardware (lua scripts)
  This library can kick ass ;)
 
-Package: aura
+Package: libaura
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.2, libusb-1.0-0, aura-scripts
+Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.2, libusb-1.0-0, libaura-scripts
 Description: Universal RPC library to interface with different hardware (binary files)
  This library can kick ass ;)
