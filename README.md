@@ -1,21 +1,27 @@
-[![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura)
+| **Travis CI (dummy-transport only)** | **Jenkins (with real hardware)** |
+|------------------|----------------------|
+| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   (TODO) |
 
 # AURA: Another Universal RPC, Actually
 
 Aura is a simple and fast universal RPC library that allows you to quickly interface
 with your favourite hardware without reinventing the wheel. Unlike most of the RPC
-libraries, it is designed to link to simple embedded devices and take care of their 
+libraries, it is designed to link you to simple embedded devices and take care of their 
 weirdness, namely: 
 
-* It does all the job serializing and deserializing data, taking care of foreign endianness
+* It does all the job serializing and deserializing data, taking all the care of foreign endianness
 
 * It doesn't use any complex data formats (e.g. XML) that some 8-bit avr will have a hard time 
   parsing. 
  
 * Remote 'nodes' can go offline and online multiple times and it's not an error (unless you want it to be)
 
+* Remote 'nodes' can even go offline and come back online with a different set of exported functions. And it 
+  still will not be an error, unless you want it to be. 
+
 * Aura provides hooks to override memory allocation, allowing you to interface with DSPs that require
-  a special memory allocation technique for performance reasons, e.g. ION Memory Manager. 
+  a special memory allocation technique for performance reasons, e.g. ION Memory Manager. And it allows
+  you to avoid needless copying of serialized data. e.g. zero-copy
 
 * Provides both sync and async API
 
