@@ -11,14 +11,14 @@ Homepage: http://github.com/nekromant/aura
 Package: libaura-dev
 Section: libdevel
 Architecture: any
-Depends: aura (= ${binary:Version}), ${misc:Depends} libaura
+Depends: libaura (= ${binary:Version}), ${misc:Depends} libaura
 Description: Universal RPC library to interface with different hardware (headers)
  This library can kick ass ;)
 
 Package: libaura-scripts
 Section: libdevel
 Architecture: all
-Depends: aura (= ${binary:Version}), ${misc:Depends}
+Depends: libaura (= ${binary:Version}), ${misc:Depends}
 Description: Universal RPC library to interface with different hardware (lua scripts)
  This library can kick ass ;)
 
