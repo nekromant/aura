@@ -11,6 +11,7 @@ script:
   - cmake ..
   - make
   - make test
+  - make ExperimentalMemCheck
 addons:
   apt:
     packages:
