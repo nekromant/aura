@@ -56,6 +56,10 @@ struct aura_node {
 	enum aura_node_status     status;
 	struct list_head          outbound_buffers;
 	struct list_head          inbound_buffers;
+
+	/* A simple, memory efficient buffer pool */
+	struct list_head          buffer_pool;
+	int                       num_buffers_in_pool;
 	/* Synchronos calls put their stuff here */
 	bool sync_call_running;
 	bool need_endian_swap;
@@ -295,7 +299,7 @@ struct aura_transport
 	 * @param size
 	 * @return
 	 */
-	void                (*buffer_release)(struct aura_node *node, struct aura_buffer *buf);
+	void                (*buffer_release)(struct aura_buffer *buf);
 
 	/** \brief Private.
 	 *
@@ -338,7 +342,7 @@ struct aura_buffer {
 	void               *transportdata;
 	/** The node that owns the buffer */
 	struct aura_node   *owner;
-	/** list_entry. Used to queue/deueue buffers */
+	/** list_entry. Used to link buffers in queue keep in buffer pool */
 	struct list_head    qentry;
 	/** The actual data in this buffer */
 	char                data[];
@@ -762,7 +766,8 @@ void aura_handle_events_forever(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
-void aura_buffer_release(struct aura_node *nd, struct aura_buffer *buf);
+void aura_buffer_release(struct aura_buffer *buf);
+void aura_buffer_destroy(struct aura_buffer *buf);
 
 /* event system data access functions */
 struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node);

@@ -17,7 +17,7 @@ int main() {
 		slog(0, SLOG_DEBUG, "evt get ret %d", ret);
 		
 		aura_hexdump("Out buffer", retbuf->data, retbuf->size);
-		aura_buffer_release(n, retbuf);
+		aura_buffer_release(retbuf);
 	}
 
 	aura_close(n);

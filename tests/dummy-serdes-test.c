@@ -12,7 +12,7 @@ void test_u16(struct aura_node *n)
 	uint16_t out = aura_buffer_get_u16(retbuf);
 	if (out != 0xdead)
 		BUG(n, "Unexpected data from buffer");
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 }
 
 void test_u32(struct aura_node *n)
@@ -26,7 +26,7 @@ void test_u32(struct aura_node *n)
 	uint32_t out = aura_buffer_get_u32(retbuf);
 	if (out != 0xdeadb00b)
 		BUG(n, "Unexpected data from buffer");
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 }
 
 void test_seq(struct aura_node *n)
@@ -45,7 +45,7 @@ void test_seq(struct aura_node *n)
 		slog(0, SLOG_ERROR, "===> 0x%x 0x%x 0x%x", out32, (uint32_t) out16, (uint32_t) out8);
 		BUG(n, "Unexpected data from buffer");
 	}
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 }
 
 
@@ -79,7 +79,7 @@ void test_bin_32_32(struct aura_node *n )
 		BUG(n, "src1 mismatch");
 	}
 
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 }
 
 

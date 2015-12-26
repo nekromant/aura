@@ -37,6 +37,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	int ret = 0; 
 	if (!node)
 		return NULL;
+
 	node->poll_timeout = 250; /* 250 ms default */
 	node->tr = aura_transport_lookup(name); 
 	if (!node->tr) { 
@@ -47,6 +48,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	INIT_LIST_HEAD(&node->outbound_buffers);
 	INIT_LIST_HEAD(&node->inbound_buffers);
 	INIT_LIST_HEAD(&node->event_buffers);
+	INIT_LIST_HEAD(&node->buffer_pool);
 
 	node->status = AURA_STATUS_OFFLINE;
 
@@ -70,7 +72,7 @@ err_free_node:
 }
 
 
-static void cleanup_buffer_queue(struct list_head *q)
+static void cleanup_buffer_queue(struct list_head *q, bool destroy)
 {
 	int i = 0;
 
@@ -79,7 +81,10 @@ static void cleanup_buffer_queue(struct list_head *q)
 		struct aura_buffer *b; 
 		b = list_entry(pos, struct aura_buffer, qentry); 
 		list_del(pos);
-		aura_buffer_release(NULL, b);
+		if (!destroy) /* Just return it to the pool */
+			aura_buffer_release(b);
+		else /* Nuke it, we're closing down */
+			aura_buffer_destroy(b);
 		i++;
 	}
 	slog(6, SLOG_LIVE, "Cleaned up %d buffers", i);
@@ -107,8 +112,9 @@ void aura_close(struct aura_node *node)
 
 	/* After transport shutdown we need to clean up 
 	   remaining buffers */
-	cleanup_buffer_queue(&node->inbound_buffers);
-	cleanup_buffer_queue(&node->outbound_buffers);
+	cleanup_buffer_queue(&node->inbound_buffers, true);
+	cleanup_buffer_queue(&node->outbound_buffers, true);
+	cleanup_buffer_queue(&node->buffer_pool, true);
 	aura_transport_release(node->tr);
 	/* Check if we have an export table registered and nuke it */
 	if (node->tbl)
@@ -149,12 +155,12 @@ static void aura_handle_inbound(struct aura_node *node)
 		if (object_is_method(o) && !o->pending) { 
 			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)", 
 			     o->id, o->name);
-			aura_buffer_release(node, buf);
+			aura_buffer_release(buf);
 		} else if (o->calldonecb) { 
 			slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
 			     o->id, o->name);
 			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
-			aura_buffer_release(node, buf);
+			aura_buffer_release(buf);
 		} else if (object_is_method(o) && (node->sync_call_running)) { 
 			slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
 			     o->id, o->name);
@@ -173,7 +179,7 @@ static void aura_handle_inbound(struct aura_node *node)
 					int ret = aura_get_next_event(node, &dummy, &todrop);
 					if (ret != 0)
 						BUG(node, "Internal bug, no next event");
-					aura_buffer_release(node, todrop);
+					aura_buffer_release(todrop);
 				}
 
 				/* Now just queue the next one */
@@ -188,7 +194,7 @@ static void aura_handle_inbound(struct aura_node *node)
 				else /* Or just drop it with a warning */
 					slog(0, SLOG_WARN, "Dropping event %d (%s)",
 					     o->id, o->name);
-				aura_buffer_release(node, buf);
+				aura_buffer_release(buf);
 			}
 		}
 	}
@@ -687,7 +693,7 @@ void aura_enable_sync_events(struct aura_node *node, int count)
 		int ret = aura_get_next_event(node, &o, &buf);
 		if (ret!=0)
 			BUG(node, "Internal bug while resizing event queue (failed to drop some events)");
-		aura_buffer_release(node, buf);
+		aura_buffer_release(buf);
 	}
 	node->sync_event_max = count;
 }
@@ -806,7 +812,7 @@ void aura_set_status(struct aura_node *node, int status)
 
 		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
 		     node->tr->name);
-		cleanup_buffer_queue(&node->outbound_buffers);
+		cleanup_buffer_queue(&node->outbound_buffers, false);
 		/* Handle any remaining inbound messages */
 		aura_handle_inbound(node);
 		/* Cancel any pending calls */

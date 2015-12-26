@@ -361,7 +361,7 @@ static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, i
 
 	return buf;
 err:
-	aura_buffer_release(node, buf);
+	aura_buffer_release(buf);
 	return NULL;
 }
 
@@ -437,7 +437,7 @@ static int laura_do_sync_call(lua_State *L){
 		return luaL_error(L, "Call for %s failed", o->name);
 
 	ret = buffer_to_lua(L, lnode->node, o, retbuf);
-	aura_buffer_release(lnode->node, retbuf);
+	aura_buffer_release(retbuf);
 	return ret;
 }
 
@@ -538,7 +538,7 @@ static int laura_do_async_call(lua_State *L){
 
 	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *) (long) callback_ref, buf);
 	if (ret != 0) { 
-		aura_buffer_release(lnode->node, buf);
+		aura_buffer_release(buf);
 		return luaL_error(L, "Async call for %s failed: %d:%s", o->name, ret, strerror(ret));
 	}
 

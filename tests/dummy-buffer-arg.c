@@ -16,8 +16,8 @@ int main() {
 	if (tmp != iobuf)
 		BUG(n, "test not ok");
 
-	aura_buffer_release(n, retbuf);
-	aura_buffer_release(n, tmp);
+	aura_buffer_release(retbuf);
+	aura_buffer_release(tmp);
 	aura_close(n);
 
 	return 0;

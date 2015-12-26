@@ -496,7 +496,7 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 panic: 
 	usb_panic_and_reset_state(node);
 ignore:
-	aura_buffer_release(node, buf);
+	aura_buffer_release(buf);
 	inf->current_buffer = NULL;
 	return;
 }
@@ -537,7 +537,7 @@ static void cb_call_write_done(struct libusb_transfer *transfer)
 		goto requeue;
 	}
 
-	aura_buffer_release(node, inf->current_buffer);
+	aura_buffer_release(inf->current_buffer);
 	inf->current_buffer = NULL;
 	slog(4, SLOG_DEBUG, "Call write done");
 	return;
