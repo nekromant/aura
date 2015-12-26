@@ -106,7 +106,7 @@ TARGET_LINK_LIBRARIES(aurashared
     ${LIBUSB_LIBRARIES}
     ${LUA_LIBRARIES}
     ${EASYNMC_LIBRARIES}
-    -lrt
+    -lrt -lm
 )
 
 

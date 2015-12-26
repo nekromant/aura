@@ -18,6 +18,7 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	aura_etable_add(etbl, "echo_seq", "321", "321");
 	aura_etable_add(etbl, "echo_bin", "s32.s32.", "s32.s32.");
 	aura_etable_add(etbl, "echo_buf", "b", "b");
+	aura_etable_add(etbl, "echo_u64", "4", "4");
 	aura_etable_activate(etbl);
 	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
