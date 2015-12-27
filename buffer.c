@@ -69,10 +69,9 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
  * @param buf
  */
 void aura_buffer_release(struct aura_buffer *buf) {
-	struct aura_node *nd = buf->owner;
-
 	/* Just put the buffer back into the pool at the very start */
 #ifdef AURA_USE_BUFFER_POOL
+	struct aura_node *nd = buf->owner;
 	if (buf->magic != AURA_BUFFER_MAGIC_ID)
 		BUG(nd,
 				"FATAL: Attempting to release a buffer with invalid magic OR double free an aura_buffer");
