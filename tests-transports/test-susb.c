@@ -23,7 +23,7 @@ int main() {
         }
         printf("====> GOT %x from device\n", ret);
 	aura_hexdump("buffer", retbuf->data, retbuf->size);
-        aura_buffer_release(n, retbuf); 
+        aura_buffer_release(retbuf); 
 	
 	while(i--) {
 		aura_handle_events(loop);

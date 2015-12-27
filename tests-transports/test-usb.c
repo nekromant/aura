@@ -18,7 +18,7 @@ int main() {
 		ret = aura_buffer_get_u8(retbuf);
 	}
 	printf("====> GOT %d from device\n", ret);
-	aura_buffer_release(n, retbuf); 
+	aura_buffer_release(retbuf); 
 
 	/* Test if auto-created eventsystem will get properly destroyed */
 	struct aura_eventloop *loop = aura_eventloop_create(n); 

@@ -12,7 +12,7 @@ void test_u32(struct aura_node *n)
 	if (v != 0xbeefc0de) {
 		slog(0, SLOG_ERROR, "U32 test NOT ok: %llx vs %llx", v, 0xbeefc0de); 
 	}
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 	slog(0, SLOG_INFO, "U32 echo test passed");
 }
 
@@ -47,7 +47,7 @@ void test_u64(struct aura_node *n)
 	uint64_t v = aura_buffer_get_u64(retbuf);
 	if (v != 0xbeefc0deb00bc0de)
 		slog(0, SLOG_ERROR, "U64 test NOT ok: %llx vs %llx", v, 0xbeefc0deb00bc0de); 
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 	slog(0, SLOG_INFO, "U64 echo test passed");
 }
 
@@ -68,8 +68,8 @@ void test_buf(struct aura_node *n)
 	if (tmp != iobuf)
 		BUG(n, "test not ok");
 
-	aura_buffer_release(n, retbuf);
-	aura_buffer_release(n, tmp);
+	aura_buffer_release(retbuf);
+	aura_buffer_release(tmp);
 	slog(0, SLOG_INFO, "BUF test passed");	
 }
 
@@ -89,7 +89,7 @@ void test_u32u32(struct aura_node *n)
 		     v1, v2, 0xbeefc0de, 0xdeadc0de); 
 	}
 
-	aura_buffer_release(n, retbuf);
+	aura_buffer_release(retbuf);
 	slog(0, SLOG_INFO, "U32U32 echo test passed");
 }
 

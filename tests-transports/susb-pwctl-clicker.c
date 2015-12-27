@@ -19,7 +19,7 @@ int main() {
         slog(0, SLOG_DEBUG, "call ret %d", ret);
         if (0 == ret) {
                 printf("====> buf pos %d len %d\n", retbuf->pos, retbuf->size);
-		aura_buffer_release(n, retbuf); 
+		aura_buffer_release(retbuf); 
         }
 
 	int v = 1; 	
@@ -30,7 +30,7 @@ int main() {
 		slog(0, SLOG_DEBUG, "call ret %d", ret);
 		if (0 == ret) {
 			printf("====> buf pos %d len %d\n", retbuf->pos, retbuf->size);
-			aura_buffer_release(n, retbuf); 
+			aura_buffer_release(retbuf); 
 		} else {
 			aura_wait_status(n, AURA_STATUS_ONLINE);
 			i--;

@@ -17,7 +17,7 @@ void write_serial(struct aura_node *node, const char *str)
 
         ret = aura_call(node, "set_serial", &retbuf, 0, 0, data);
         printf("Serial number written with result %d, replug the device\n", ret);
-	aura_buffer_release(node, retbuf); 	
+	aura_buffer_release(retbuf); 	
 	free(data);
 }
 

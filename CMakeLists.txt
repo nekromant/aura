@@ -9,7 +9,6 @@ find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
 
 
-
 #TODO: Move out linux-specific stuff
 SET(SRCS   
   buffer.c buffer-dummy.c 
@@ -23,9 +22,6 @@ SET(SRCS
 )
 SET(TRANSPORTS dummy sysfs-gpio serial)
 
-file(GLOB TESTS
-    "${CMAKE_SOURCE_DIR}/tests/*.c"
-)
 
 
 FIND_PACKAGE(PkgConfig)
@@ -114,13 +110,40 @@ TARGET_LINK_LIBRARIES(aurashared
     -lrt -lm
 )
 
+# UNIT TESTS OF THE CORE API
+file(GLOB UNITS
+    "${CMAKE_SOURCE_DIR}/tests/*.c"
+)
 
-foreach(file ${TESTS})
+foreach(file ${UNITS})
   GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   ADD_TEST(${f} ${f})
 endforeach(file)
+
+# BENCHMARKS OF THE CORE API (We won't run them during CI)
+file(GLOB BENCHES
+    "${CMAKE_SOURCE_DIR}/benchmarks/*.c"
+)
+
+foreach(file ${BENCHES})
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
+  ADD_EXECUTABLE(bench-${f} ${file})
+  TARGET_LINK_LIBRARIES(bench-${f} aurashared)
+endforeach(file)
+
+# Transport plugins tests (need hardware to run)
+file(GLOB TTESTS
+    "${CMAKE_SOURCE_DIR}/tests-transports/*.c"
+)
+
+foreach(file ${TTESTS})
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
+  ADD_EXECUTABLE(${f} ${file})
+  TARGET_LINK_LIBRARIES(${f} aurashared)
+endforeach(file)
+
 
 SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
   VERSION ${AURA_API_VERSION})

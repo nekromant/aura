@@ -7,7 +7,7 @@ void ctl(struct aura_node *node, int out, int reg, int state)
         struct aura_buffer *retbuf = NULL; 
         aura_call(node, "bit_set", &retbuf, out << 8 | reg, state);
 	if (retbuf)
-		aura_buffer_release(node, retbuf); 	
+		aura_buffer_release(retbuf); 	
 }
 
 int main(int argc, const char **argv) {
