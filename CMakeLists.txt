@@ -36,6 +36,11 @@ PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
 
 SET(CMAKE_C_FLAGS "-Wall -fPIC")
 
+if(AURA_USE_BUFFER_POOL)
+	message("Experimental buffer pooling enabled!")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
+endif()
+
 # Let's auto detect a suitable lua version 
 if(LUA52_FOUND)
   SET(LUA_INCLUDE_DIRS ${LUA52_INCLUDE_DIRS})

@@ -211,6 +211,16 @@ void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms)
 	/* Check if any nodes needs their periodic medicine */ 
 	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
 		aura_process_node_event(pos, NULL);
+#ifdef AURA_USE_BUFFER_POOL
+		/* GC: Ditch one last buffer from pool if we have too many */
+		if (pos->num_buffers_in_pool >= pos->gc_threshold) {
+			struct aura_buffer *buf;
+			pos->num_buffers_in_pool--;
+			buf = list_entry(pos->buffer_pool.prev, struct aura_buffer, qentry);
+			list_del(pos->buffer_pool.prev);
+			aura_buffer_destroy(buf);
+		}
+#endif
 	}
 }
 

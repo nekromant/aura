@@ -60,6 +60,7 @@ struct aura_node {
 	/* A simple, memory efficient buffer pool */
 	struct list_head          buffer_pool;
 	int                       num_buffers_in_pool;
+	int                       gc_threshold;
 	/* Synchronos calls put their stuff here */
 	bool sync_call_running;
 	bool need_endian_swap;

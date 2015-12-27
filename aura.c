@@ -49,6 +49,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	INIT_LIST_HEAD(&node->inbound_buffers);
 	INIT_LIST_HEAD(&node->event_buffers);
 	INIT_LIST_HEAD(&node->buffer_pool);
+	node->gc_threshold = 10; /* This should be more than enough */
 
 	node->status = AURA_STATUS_OFFLINE;
 
