@@ -3,7 +3,7 @@
 
 static int dummy_open(struct aura_node *node, const char *opts)
 {
-	slog(0, SLOG_INFO, "Opening dummy transport");
+	slog(1, SLOG_INFO, "Opening dummy transport");
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
 	if (!etbl)
 		BUG(node, "Failed to create etable");
@@ -26,7 +26,7 @@ static int dummy_open(struct aura_node *node, const char *opts)
 
 static void dummy_close(struct aura_node *node)
 {
-	slog(0, SLOG_INFO, "Closing dummy transport");
+	slog(1, SLOG_INFO, "Closing dummy transport");
 }
 
 static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
