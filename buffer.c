@@ -25,6 +25,7 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *nd,
 	return NULL ;
 }
 
+
 /**
  * Request an aura_buffer for this node big enough to contain at least size bytes of data.
  *
@@ -47,12 +48,20 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
 	/* Try buffer pool first */
 	ret = fetch_buffer_from_pool(nd, size);
 #endif
+
 	/* Fallback to alloc() */
 	if (!ret) {
-		if (!nd->tr->buffer_request)
-			ret = aura_buffer_internal_request(act_size);
-		else
-			ret = nd->tr->buffer_request(nd, act_size);
+		if (!nd->tr->buffer_request) {
+			char *data = malloc(act_size);
+			ret = (struct aura_buffer *) data;
+			if (!ret)
+				BUG(nd, "FATAL: malloc() failed");
+			ret->data = &data[sizeof(*ret)];
+		} else {
+			ret = nd->tr->buffer_request(nd, size);
+			if (!ret)
+				BUG(nd, "FATAL: buffer allocation by transport failed");
+		}
 	}
 	ret->magic = AURA_BUFFER_MAGIC_ID;
 	ret->size = act_size - sizeof(struct aura_buffer);
@@ -73,8 +82,8 @@ void aura_buffer_release(struct aura_buffer *buf) {
 #ifdef AURA_USE_BUFFER_POOL
 	struct aura_node *nd = buf->owner;
 	if (buf->magic != AURA_BUFFER_MAGIC_ID)
-		BUG(nd,
-				"FATAL: Attempting to release a buffer with invalid magic OR double free an aura_buffer");
+	BUG(nd,
+			"FATAL: Attempting to release a buffer with invalid magic OR double free an aura_buffer");
 
 	list_add(&buf->qentry, &nd->buffer_pool);
 	nd->num_buffers_in_pool++;
@@ -99,7 +108,7 @@ void aura_buffer_destroy(struct aura_buffer *buf) {
 	if (nd && nd->tr->buffer_release)
 		nd->tr->buffer_release(buf);
 	else
-		aura_buffer_internal_free(buf);
+		free(buf);
 }
 
 /**
@@ -117,7 +126,8 @@ void aura_bufferpool_gc(struct aura_node *nd, int numdrop, int threshold) {
 	/* We iterate in reverse order, since the least used buffers
 	 * will naturally end up at the very end of the list
 	 */
-	list_for_each_entry_safe_reverse(pos, tmp, &nd->buffer_pool, qentry) {
+	list_for_each_entry_safe_reverse(pos, tmp, &nd->buffer_pool, qentry)
+	{
 		if ((numdrop == -1)
 				|| (numdrop-- && nd->num_buffers_in_pool > threshold)) {
 			list_del(&pos->qentry);
@@ -129,14 +139,12 @@ void aura_bufferpool_gc(struct aura_node *nd, int numdrop, int threshold) {
 	}
 }
 
-
 /**
  * Force-populate the bufferpool with count buffers of size size
  * Warning: If count exceeds the threshold they will start being dropped
  * by the GC.
  */
-void aura_bufferpool_preheat(struct aura_node *nd, int size, int count)
-{
+void aura_bufferpool_preheat(struct aura_node *nd, int size, int count) {
 	while (count--) {
 		struct aura_buffer *buf = aura_buffer_request(nd, size);
 		aura_buffer_release(buf);
@@ -151,8 +159,7 @@ void aura_bufferpool_preheat(struct aura_node *nd, int size, int count)
  * @param nd The node for which we're setting the new threshold
  * @param threshold The new threshold
  */
-void aura_bufferpool_set_gc_threshold(struct aura_node *nd, int threshold)
-{
+void aura_bufferpool_set_gc_threshold(struct aura_node *nd, int threshold) {
 	nd->gc_threshold = threshold;
 }
 

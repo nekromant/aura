@@ -11,7 +11,7 @@ set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
 
 #TODO: Move out linux-specific stuff
 SET(SRCS   
-  buffer.c buffer-dummy.c 
+  buffer.c
   slog.c panic.c utils.c 
   transport.c eventloop.c aura.c export.c serdes.c 
   retparse.c queue.c utils-linux.c

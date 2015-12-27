@@ -270,7 +270,8 @@ struct aura_transport
 	 * Override Buffer allocation. This may be called if you need
 	 * any special consideration when allocating buffers (e.g. ION).
 	 * The size includes any transport-required overhead, but doesn't include
-	 * the actual struct aura_buffer.
+	 * the actual struct aura_buffer or any of your own data. Your code should set
+	 * (struct aura_buffer *)->data field to point to the actual data
 	 *
 	 * The simplest implementation would be:
 	 * \code{.c}
@@ -285,7 +286,7 @@ struct aura_transport
 	 *
 	 *
 	 * @param node current node
-	 * @param size requested buffer size (not including struct aura_buffer)
+	 * @param size requested buffer size (NOT including struct aura_buffer)
 	 * @return
 	 */
 	struct aura_buffer *(*buffer_request)(struct aura_node *node, int size);
@@ -346,7 +347,7 @@ struct aura_buffer {
 	/** list_entry. Used to link buffers in queue keep in buffer pool */
 	struct list_head    qentry;
 	/** The actual data in this buffer */
-	char                data[];
+	char                *data;
 };
 
 /**
