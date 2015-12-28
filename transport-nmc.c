@@ -331,9 +331,9 @@ static void nmc_close(struct aura_node *node)
 	aura_del_pollfds(node, pv->h->memfd);
 	easynmc_close(pv->h);
 	if (pv->current_out)
-		aura_buffer_release(node, pv->current_out);
+		aura_buffer_release(pv->current_out);
 	if (pv->current_in)
-		aura_buffer_release(node, pv->current_in);
+		aura_buffer_release(pv->current_in);
 	free(pv);
 }
 
@@ -413,7 +413,7 @@ static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 			slog(4, SLOG_DEBUG, "transport-nmc: NMC is still working");
 			break;
 		case SYNCBUF_RETIN:
-			aura_buffer_release(node, pv->current_out);
+			aura_buffer_release(pv->current_out);
 			aura_queue_buffer(&node->inbound_buffers, pv->current_in);
 			pv->current_out = NULL;
 			pv->current_in  = NULL;
