@@ -371,6 +371,9 @@ void aura_set_status(struct aura_node *node, int status);
 
 enum aura_endianness aura_get_host_endianness();
 void aura_hexdump (char *desc, void *addr, int len);
+const char *aura_get_version();
+unsigned int aura_get_version_code();
+
 void aura_set_node_endian(struct aura_node *node, enum aura_endianness en);
 
 void aura_queue_buffer(struct list_head *list, struct aura_buffer *buf);

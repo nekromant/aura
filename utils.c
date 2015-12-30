@@ -1,5 +1,11 @@
 #include <aura/aura.h>
 
+/** 
+ * Get host endianness
+ * 
+ * 
+ * @return 
+ */
 enum aura_endianness aura_get_host_endianness() {
         union {
                 uint32_t i;
@@ -12,7 +18,37 @@ enum aura_endianness aura_get_host_endianness() {
                 return AURA_ENDIAN_LITTLE;
 }
 
+/** 
+ * Get aura version string. The string should not be freed.
+ * 
+ * 
+ * @return string containing version number, e.g. "0.1.2"
+ */
+const char *aura_get_version()
+{
+	return AURA_VERSION " " AURA_VERSION_GIT;
+}
 
+/** 
+ * Get a version number that can be used for comparison
+ * 
+ * @return 
+ */
+unsigned int aura_get_version_code()
+{
+	int a,b,c;
+	sscanf(AURA_VERSION, "%d.%d.%d", &a, &b, &c);
+	return a * 100000 + b * 1000 + c;
+}
+
+
+/** 
+ * Print a hexdump of a buffer
+ * 
+ * @param desc 
+ * @param addr 
+ * @param len 
+ */
 void aura_hexdump (char *desc, void *addr, int len) {
 	int i;
 	unsigned char buff[17];

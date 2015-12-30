@@ -10,6 +10,7 @@ set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
 
 
 #TODO: Move out linux-specific stuff
+
 SET(SRCS   
   buffer.c
   slog.c panic.c utils.c 
@@ -22,15 +23,22 @@ SET(SRCS
 )
 SET(TRANSPORTS dummy sysfs-gpio serial)
 
-
-
 FIND_PACKAGE(PkgConfig)
 PKG_CHECK_MODULES(LIBUSB libusb-1.0)
 PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
 
-SET(CMAKE_C_FLAGS "-Wall -fPIC")
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+#Version handling
+EXECUTE_PROCESS(COMMAND git rev-parse HEAD
+    OUTPUT_VARIABLE PROJECT_VERSION_GIT
+    )
+STRING(REGEX REPLACE "\n" "" PROJECT_VERSION_GIT ${PROJECT_VERSION_GIT})
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION='\"${PROJECT_VERSION}\"'")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION_GIT='\"${PROJECT_VERSION_GIT}\"'")
 
 if(AURA_USE_BUFFER_POOL)
 	message("Experimental buffer pooling enabled!")
@@ -148,6 +156,8 @@ endforeach(file)
 SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
   VERSION ${AURA_API_VERSION})
 
+message("libaura version:           ${PROJECT_VERSION}")
+message("libaura git commit:        ${PROJECT_VERSION_GIT}")
 message("Enabled transports:        ${TRANSPORTS}")
 message("Enabled language bindings: ${BINDINGS}")
 message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
