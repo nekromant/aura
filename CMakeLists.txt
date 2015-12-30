@@ -40,8 +40,9 @@ STRING(REGEX REPLACE "\n" "" PROJECT_VERSION_GIT ${PROJECT_VERSION_GIT})
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION='\"${PROJECT_VERSION}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION_GIT='\"${PROJECT_VERSION_GIT}\"'")
 
+#Enable by default
+SET(AURA_USE_BUFFER_POOL yes)
 if(AURA_USE_BUFFER_POOL)
-	message("Experimental buffer pooling enabled!")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
 endif()
 
@@ -161,6 +162,13 @@ message("libaura git commit:        ${PROJECT_VERSION_GIT}")
 message("Enabled transports:        ${TRANSPORTS}")
 message("Enabled language bindings: ${BINDINGS}")
 message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
+
+if (AURA_USE_BUFFER_POOL)
+message("Buffer pooling:            enabled")
+else()
+message("Buffer pooling:            disabled")
+endif()
+
 if(LUA_FOUND)
   message("lua .so dir:               ${CMAKE_INSTALL_PREFIX}/${LUA_CPATH}")
   message("lua lib dir:               ${CMAKE_INSTALL_PREFIX}/${LUA_LPATH}")
