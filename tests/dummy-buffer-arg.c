@@ -7,6 +7,7 @@ int main() {
 	struct aura_node *n = aura_open("dummy", NULL);
 	struct aura_buffer *retbuf; 
 	struct aura_buffer *iobuf = aura_buffer_request(n, 80);
+	aura_wait_status(n, AURA_STATUS_ONLINE);
 
 	ret = aura_call(n, "echo_buf", &retbuf, iobuf);
 	slog(0, SLOG_DEBUG, "call ret %d", ret);

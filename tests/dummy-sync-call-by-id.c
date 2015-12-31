@@ -7,7 +7,7 @@ int main() {
 	int ret; 
 	struct aura_node *n = aura_open("dummy", NULL);
 	struct aura_buffer *retbuf; 
-
+	aura_wait_status(n, AURA_STATUS_ONLINE);
 	ret = aura_call_raw(n, 2, &retbuf, 0x0102);
 	slog(0, SLOG_DEBUG, "call ret %d", ret);
 	aura_hexdump("Out buffer", retbuf->data, retbuf->size);

@@ -20,7 +20,6 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	aura_etable_add(etbl, "echo_buf", "b", "b");
 	aura_etable_add(etbl, "echo_u64", "4", "4");
 	aura_etable_activate(etbl);
-	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
 }
 
@@ -33,6 +32,9 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;
+
+	if (node->status != AURA_STATUS_ONLINE)
+		aura_set_status(node, AURA_STATUS_ONLINE);
 
 	/* queue an event */
 	buf = aura_buffer_request(node, 32);

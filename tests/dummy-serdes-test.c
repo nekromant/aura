@@ -86,6 +86,7 @@ void test_bin_32_32(struct aura_node *n )
 int main() {
 	slog_init(NULL, 18);
 	struct aura_node *n = aura_open("dummy", NULL);
+	aura_wait_status(n, AURA_STATUS_ONLINE);
 	test_u16(n);
 	test_u32(n);
 	test_seq(n);
