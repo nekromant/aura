@@ -30,8 +30,11 @@ int main() {
 
 	int ret; 
 	struct aura_node *n = aura_open("dummy", NULL);
+	aura_wait_status(n, AURA_STATUS_ONLINE);
+
 	ret = aura_start_call_raw(n, 2, calldonecb, (void *) ARG, 0x0102);
-	printf("call started with ret %d\n", ret);
+	if (ret !=0)
+		return ret;
 
 	ret = aura_set_event_callback_raw(n, 5, pingcb, (void *) ARG2);
 	printf("event handler set with ret %d\n", ret);

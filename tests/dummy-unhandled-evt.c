@@ -35,8 +35,12 @@ int main() {
 
 	int ret; 
 	struct aura_node *n = aura_open("dummy", NULL);
+	aura_wait_status(n, AURA_STATUS_ONLINE);
+
 	ret = aura_start_call(n, "echo_u16", calldonecb, (void *) ARG, 0x0102);
 	printf("call started with ret %d\n", ret);
+	if (ret !=0)
+		return ret;
 
 	aura_unhandled_evt_cb(n, unhandled_cb, (void *) ARG2);
 	printf("event handler set with ret %d\n", ret);

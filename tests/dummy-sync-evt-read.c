@@ -7,6 +7,8 @@ int main() {
 	int count = 5;
 	int ret; 
 	struct aura_node *n = aura_open("dummy", NULL);
+	aura_wait_status(n, AURA_STATUS_ONLINE);
+
 	struct aura_buffer *retbuf; 
 	const struct aura_object *o; 
 

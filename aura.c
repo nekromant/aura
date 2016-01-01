@@ -459,6 +459,7 @@ int aura_start_call_raw(
 {
 	va_list ap;
 	struct aura_buffer *buf; 
+	int ret; 
 
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
 	if (!o)
@@ -471,7 +472,12 @@ int aura_start_call_raw(
 	if (!buf) 
 		return -EIO;
 	
-	return aura_core_start_call(node, o, calldonecb, arg, buf);
+	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
+
+	if (ret != 0)
+		aura_buffer_release(buf);
+
+	return ret;
 }
 
 /**
@@ -556,6 +562,8 @@ int aura_start_call(
 	struct aura_object *o; 
 	va_list ap;
 	struct aura_buffer *buf; 
+	int ret; 
+
 	o = aura_etable_find(node->tbl, name);
 	if (!o) 
 		return -ENOENT; 
@@ -566,7 +574,12 @@ int aura_start_call(
 	if (!buf) 
 		return -EIO;
 	
-	return aura_core_start_call(node, o, calldonecb, arg, buf);
+	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
+
+	if (ret != 0)
+		aura_buffer_release(buf);
+
+	return ret;
 }
 
 /**
