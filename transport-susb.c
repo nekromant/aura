@@ -91,7 +91,6 @@ static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	
 	inf->state = SUSB_DEVICE_OPERATIONAL;
 	slog(4, SLOG_DEBUG, "susb: Device opened and ready to accept calls");
-	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
 };
 
@@ -175,21 +174,24 @@ static int susb_open(struct aura_node *node, const char *conf)
 
 	lua_settoken(L, "FMT_BIN",  URPC_BIN);
 
-	ret = lua_pcall(L, 0, 5, 0);
+	ret = lua_pcall(L, 0, 6, 0);
 	if (ret) { 
 		const char* err = lua_tostring(L, -1);
 		slog(0, SLOG_FATAL, "usbsimple: %s", err);
 		goto err_free_ct;
 	}
+	
+	inf->dev_descr.vid     = lua_tonumber(L, -6);
+	inf->dev_descr.pid     = lua_tonumber(L, -5);
+	inf->dev_descr.vendor  = lua_strfromstack(L, -4);
+	inf->dev_descr.product = lua_strfromstack(L, -3);
+	inf->dev_descr.serial  = lua_strfromstack(L, -2);
+	inf->etbl              = lua_touserdata(L, -1);
 
-	inf->dev_descr.vid = lua_tonumber(L, -5);
-	inf->dev_descr.pid = lua_tonumber(L, -4);
-	inf->dev_descr.vendor = lua_strfromstack(L, -3);
-	inf->dev_descr.product = lua_strfromstack(L, -2);
-	inf->dev_descr.serial  = lua_strfromstack(L, -1);
 	inf->dev_descr.device_found_func = usb_start_ops;
 	inf->dev_descr.arg = inf;
 	inf->node = node;
+
 	/* We no not need this state anymore */
 	lua_close(L); 
 	aura_set_transportdata(node, inf);
@@ -298,7 +300,6 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	};
 
 	libusb_handle_events_timeout(inf->ctx, &tv);
-	slog(4, SLOG_DEBUG, "susb: loop state %d", inf->state);
 	if (inf->cbusy)
 		return; 
 	
@@ -309,13 +310,19 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		inf->handle = NULL;
 		inf->state = SUSB_DEVICE_SEARCHING;
 		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
-	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {   
+	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {
+		
+		if (inf->etbl) { 
+			aura_etable_activate(inf->etbl);
+			inf->etbl = NULL;
+		}
+		aura_set_status(node, AURA_STATUS_ONLINE);
 		buf = aura_peek_buffer(&node->outbound_buffers); 
 		if (!buf)
 			return;
-		slog(4, SLOG_DEBUG, "susb: outgoing...");
 		susb_issue_call(node, buf);
 	}
+	
 }
 
 static struct aura_transport tusb = { 

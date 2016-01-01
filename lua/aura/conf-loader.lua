@@ -33,8 +33,7 @@ function do_load()
       n = n + 1
    end
 
-   aura.etable_activate(tbl)
-   return device.vid, device.pid, device.vendor,device.product,device.serial
+   return device.vid, device.pid, device.vendor,device.product,device.serial, tbl
 end
 
 return do_load
