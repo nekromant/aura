@@ -196,9 +196,12 @@ INSTALL(FILES ${LUA_SCRIPTS}
 INSTALL(FILES lua/aura.lua
        DESTINATION ${LUA_LPATH})
 
-INSTALL(TARGETS aurashared LIBRARY
-        DESTINATION ${LUA_CPATH} NAMELINK_ONLY
-	RENAME libauracore)
+#FixMe: Hack. CMake symlink handling is shitty and obscure 
+add_custom_command(TARGET aurashared POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:aurashared> auracore.so
+)
+
+INSTALL(FILES ${CMAKE_BINARY_DIR}/auracore.so DESTINATION ${LUA_CPATH})
 endif()
 
 # Now, let's install headers
