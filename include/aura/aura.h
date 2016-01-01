@@ -64,6 +64,7 @@ struct aura_node {
 	/* Synchronos calls put their stuff here */
 	bool sync_call_running;
 	bool need_endian_swap;
+	bool is_opening;
 	struct aura_buffer *sync_ret_buf; 
 	int sync_call_result;
 

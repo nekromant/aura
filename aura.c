@@ -37,6 +37,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	int ret = 0; 
 	if (!node)
 		return NULL;
+	node->is_opening = true;
 
 	node->poll_timeout = 250; /* 250 ms default */
 	node->tr = aura_transport_lookup(name); 
@@ -64,6 +65,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 		goto err_free_node;
 	
 	slog(6, SLOG_LIVE, "Created a node using transport: %s", name); 
+	node->is_opening = false;
 	return node;
 
 err_free_node:
@@ -804,6 +806,9 @@ void aura_set_status(struct aura_node *node, int status)
 	if (oldstatus == status)
 		return;
 
+	if (node->is_opening)
+		BUG(node, "Transport BUG: Do not call aura_set_status in open()");		
+		
 	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) {
 		/* Dump etable */
 		int i;

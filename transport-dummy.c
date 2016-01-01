@@ -4,6 +4,13 @@
 static int dummy_open(struct aura_node *node, const char *opts)
 {
 	slog(1, SLOG_INFO, "Opening dummy transport");
+	
+	return 0;
+}
+
+
+static void dummy_populate_etable(struct aura_node *node)
+{
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
 	if (!etbl)
 		BUG(node, "Failed to create etable");
@@ -19,8 +26,7 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	aura_etable_add(etbl, "echo_bin", "s32.s32.", "s32.s32.");
 	aura_etable_add(etbl, "echo_buf", "b", "b");
 	aura_etable_add(etbl, "echo_u64", "4", "4");
-	aura_etable_activate(etbl);
-	return 0;
+	aura_etable_activate(etbl);	
 }
 
 static void dummy_close(struct aura_node *node)
@@ -33,8 +39,10 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	struct aura_buffer *buf;
 	struct aura_object *o;
 
-	if (node->status != AURA_STATUS_ONLINE)
+	if (node->status != AURA_STATUS_ONLINE) {
+		dummy_populate_etable(node);
 		aura_set_status(node, AURA_STATUS_ONLINE);
+	}
 
 	/* queue an event */
 	buf = aura_buffer_request(node, 32);

@@ -195,10 +195,14 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 void aura_etable_activate(struct aura_export_table *tbl)
 {
 	struct aura_node *node = tbl->owner; 
+
 	if (aura_get_status(node) == AURA_STATUS_ONLINE) { 
 		slog(0, SLOG_FATAL, "Internal BUG: Attemped to change export table when transport is online");
 		aura_panic(node);
 	}
+
+	if (node->is_opening)
+		BUG(node, "Transport BUG: Do not call aura_etable_activate in open()");		
 
 	if (node->etable_changed_cb)
 		node->etable_changed_cb(node, node->tbl, tbl, node->etable_changed_arg);
