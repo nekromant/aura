@@ -126,11 +126,13 @@ foreach(file ${UNITS})
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   ADD_TEST(${f} ${f})
-  ADD_TEST(memcheck-${f} valgrind
-         --error-exitcode=1 --read-var-info=yes
-         --leak-check=full  --show-leak-kinds=all
-	 --undef-value-errors=no
-         ./${f})
+  if (TEST_LEAKS)
+    ADD_TEST(memcheck-${f} valgrind
+      --error-exitcode=1 --read-var-info=yes
+      --leak-check=full  --show-leak-kinds=all
+      --undef-value-errors=no
+      ./${f})
+  endif()
 endforeach(file)
 
 # BENCHMARKS OF THE CORE API (We won't run them during CI)
