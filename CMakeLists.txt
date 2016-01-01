@@ -130,7 +130,7 @@ foreach(file ${UNITS})
     ADD_TEST(memcheck-${f} valgrind
       --error-exitcode=1 --read-var-info=yes
       --leak-check=full  --show-leak-kinds=all
-      --undef-value-errors=no
+      --undef-value-errors=no --xml=yes --xml-file=${f}.xml 
       ./${f})
   endif()
 endforeach(file)
