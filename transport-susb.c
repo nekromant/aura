@@ -259,17 +259,22 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	uint8_t rqtype;
 	uint16_t wIndex, wValue, *ptr;
+	size_t datalen; /*Actual data in packet, save for setup */
 
-	if (o->ret_fmt)
-		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
-	else
+	if (o->ret_fmt) {
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
+		datalen = o->retlen;
+	} else {
+		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
+		datalen = o->arglen - 2 * sizeof(uint16_t);
+	}
 
 	ptr = (uint16_t *) &buf->data[buf->pos]; 
 	wValue = *ptr++;
 	wIndex = *ptr++;
 
-	memmove(&buf->data[buf->pos], ptr, buf->size - LIBUSB_CONTROL_SETUP_SIZE - 2*sizeof(uint16_t));
+	slog(0, SLOG_DEBUG, "%d %d", datalen, buf->size); 
+	memmove(&buf->data[buf->pos], ptr, datalen);
 
 	/* e.g if device is big endian, but has le descriptors
 	 * we have to be extra careful here 
@@ -282,7 +287,7 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	
 	inf->current_buffer = buf; 
 	libusb_fill_control_setup((unsigned char *) buf->data, rqtype, o->id, wValue, wIndex, 
-				  buf->size - LIBUSB_CONTROL_SETUP_SIZE);
+				  datalen);
 
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, 
 				     (unsigned char *) buf->data, cb_call_done, node, 10000);
@@ -312,6 +317,16 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {
 		
 		if (inf->etbl) { 
+			/* Hack: Since libusb tends to send and receive data in one buffer,
+			   we need to adjust argument buffer to fit in return values as well.
+			   It helps us to avoid needless copying.
+			*/
+			int i;
+			for (i=0; i < inf->etbl->next; i++) { 
+				struct aura_object *tmp;
+				tmp=&inf->etbl->objects[i];
+				tmp->arglen += tmp->retlen;
+			}
 			aura_etable_activate(inf->etbl);
 			inf->etbl = NULL;
 		}

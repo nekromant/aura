@@ -155,6 +155,16 @@ foreach(file ${TTESTS})
   GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
+  if (TEST_TRANSPORTS)
+    ADD_TEST(${f} ${f})
+    if (TEST_LEAKS)
+      ADD_TEST(memcheck-${f} valgrind
+	--error-exitcode=1 --read-var-info=yes
+	--leak-check=full  --show-leak-kinds=all
+	--undef-value-errors=no --xml=yes --xml-file=${f}.xml 
+	./${f})
+    endif()
+  endif()
 endforeach(file)
 
 

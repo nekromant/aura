@@ -7,34 +7,49 @@
 #include <arch/vusb/usbportability.h>
 #include <arch/vusb/usbdrv.h>
 
+#include <lib/light_ws2812.h>
 
 unsigned char iobuf[8];
+struct cRGB target[2] = { 
+        { 0xff, 0, 0 },
+        { 0xff, 0, 0 }
+};
+
+struct cRGB current[2] = { 
+        { 0x00, 0xff, 0 },
+        { 0x00, 0xff, 0 }
+};
+
+
 uchar   usbFunctionSetup(uchar data[8])
 {
 	usbRequest_t    *rq = (void *)data;
 	switch (rq->bRequest) { 
 	case 0:
-		PORTC&=~(1<<2);
-		PORTC|=(rq->wValue.word << 2);
+		target[0].r=rq->wValue.bytes[0];
+		target[0].g=rq->wValue.bytes[1];
+		target[0].b=rq->wValue.bytes[2];
+		ws2812_setleds(&target, 2); 
 		break;
 	case 1:
-		PORTC&=~(1<<2);
+		ws2812_setleds(&target, 2); 
 		_delay_ms(rq->wValue.word);
-		PORTC|=1<<2;
+		ws2812_setleds(&current, 2); 
 		break;
 	case 2: { 
-		uint32_t tmp = 0xdeadbeef;
-		memcpy(iobuf, &tmp, sizeof(tmp));
 		usbMsgPtr = iobuf;
-		return 4;
+		return 8;
 	}
+	case 3: 
+		return USB_NO_MSG;
 	}
+
 	return 0;
 }
 
 uchar usbFunctionWrite(uchar *data, uchar len)
 {
-
+	memcpy(iobuf, data, len);
 }
 
 inline void usbReconnect()
