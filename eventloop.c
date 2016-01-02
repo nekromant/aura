@@ -56,11 +56,6 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 
 	if (loop->poll_timeout > node->poll_timeout)
 		loop->poll_timeout = node->poll_timeout;
-		
-	/* Now we need to fetch all descriptrs and add them to the loop */
-	count = aura_get_pollfds(node, &fds);
-	for (i=0; i<count; i++) 
-		aura_eventsys_backend_fd_action(loop->eventsysdata, &fds[i], AURA_FD_ADDED);
 
 	/* Set up our fdaction callback to handle descriptor changes */ 	
 	aura_fd_changed_cb(node, eventloop_fd_changed_cb, loop); 
@@ -90,7 +85,7 @@ void aura_eventloop_del(struct aura_node *node)
 	/* Recalc all timeouts */ 
 	eventloop_recalculate_timeouts(loop);
 
-	/* Remove all descriptors */
+	/* Remove all descriptors from epoll, but keep 'em in the node */
 	count = aura_get_pollfds(node, &fds);
 	for (i=0; i<count; i++) 
 		aura_eventsys_backend_fd_action(loop->eventsysdata, &fds[i], AURA_FD_REMOVED);
@@ -271,7 +266,6 @@ void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfd
 	if (ap) { 
 		if (ap->magic != 0xdeadbeaf)
 			BUG(NULL, "bad APFD: %x", ap);
-//		slog(4, SLOG_DEBUG, "Event on descriptor %d", ap->fd);
 		node = ap->node;
 		aura_process_node_event(node, ap);
 	} else {

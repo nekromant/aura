@@ -265,7 +265,8 @@ void aura_status_changed_cb(struct aura_node *node,
 
 /**
  * Set the fd changed callback. You don't need this call unless you're using your
- * own eventsystem.
+ * own eventsystem. Setting this callback will trigger callbacks for all the file descriptors
+ * that are already registered.
  *
  * @param node
  * @param cb
@@ -275,8 +276,14 @@ void aura_fd_changed_cb(struct aura_node *node,
 			void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
 			void *arg)
 {
+	int i;
+	const struct aura_pollfds *fds;
+	int count = aura_get_pollfds(node, &fds);
 	node->fd_changed_arg = arg;
 	node->fd_changed_cb = cb;
+	if (node->fd_changed_cb)
+		for (i=0; i<count; i++) 
+			node->fd_changed_cb(&fds[i], AURA_FD_ADDED, node->fd_changed_arg);
 }
 
 /**
