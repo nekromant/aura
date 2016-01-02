@@ -356,7 +356,7 @@ struct aura_buffer {
  */
 
 
-struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_list ap);
+struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap);
 int  aura_fmt_len(struct aura_node *node, const char *fmt);
 char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args);
 

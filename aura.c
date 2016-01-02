@@ -475,7 +475,7 @@ int aura_start_call_raw(
 		return -EBADSLT;
 
 	va_start(ap, arg);
-	buf = aura_serialize(node, o->arg_fmt, ap);
+	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 
 	if (!buf) 
@@ -578,7 +578,7 @@ int aura_start_call(
 		return -ENOENT; 
 
 	va_start(ap, arg);
-	buf = aura_serialize(node, o->arg_fmt, ap);
+	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 	if (!buf) 
 		return -EIO;
@@ -641,7 +641,7 @@ int aura_call_raw(
 		return -EBADSLT;
 	
 	va_start(ap, retbuf);
-	buf = aura_serialize(node, o->arg_fmt, ap);
+	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 
 	if (!buf) {
@@ -677,7 +677,7 @@ int aura_call(
 		return -EBADSLT;
 	
 	va_start(ap, retbuf);
-	buf = aura_serialize(node, o->arg_fmt, ap);
+	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 
 	if (!buf) {

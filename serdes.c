@@ -217,10 +217,10 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 #define va_put_BUF(buf, ap, swap)					\
 	{								\
 		struct aura_buffer *out = va_arg(ap, void *);		\
-		struct aura_node *node = buf->owner;			\
-		if (!node->tr->buffer_put)				\
-			BUG(node, "This node doesn't support aura_buffer as argument");	\
-		node->tr->buffer_put(buf, out);				\
+		struct aura_node *_node = buf->owner;			\
+		if (!_node->tr->buffer_put)				\
+			BUG(_node, "This node doesn't support aura_buffer as argument"); \
+		_node->tr->buffer_put(buf, out);			\
 	}
 
 
@@ -233,9 +233,8 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
  * @param ap
  * @return
  */
-struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, va_list ap)
+struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap)
 {
-	int size = aura_fmt_len(node, fmt);
 	struct aura_buffer *buf = aura_buffer_request(node, size);
 	if (!buf)
 		return NULL;
