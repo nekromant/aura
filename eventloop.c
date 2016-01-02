@@ -37,8 +37,6 @@ static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_
  */
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 {
-	const struct aura_pollfds *fds;
-	int i, count; 
 	struct aura_eventloop *curloop = aura_eventloop_get_data(node);
 
 	/* Some sanity checking first */

@@ -772,8 +772,10 @@ void aura_handle_events_forever(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
+
 void aura_buffer_release(struct aura_buffer *buf);
 void aura_buffer_destroy(struct aura_buffer *buf);
+void aura_bufferpool_preheat(struct aura_node *nd, int size, int count);
 
 /* event system data access functions */
 struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node);

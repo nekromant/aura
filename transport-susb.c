@@ -85,11 +85,10 @@ static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	 * from a device in an async fasion in the background. 
 	 */
 	struct usb_dev_info *inf = arg;
-	struct aura_node *node = inf->node; 
 
-	inf->handle = hndl;
-	
+	inf->handle = hndl;	
 	inf->state = SUSB_DEVICE_OPERATIONAL;
+
 	slog(4, SLOG_DEBUG, "susb: Device opened and ready to accept calls");
 	return 0;
 };
