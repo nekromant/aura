@@ -33,17 +33,16 @@ void unhandled_cb(struct aura_node *dev,
 long run_first(struct aura_node *n)
 {
 	struct aura_buffer *retbuf;
-	int ret;
 	int i;
 	long start = current_time();
 	for (i=0; i<90000; i++) {
-		ret = aura_call(n, "echo_u16", &retbuf, 0x0102);
+		aura_call(n, "echo_u16", &retbuf, 0x0102);
 		aura_buffer_release(retbuf);
-		ret = aura_call(n, "echo_u8", &retbuf, 0x0102);
+		aura_call(n, "echo_u8", &retbuf, 0x0102);
 		aura_buffer_release(retbuf);
-		ret = aura_call(n, "echo_u32", &retbuf, 0x0102);
+		aura_call(n, "echo_u32", &retbuf, 0x0102);
 		aura_buffer_release(retbuf);
-		ret = aura_call(n, "echo_u64", &retbuf, 0x0102);
+		aura_call(n, "echo_u64", &retbuf, 0x0102);
 		aura_buffer_release(retbuf);
 	}
 	return current_time() - start;
@@ -75,7 +74,6 @@ void average_aggregate(struct aura_node *n, long (*test)(struct aura_node *n), i
 int main() {
 	slog_init(NULL, 0);
 	int num_runs = 5;
-	int i;
 #ifdef AURA_USE_BUFFER_POOL
 	printf("Buffer pool enabled!");
 #else
