@@ -218,24 +218,19 @@ static void nonblock(int fd, int state)
 {
 	struct termios ttystate;
 
-	//get the terminal state
 	tcgetattr(fd, &ttystate);
 	if (state==1)
 	{
-		//turn off canonical mode
-		ttystate.c_lflag &= ~ICANON;
-		ttystate.c_lflag &= ~ECHO;
-		ttystate.c_lflag = 0;
+		ttystate.c_lflag &= ~(ICANON|ECHO);
 		ttystate.c_cc[VTIME] = 0; /* inter-character timer unused */
 		ttystate.c_cc[VMIN] = 0; /* We're non-blocking */
 		
 	}
 	else if (state==0)
 	{
-		//turn on canonical mode
 		ttystate.c_lflag |= ICANON | ECHO;
 	}
-	//set the terminal attributes.
+
 	tcsetattr(fd, TCSANOW, &ttystate);
 
 }
@@ -253,10 +248,9 @@ static int nmc_open(struct aura_node *node, const char *filepath)
 		ret = -ENOMEM;
 		goto errclose;
 	}
-	pv->ion_fd = -1; /* Default to invalid */
-	
-	if (pv->ion_fd < 0)
-		pv->ion_fd = ion_open();	
+
+	pv->ion_fd = ion_open();	
+
 	if (pv->ion_fd < 0) { 
 		slog(0, SLOG_ERROR, "Failed to init ion");
 		goto errfreemem;

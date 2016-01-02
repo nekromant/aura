@@ -42,7 +42,7 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *nd,
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
 	struct aura_buffer *ret = NULL;
 	int act_size = sizeof(struct aura_buffer) + size;
-
+	slog(4, SLOG_DEBUG, "request %d act %d ", size, act_size);
 	act_size += nd->tr->buffer_overhead;
 #ifdef AURA_USE_BUFFER_POOL
 	/* Try buffer pool first */
@@ -144,7 +144,8 @@ void aura_bufferpool_gc(struct aura_node *nd, int numdrop, int threshold) {
  * Warning: If count exceeds the threshold they will start being dropped
  * by the GC.
  */
-void aura_bufferpool_preheat(struct aura_node *nd, int size, int count) {
+void aura_bufferpool_preheat(struct aura_node *nd, int size, int count) 
+{
 	while (count--) {
 		struct aura_buffer *buf = aura_buffer_request(nd, size);
 		aura_buffer_release(buf);

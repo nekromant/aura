@@ -247,8 +247,8 @@ static int buffer_to_lua(lua_State *L, struct aura_node *node, const struct aura
 				BUG(node, "Failed to allocate userdata");
 			srcdata = aura_buffer_get_bin(buf, len);
 			memcpy(udata, srcdata, len);
-			break;
 			while (*fmt && (*fmt++ != '.'));
+			break;
 		}
 		default:
 			BUG(node, "Unexpected format token: %s", --fmt);
