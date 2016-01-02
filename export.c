@@ -86,6 +86,10 @@ struct aura_object *aura_etable_find(struct aura_export_table *tbl,
 	int ret; 
 	ENTRY e, *ep;
 	struct aura_object *target = NULL;
+
+	if (!tbl)
+		return NULL;
+
 	e.key  = (char *) name;
 	e.data = NULL; 
 	ret = hsearch_r(e, FIND, &ep, &tbl->index);
