@@ -462,13 +462,14 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	struct usb_event_packet *evt; 
 	struct aura_buffer *buf = inf->current_buffer;
 	struct aura_object *o; 
- 
+
 	if (0 != check_control(transfer))
 		goto ignore;
 
 	if (transfer->actual_length < sizeof(struct usb_event_packet))
 		goto ignore;
-	
+
+
 	evt = (struct usb_event_packet *) libusb_control_transfer_get_data(transfer);
 	o = aura_etable_find_id(node->tbl, evt->id); 
 	if (!o) {

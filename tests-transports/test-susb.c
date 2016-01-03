@@ -43,6 +43,8 @@ int main() {
 
 	if (b != aura_buffer_get_u32(retbuf))
 		exit(1);
+
+        aura_buffer_release(retbuf); 
 	
 	printf("TEST_OK!\n");
         aura_close(n);

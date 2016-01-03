@@ -85,15 +85,20 @@ uchar   usbFunctionSetup(uchar data[8])
 			return 0;
 		uint16_t *id = iobuf; 
 		uint8_t *ret = &iobuf[2];
-		*id=0;
-		*ret=7;
-		PORTC^=(1<<2);
 		num_evt_pending--;
+		if (num_evt_pending)
+			*id=0;
+		else
+			*id=2;
+		*ret=7;
+
+		PORTC^=(1<<2);
+
 		return 3;
 		break;
 	}
 	case RQ_PUT_CALL:
-		num_evt_pending++;
+		num_evt_pending=2;
 		return USB_NO_MSG;
 		break;
 	}
