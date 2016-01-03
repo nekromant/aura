@@ -262,20 +262,17 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	size_t datalen; /*Actual data in packet, save for setup */
 
 	if (o->retlen) {
-		slog(0, SLOG_DEBUG, "!");
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN;
 		datalen = o->retlen;
 	} else {
-		slog(0, SLOG_DEBUG, "!!");
-		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE  | LIBUSB_ENDPOINT_OUT;
 		datalen = o->arglen - 2 * sizeof(uint16_t);
+		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
 	}
 
 	ptr = (uint16_t *) &buf->data[buf->pos]; 
 	wValue = *ptr++;
 	wIndex = *ptr++;
 
-	slog(0, SLOG_DEBUG, "%d %d", datalen, buf->size); 
 	memmove(&buf->data[buf->pos], ptr, datalen);
 	
 	/* e.g if device is big endian, but has le descriptors
@@ -292,7 +289,6 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 				  datalen);
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, 
 				     (unsigned char *) buf->data, cb_call_done, node, 4000);
-	aura_hexdump("buffer", buf->data, buf->size);
 	submit_control(node);	
 }
 

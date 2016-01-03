@@ -9,7 +9,7 @@
 
 #include <lib/light_ws2812.h>
 
-unsigned char iobuf[8];
+unsigned char iobuf[16];
 struct cRGB target[2] = { 
         { 0xff, 0, 0 },
         { 0xff, 0, 0 }
@@ -50,6 +50,7 @@ uchar   usbFunctionSetup(uchar data[8])
 uchar usbFunctionWrite(uchar *data, uchar len)
 {
 	memcpy(iobuf, data, len);
+	return 1;
 }
 
 inline void usbReconnect()
@@ -74,5 +75,7 @@ ANTARES_INIT_HIGH(uinit)
 
 ANTARES_APP(usb_app)
 {
-	usbPoll();
+	while (1) { 
+		usbPoll();
+	}
 }
