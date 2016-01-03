@@ -552,12 +552,12 @@ static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
 	struct aura_object *o = buf->object;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 	
-	slog(4, SLOG_DEBUG, "Writing call %s data to device, %d bytes", o->name, buf->size);
+	slog(4, SLOG_DEBUG, "Writing call %s data to device, %d bytes", o->name, o->arglen);
 	inf->current_buffer = buf; 
 	libusb_fill_control_setup((unsigned char *)buf->data,
 				  LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT,
 				  RQ_PUT_CALL,
-				  0, 0, buf->size - LIBUSB_CONTROL_SETUP_SIZE);
+				  0, 0, o->arglen);
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, 
 				     (unsigned char *) buf->data, 
 				     cb_call_write_done, node, 1500);

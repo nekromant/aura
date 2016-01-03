@@ -4,7 +4,7 @@ int main() {
         int ret; 
         int i = 32; 
         slog_init(NULL, 88);
-        struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/susb-test.conf");
+        struct aura_node *n = aura_open("simpleusb", "../simpleusbconfigs/susb-test.conf");
 
         if (!n) { 
                 printf("err\n");
@@ -20,8 +20,11 @@ int main() {
 		exit(1);
 
         aura_buffer_release(retbuf); 
+	
+	uint32_t a = rand();
+	uint32_t b = rand();
 
-        ret = aura_call(n, "write", &retbuf, 0x0, 0x0, 0xdeadbeef, 0xb00bc0de);
+        ret = aura_call(n, "write", &retbuf, 0xa, 0xb, a, b);
         slog(0, SLOG_DEBUG, "call ret %d", ret);
         if (0 != ret)
 		exit(1);
@@ -35,13 +38,13 @@ int main() {
 
 	aura_hexdump("buffer", retbuf->data, retbuf->size);
 
-	if (0xdeadbeef != aura_buffer_get_u32(retbuf))
+	if (a != aura_buffer_get_u32(retbuf))
 		exit(1);
 
-	if (0xb00bc0de != aura_buffer_get_u32(retbuf))
+	if (b != aura_buffer_get_u32(retbuf))
 		exit(1);
 	
-	printf("TEST_OK!");
+	printf("TEST_OK!\n");
         aura_close(n);
         return 0;
 }
