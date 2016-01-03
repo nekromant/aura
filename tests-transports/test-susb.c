@@ -2,7 +2,7 @@
 #include <unistd.h>
 int main() {
         int ret; 
-        int i = 32; 
+
         slog_init(NULL, 88);
         struct aura_node *n = aura_open("simpleusb", "../simpleusbconfigs/susb-test.conf");
 
