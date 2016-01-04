@@ -31,7 +31,10 @@ void ncusb_print_libusb_transfer(struct libusb_transfer *p_t)
 int ncusb_match_string(libusb_device_handle *dev, int index, const char* string)
 {
 	unsigned char tmp[256];
-	libusb_get_string_descriptor_ascii(dev, index, tmp, 256);
+	int ret = libusb_get_string_descriptor_ascii(dev, index, tmp, 256);
+	if (ret <= 0)
+		return 0;
+
 	slog(4, SLOG_DEBUG, "cmp idx %d str %s vs %s", index, tmp, string);
 	if (string == NULL)
 		return 1; /* NULL matches anything */
