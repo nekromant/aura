@@ -136,3 +136,91 @@ make ExperimatalMemcheck
 ```
 
 * If you are adding a new transport - don't be lazy to add unit tests and some doxygen documentation.
+
+
+* Transport plugin options and docs
+
+All transport accept parameters as a string. The format of the string depends on the transport. 
+
+** simpleusb
+
+simpleusb transport maps control transfers to methods. Simple as that. No events whatsoever. All methods require at least two arguments. wValue and wIndex (See USB spec). The transport accepts a path to the configuration file as it's option.
+
+A typical configuration file may look like this:
+
+```lua
+device = 
+{
+   vid = 0x1d50;
+   pid = 0x6032;
+   vendor  = "www.ncrmnt.org";
+   product = "aura-susb-test-rig";
+   --serial = "blah"; 
+   methods = {
+      [0] = NONE("led_ctl"), 
+      [1] = NONE("blink"),
+      [2] = READ("read", UINT32, UINT32),
+      [3] = WRITE("write", UINT32, UINT32),
+   };
+}
+
+
+return device
+```
+
+The config above describes 4 methods: 
+
+```
+--- Dumping export table ---
+0. METHOD  led_ctl( uint16_t uint16_t )  [out 4 bytes] | [in 0 bytes] 
+1. METHOD  blink( uint16_t uint16_t )  [out 4 bytes] | [in 0 bytes] 
+2. METHOD  uint32_t uint32_t read( uint16_t uint16_t )  [out 12 bytes] | [in 8 bytes] 
+3. METHOD  write( uint16_t uint16_t uint32_t uint32_t )  [out 12 bytes] | [in 0 bytes] 
+-------------8<-------------
+
+```
+
+vendor, product and serial strings can be omited. If so the transport will match any. 
+
+NONE stands for a control packet with no data phase. 
+
+READ stands for *surprise* reading data from device
+
+WRITE stands for writing data to device 
+
+Your hardware should pack the data without any padding between fields. E.g. Use  __attribute__(("packed")) for your structs in firmware.
+
+N.B. 	   
+
+VUSB-based devices (or libusb?) do not seem to play nicely when we have the setup packet only with no data part. 
+Transfers may fail instantly at random without any data delivered. A typical run at my box gives: 
+
+9122 succeeded, 878 failed total 10000
+
+The distribution of failures is more or less even. See tests-transports/test-susb-stability-none
+
+Adding just one byte of data to the packet fix the issue. Posible workarounds here are:
+
+1. Retry N times
+
+2. Add just one dummy byte for the transfer
+
+Since nobody reported this workaround breaking support for their hardware (yet!) - we'll do it the second way. 
+For now. 
+
+** usb 
+
+This is a full-blown aura RPC over the usb bus with events. 
+The transport's option string looks like this: 
+
+"1d50:6032;vendorstring;productstring;serial"
+
+To match *ANY* serial, product, vendor:
+
+"1d50:6032;;;"
+ 
+
+** nmc
+
+You can use this transport to call remote methods running on RC Module's NeuroMatrix DSP core. This transport requires that you run it on a SoC with NeuroMatrix DSP and experimental easynmc driver, e.g. K1879ХБ1Я. 
+
