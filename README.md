@@ -1,6 +1,6 @@
 | **Travis CI (Core Unit Tests)** | **Jenkins (transports, real hardware )** |
 |------------------|----------------------|
-| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](http://ncrmnt.org:8090/job/Github%20CI/job/aura/badge/icon)](https://jenkins.ncrmnt.org/job/Github%20CI/job/aura/)|
+| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](http://jenkins.ncrmnt.org/job/Github%20CI/job/aura/badge/icon)](https://jenkins.ncrmnt.org/job/Github%20CI/job/aura/)|
 
 # AURA: Another Universal RPC, Actually
 
