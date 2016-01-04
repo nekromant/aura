@@ -266,8 +266,27 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 		datalen = o->retlen;
 	} else {
 		datalen = o->arglen - 2 * sizeof(uint16_t);
-		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT;
+		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_ENDPOINT_OUT;
 	}
+
+	/* 
+	   VUSB-based devices (or libusb?) do not seem to play nicely when we have the 
+	   setup packet with no data. Transfers may fail instantly. 
+	   A typical run at my box gives: 
+
+	   9122 succeeded, 878 failed total 10000
+	   
+	   See tests-transports/test-susb-stability-none
+	   Adding just one byte of data to the packet fix the issue.
+	   Posible workarounds are:
+	   1. Retry N times
+	   2. Add just one dummy byte for the transfer
+	   Since nobody reported this workaround breaking support for their
+	   hardware - we'll do it the second way. For now. 
+	 */
+	
+	if (!datalen)
+		datalen++; /* buffer's big enough anyway */
 
 	ptr = (uint16_t *) &buf->data[buf->pos]; 
 	wValue = *ptr++;
