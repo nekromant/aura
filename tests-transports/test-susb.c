@@ -14,16 +14,16 @@ int main() {
 
         struct aura_buffer *retbuf; 
 
-        ret = aura_call(n, "blink", &retbuf, 0x100, 0x100);
+        ret = aura_call(n, "led_ctl", &retbuf, 0x100, 0x100);
         slog(0, SLOG_DEBUG, "call ret %d", ret);
         if (0 != ret)
 		exit(1);
 
         aura_buffer_release(retbuf); 
 
+
 	uint32_t a = rand();
 	uint32_t b = rand();
-
         ret = aura_call(n, "write", &retbuf, 0xa, 0xb, a, b);
         slog(0, SLOG_DEBUG, "call ret %d", ret);
         if (0 != ret)
@@ -37,13 +37,18 @@ int main() {
 		exit(1);
 
 	aura_hexdump("buffer", retbuf->data, retbuf->size);
-
-	if (a != aura_buffer_get_u32(retbuf))
+	slog(0, SLOG_INFO, "a=%x b= %x", a, b);
+	uint32_t tmp = aura_buffer_get_u32(retbuf);
+	if (a != tmp) {
+		slog(0, SLOG_ERROR, "%x != %x", tmp, a);
 		exit(1);
+	}
 
-	if (b != aura_buffer_get_u32(retbuf))
+	tmp = aura_buffer_get_u32(retbuf);
+	if (b != tmp) {
+		slog(0, SLOG_ERROR, "%x != %x", tmp, b);
 		exit(1);
-
+	}
         aura_buffer_release(retbuf); 
 	
 	printf("TEST_OK!\n");
