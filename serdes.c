@@ -138,18 +138,24 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 //FixMe: This is likely to get messy due to integer promotion 
 //       on different platforms
 
+
+#define CHECK_AND_PUT(buf, src) \
+	if (buf->pos + sizeof(src) > buf->size)			\
+		BUG(NULL, "SERDES: Out of buffer bounds");	\
+	memcpy(&buf->data[buf->pos], &src, sizeof(src));	\
+	buf->pos+=sizeof(src);					\
+
+
 #define va_put_U8(buf, ap, swap)				\
 	{							\
 		uint8_t v = (uint8_t) va_arg(ap, unsigned int); \
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}
 
 #define va_put_S8(buf, ap, swap)				\
 	{							\
 		int8_t v = (int8_t) va_arg(ap, int);		\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}							\
 
 #define va_put_U16(buf, ap, swap)					\
@@ -157,8 +163,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		uint16_t v = (uint16_t) va_arg(ap, unsigned int);	\
 		if (swap)						\
 			v = __swap16(v);				\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));		\
-		buf->pos+=sizeof(v);					\
+		CHECK_AND_PUT(buf, v);					\
 	}
 
 #define va_put_S16(buf, ap, swap)				\
@@ -166,8 +171,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		int16_t v = (int16_t) va_arg(ap, int);		\
 		if (swap)					\
 			v = __swap16(v);			\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}
 
 /* FixMe: Portability, we assume no promotion here for now */
@@ -176,8 +180,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		uint32_t v = (uint32_t) va_arg(ap, uint32_t);	\
 		if (swap)					\
 			v = __swap32(v);			\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}
 
 #define va_put_S32(buf, ap, swap)				\
@@ -185,8 +188,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		int32_t v = (int32_t) va_arg(ap, int32_t);	\
 		if (swap)					\
 			v = __swap32(v);			\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}
 
 #define va_put_U64(buf, ap, swap)				\
@@ -194,8 +196,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		uint64_t v = (uint64_t) va_arg(ap, uint64_t);	\
 		if (swap)					\
 			v = __swap64(v);			\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}
 
 #define va_put_S64(buf, ap, swap)				\
@@ -203,8 +204,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		int64_t v = (int64_t) va_arg(ap, uint64_t);	\
 		if (swap)					\
 			v = __swap64(v);			\
-		memcpy(&buf->data[buf->pos], &v, sizeof(v));	\
-		buf->pos+=sizeof(v);				\
+		CHECK_AND_PUT(buf, v);				\
 	}							\
 
 #define va_put_BIN(buf, len, ap)			\
