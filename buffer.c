@@ -42,27 +42,29 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *nd,
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
 	struct aura_buffer *ret = NULL;
 	int act_size = sizeof(struct aura_buffer) + size;
-	slog(4, SLOG_DEBUG, "request %d act %d ", size, act_size);
 	act_size += nd->tr->buffer_overhead;
+
 #ifdef AURA_USE_BUFFER_POOL
 	/* Try buffer pool first */
-	ret = fetch_buffer_from_pool(nd, size);
+	ret = fetch_buffer_from_pool(nd, act_size);
+	if (ret)
+		goto bailout; /* For the sake of readability */
 #endif
 
 	/* Fallback to alloc() */
-	if (!ret) {
-		if (!nd->tr->buffer_request) {
-			char *data = malloc(act_size);
-			ret = (struct aura_buffer *) data;
-			if (!ret)
-				BUG(nd, "FATAL: malloc() failed");
-			ret->data = &data[sizeof(*ret)];
-		} else {
-			ret = nd->tr->buffer_request(nd, size);
-			if (!ret)
-				BUG(nd, "FATAL: buffer allocation by transport failed");
-		}
+	if (!nd->tr->buffer_request) {
+		char *data = malloc(act_size);
+		ret = (struct aura_buffer *) data;
+		if (!ret)
+			BUG(nd, "FATAL: malloc() failed");
+		ret->data = &data[sizeof(*ret)];
+	} else {
+		ret = nd->tr->buffer_request(nd, size);
+		if (!ret)
+			BUG(nd, "FATAL: buffer allocation by transport failed");
 	}
+	
+bailout:
 	ret->magic = AURA_BUFFER_MAGIC_ID;
 	ret->size = act_size - sizeof(struct aura_buffer);
 	ret->owner = nd;
