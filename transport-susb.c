@@ -268,6 +268,11 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 		datalen = o->arglen - 2 * sizeof(uint16_t);
 		rqtype = LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_ENDPOINT_OUT;
 	}
+	ptr = (uint16_t *) &buf->data[buf->pos]; 
+	wValue = *ptr++;
+	wIndex = *ptr++;
+
+	memmove(&buf->data[buf->pos], ptr, datalen);
 
 	/* 
 	   VUSB-based devices (or libusb?) do not seem to play nicely when we have the 
@@ -287,12 +292,6 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	
 	if (!datalen)
 		datalen++; /* buffer's big enough anyway */
-
-	ptr = (uint16_t *) &buf->data[buf->pos]; 
-	wValue = *ptr++;
-	wIndex = *ptr++;
-
-	memmove(&buf->data[buf->pos], ptr, datalen);
 	
 	/* e.g if device is big endian, but has le descriptors
 	 * we have to be extra careful here 
