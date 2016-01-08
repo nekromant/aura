@@ -216,7 +216,7 @@ err_free_inf:
 static void susb_close(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	slog(0, SLOG_INFO, "Closing susb transport");
+	slog(3, SLOG_INFO, "Closing susb transport");
 
 	while (inf->cbusy) 
 		libusb_handle_events(inf->ctx);
