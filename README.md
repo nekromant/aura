@@ -105,20 +105,6 @@ Host issues all method calls.
 
 Basically that's all you need to know. More details in the doxygen docs. 
 
-# Available transports: 
-
-* dummy - A dummy transport for unit tests. We love unit-tests. Nuff said!
-
-* sysfs-gpio - A 'transport' that allows you to control host PC GPIO lines using the sysfs interface. Should serve as a more complex transport plugin example.  
-
-* susb - A simple usb transport that does control transfers to a usb device according to a config file. Using this one you can interface with simplest possible USB devices that have no flash for any other logic. Doesn't support events. Needs lua, since the configuration file for it is just a lua script. 
-
-* usb - A more complex transport over USB. Supports events and methods, reads the information from the target device
-
-* nmc - NeuroMatrix DSP transport. Requires experimental Easynmc Framework and ION Memory Manager. Aura must be running on a SoC equipped with a NeuroMatrix DSP, e.g. K1879ХБ1Я.
-
-Want more? Contribute!
-
 # Pull request checklist. 
 
 Before pull-requesting, please: 
@@ -142,7 +128,22 @@ make ExperimatalMemcheck
 
 All transport accept parameters as a string. The format of the string depends on the transport. 
 
-** simpleusb
+
+# Available transports: 
+
+* dummy - A dummy transport for unit tests. We love unit-tests. Nuff said!
+
+* sysfs-gpio - A 'transport' that allows you to control host PC GPIO lines using the sysfs interface. Should serve as a more complex transport plugin example.  
+
+* susb - A simple usb transport that does control transfers to a usb device according to a config file. Using this one you can interface with simplest possible USB devices that have no flash for any other logic. Doesn't support events. Needs lua, since the configuration file for it is just a lua script. 
+
+* usb - A more complex transport over USB. Supports events and methods, reads the information from the target device
+
+* nmc - NeuroMatrix DSP transport. Requires experimental Easynmc Framework and ION Memory Manager. Aura must be running on a SoC equipped with a NeuroMatrix DSP, e.g. K1879ХБ1Я.
+
+Want more? Contribute!
+
+## simpleusb (a.k.a. susb)
 
 simpleusb transport maps control transfers to methods. Simple as that. No events whatsoever. All methods require at least two arguments. wValue and wIndex (See USB spec). The transport accepts a path to the configuration file as it's option.
 
@@ -208,7 +209,7 @@ Adding just one byte of data to the packet fix the issue. Posible workarounds he
 Since nobody reported this workaround breaking support for their hardware (yet!) - we'll do it the second way. 
 For now. 
 
-** usb 
+## usb 
 
 This is a full-blown aura RPC over the usb bus with events. 
 The transport's option string looks like this: 
@@ -220,7 +221,7 @@ To match *ANY* serial, product, vendor:
 "1d50:6032;;;"
  
 
-** nmc
+## nmc
 
 You can use this transport to call remote methods running on RC Module's NeuroMatrix DSP core. This transport requires that you run it on a SoC with NeuroMatrix DSP and experimental easynmc driver, e.g. K1879ХБ1Я. 
 
