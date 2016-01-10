@@ -388,10 +388,21 @@ void aura_etable_add(struct aura_export_table *tbl,
 		    const char *argfmt, 
 		     const char *retfmt);
 void aura_etable_activate(struct aura_export_table *tbl);
+
 struct aura_object *aura_etable_find(struct aura_export_table *tbl, 
 				     const char *name);
 struct aura_object *aura_etable_find_id(struct aura_export_table *tbl, 
 					int id);
+
+#define AURA_DECLARE_CACHED_ID(idvar, node, name)\
+	static int idvar = 0; \
+	if (!idvar) {\
+		struct aura_object *tmp = aura_etable_find(node->tbl, name); \
+		if (!tmp) \
+			BUG(node, "Static lobject lookup failed!"); \
+		idvar = tmp->id; \
+		}
+
 void aura_etable_destroy(struct aura_export_table *tbl);
 
 struct aura_node *aura_open(const char* name, const char *opts); 
