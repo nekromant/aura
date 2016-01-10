@@ -92,6 +92,35 @@ void aura_eventloop_del(struct aura_node *node)
 	aura_fd_changed_cb(node, NULL, NULL); 
 }
 
+
+/** 
+ * Create an empty eventloop with no nodes
+ * 
+ * @return Pointer to eventloop object or NULL
+ */
+void *aura_eventloop_create_empty()
+{
+	struct aura_node *node; 
+	struct aura_eventloop *loop = calloc(1, sizeof(*loop));
+
+	if (!loop)
+		return NULL;
+	
+	loop->poll_timeout = 5000; 
+	loop->eventsysdata = aura_eventsys_backend_create(loop);
+	if (!loop->eventsysdata)
+		goto err_free_loop;
+
+	INIT_LIST_HEAD(&loop->nodelist); 
+
+	/* Just return the loop, we're good */
+	return loop;
+
+err_free_loop:
+	free(loop);
+	return NULL; 	
+}
+
 /**
  * Create an event loop from a NULL-terminated list of nodes passed in va_list
  *
@@ -100,28 +129,18 @@ void aura_eventloop_del(struct aura_node *node)
 void *aura_eventloop_vcreate(va_list ap)
 {
 	struct aura_node *node; 
-	struct aura_eventloop *loop = calloc(1, sizeof(*loop));
+
+	struct aura_eventloop *loop = aura_eventloop_create_empty();
 
 	if (!loop)
 		return NULL;
-
-	loop->poll_timeout = 5000; 
-	loop->eventsysdata = aura_eventsys_backend_create(loop);
-	if (!loop->eventsysdata)
-		goto err_free_loop;
-
-	INIT_LIST_HEAD(&loop->nodelist); 
 
 	/* Add all our nodes to this loop */
 	while ((node = va_arg(ap, struct aura_node *))) 
 		aura_eventloop_add(loop, node);
 
-	/* Just return the loop, we're good */
+	/* Return the loop, we're good */
 	return loop;
-
-err_free_loop:
-	free(loop);
-	return NULL; 
 }
 
 /**

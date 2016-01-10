@@ -772,6 +772,7 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
 void aura_eventloop_destroy(struct aura_eventloop *loop);
 void *aura_eventloop_vcreate(va_list ap);
 void *aura_eventloop_create__(int dummy, ...);
+void *aura_eventloop_create_empty();
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node);
 void aura_eventloop_del(struct aura_node *node);
 void aura_eventloop_break(struct aura_eventloop *loop);
