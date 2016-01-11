@@ -396,7 +396,7 @@ struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
 
 #define AURA_DECLARE_CACHED_ID(idvar, node, name)\
 	static int idvar = -1; \
-	if (idvar != -1) {\
+	if (idvar == -1) {\
 		struct aura_object *tmp = aura_etable_find(node->tbl, name); \
 		if (!tmp) \
 			BUG(node, "Static lobject lookup failed!"); \
