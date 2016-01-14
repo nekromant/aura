@@ -207,61 +207,61 @@ char* slog_sprintf(char *msg, ...)
  */
 void slog(int level, int flag, const char *msg, ...)
 {
-    /* Used variables */
-    SystemDate mdate;
-    char string[MAXMSG];
-    char prints[MAXMSG];
-    char *output;
 
-    /* Initialise system date */
-    get_system_date(&mdate);
+	/* Used variables */
+	SystemDate mdate;
+	char string[MAXMSG];
+	char prints[MAXMSG];
+	char *output;
 
-    /* Read args */
-    va_list args;
-    va_start(args, msg);
-    vsprintf(string, msg, args);
-    va_end(args);
+	if(level > slg.level)
+		return; 
 
-    /* Check logging levels */
-    if(level <= slg.level)
-    {
+	/* Initialise system date */
+	get_system_date(&mdate);
+
+	/* Read args */
+	va_list args;
+	va_start(args, msg);
+	vsprintf(string, msg, args);
+	va_end(args);
+
         /* Handle flags */
         switch(flag) {
-            case 1:
+	case 1:
                 sprintf(prints, "[LIVE]  %s", string);
                 break;
-            case 2:
+	case 2:
                 sprintf(prints, "[%s]  %s", strclr(1, "INFO"), string);
                 break;
-            case 3:
+	case 3:
                 sprintf(prints, "[%s]  %s", strclr(3, "WARN"), string);
                 break;
-            case 4:
+	case 4:
                 sprintf(prints, "[%s] %s", strclr(4, "DEBUG"), string);
                 break;
-            case 5:
+	case 5:
                 sprintf(prints, "[%s] %s", strclr(2, "ERROR"), string);
                 break;
-            case 6:
+	case 6:
                 sprintf(prints, "[%s] %s", strclr(2, "FATAL"), string);
                 break;
-            case 7:
+	case 7:
                 sprintf(prints, "%s", string);
                 break;
-            default:
+	default:
                 break;
-        }
 
-        /* Print output */
-        fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
+		/* Print output */
+		fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
 
-        /* Save log in file */
-        if (slg.to_file)
-        {
-            output = slog_sprintf("%s\n", string);
-            log_to_file(output, slg.fname, &mdate);
-        }
-    }
+		/* Save log in file */
+		if (slg.to_file)
+		{
+			output = slog_sprintf("%s\n", string);
+			log_to_file(output, slg.fname, &mdate);
+		}
+	}
 }
 
 
