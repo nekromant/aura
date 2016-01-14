@@ -100,7 +100,6 @@ void aura_eventloop_del(struct aura_node *node)
  */
 void *aura_eventloop_create_empty()
 {
-	struct aura_node *node; 
 	struct aura_eventloop *loop = calloc(1, sizeof(*loop));
 
 	if (!loop)
