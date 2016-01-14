@@ -474,7 +474,7 @@ void nmc_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 		BUG(dst->owner, "You know why we are screwed here, jerk!");
 
 	uint64_t buf_addrs = aura_buffer_to_nmc(buf);
-	buf_addrs |= (((uint64_t) (uint32_t) buf) << 32);
+	buf_addrs |= (((uint64_t) (uintptr_t) buf) << 32);
 	aura_buffer_put_u64(dst, buf_addrs);
 	slog(4, SLOG_DEBUG, "nmc: serialized buf 0x%x to 0x%llx ", buf, buf_addrs);
 }
@@ -482,7 +482,7 @@ void nmc_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 struct aura_buffer *nmc_buffer_get(struct aura_buffer *buf)
 {
 	uint64_t addrs = aura_buffer_get_u64(buf);
-	struct aura_buffer *ret = (struct aura_buffer *) ((uint32_t) (addrs >> 32));
+	struct aura_buffer *ret = (struct aura_buffer *) ((uintptr_t) (addrs >> 32));
 	slog(4, SLOG_DEBUG, "nmc: deserialized buf 0x%x from 0x%llx ", buf, addrs);
 	return ret;
 }
