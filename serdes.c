@@ -138,10 +138,18 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 //FixMe: This is likely to get messy due to integer promotion 
 //       on different platforms
 
+#define AURA_SERDES_PARANOID
 
-#define CHECK_AND_PUT(buf, src) \
-	if (buf->pos + sizeof(src) > buf->size)			\
-		BUG(NULL, "SERDES: Out of buffer bounds");	\
+#ifdef AURA_SERDES_PARANOID
+#define CHECK_BOUNDS() 	if (buf->pos + sizeof(src) > buf->size)	\
+		BUG(NULL, "SERDES: Out of buffer bounds");
+#else
+#define CHECK_BOUNDS()
+#endif
+
+
+#define CHECK_AND_PUT(buf, src)					\
+	CHECK_BOUNDS();						\
 	memcpy(&buf->data[buf->pos], &src, sizeof(src));	\
 	buf->pos+=sizeof(src);					\
 
