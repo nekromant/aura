@@ -141,7 +141,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 #define AURA_SERDES_PARANOID
 
 #ifdef AURA_SERDES_PARANOID
-#define CHECK_BOUNDS() 	if (buf->pos + sizeof(src) > buf->size)	\
+#define CHECK_BOUNDS(buf,src) 	if (buf->pos + sizeof(src) > buf->size)	\
 		BUG(NULL, "SERDES: Out of buffer bounds");
 #else
 #define CHECK_BOUNDS()
@@ -149,10 +149,10 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 
 
 #define CHECK_AND_PUT(buf, src)					\
-	CHECK_BOUNDS();						\
+	CHECK_BOUNDS(buf,src);					\
 	memcpy(&buf->data[buf->pos], &src, sizeof(src));	\
 	buf->pos+=sizeof(src);					\
-
+	
 
 #define va_put_U8(buf, ap, swap)				\
 	{							\
