@@ -57,8 +57,8 @@ struct ion_buffer_descriptor {
 	int map_fd;
 	int share_fd;
 	int size; 
-	ion_user_handle_t hndl; 
-	struct aura_buffer *mapped_buf;
+	ion_user_handle_t hndl;
+	struct aura_buffer buf; 
 };
 
 
@@ -77,6 +77,7 @@ struct nmc_private {
 	int ion_fd; 
 	struct aura_buffer *current_in;
 	struct aura_buffer *current_out;
+	struct aura_export_table *etbl;
 };
 
 static char *nmc_fetch_str(void *nmstr)
@@ -204,7 +205,7 @@ static int parse_and_register_exports(struct nmc_private *pv)
 	}
 
 	pv->inbufsize = max_buf_sz;
-	aura_etable_activate(etbl);
+	pv->etbl = etbl;
 
 	return 0;
 }
@@ -285,8 +286,6 @@ static int nmc_open(struct aura_node *node, const char *filepath)
 	aura_add_pollfds(node, h->memfd, (EPOLLPRI | EPOLLET));
 
 	easynmc_start_app(h, pv->ep);
-
-	aura_set_status(node, AURA_STATUS_ONLINE);
 	return 0;
 
 errfreemem:
@@ -335,7 +334,7 @@ static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)
 {
 	struct aura_node *node = buf->owner;
 	struct nmc_private *pv = aura_get_userdata(node);
-	struct ion_buffer_descriptor *dsc = buf->transportdata;
+	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
 	uint32_t nmaddress;
 
 	if (dsc->share_fd == -1) { /* Already shared? */
@@ -357,8 +356,6 @@ static inline void do_issue_next_call(struct aura_node *node)
 	struct nmc_private *pv = aura_get_userdata(node);
 	struct aura_object *o;
 
-	int data_offset = (sizeof(struct aura_buffer) / 4);
-
 	out_buf = aura_dequeue_buffer(&node->outbound_buffers); 
 	if (!out_buf)
 		return;
@@ -373,8 +370,8 @@ static inline void do_issue_next_call(struct aura_node *node)
 	pv->current_in  = in_buf;
 	pv->sbuf->id = o->id;
 	
-	pv->sbuf->outbound_buffer_ptr = aura_buffer_to_nmc(out_buf) + data_offset;
-	pv->sbuf->inbound_buffer_ptr  = aura_buffer_to_nmc(in_buf) + data_offset;
+	pv->sbuf->outbound_buffer_ptr = aura_buffer_to_nmc(out_buf);
+	pv->sbuf->inbound_buffer_ptr  = aura_buffer_to_nmc(in_buf);
 	pv->sbuf->state = SYNCBUF_ARGOUT;
 }
 
@@ -385,6 +382,7 @@ static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 
 	/* Handle state changes */
 	if (!pv->is_online && (easynmc_core_state(h) == EASYNMC_CORE_RUNNING)) { 
+		aura_etable_activate(pv->etbl);
 		aura_set_status(node, AURA_STATUS_ONLINE);
 		pv->is_online++;
 	};
@@ -420,47 +418,46 @@ static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		}
 }
 
-
 struct aura_buffer *ion_buffer_request(struct aura_node *node, int size)
 {
 	int ret;
 	int map_fd;
 	ion_user_handle_t hndl;
-	struct aura_buffer *buf;
 	struct nmc_private *pv = aura_get_userdata(node);
-	struct ion_buffer_descriptor *dsc = malloc(sizeof(*dsc));
 
+	struct ion_buffer_descriptor *dsc = malloc(sizeof(*dsc));	
 	if (!dsc)
 		BUG(node, "malloc failed!");
 
 	ret = ion_alloc(pv->ion_fd, size, 0x10, 0xf, 0,  &hndl);	
 	if (ret) 
-		BUG(node, "ION allocation failed");
+		BUG(node, "ION allocation of %d bytes failed: %d", size, ret);
 	
 	ret = ion_map(pv->ion_fd, hndl, size, (PROT_READ | PROT_WRITE), 
-		      MAP_SHARED, 0, (void *) &buf, &map_fd);
+		      MAP_SHARED, 0, (void *) &dsc->buf.data, &map_fd);
 	if (ret)
 		BUG(node, "ION mmap failed");
 	
 	dsc->map_fd = map_fd; 
 	dsc->hndl = hndl;
-	dsc->mapped_buf = buf; 
 	dsc->size = size;
 	dsc->share_fd = -1;
-	buf->transportdata = dsc;
-	return buf;
+	return &dsc->buf;
 }
 
-static void ion_buffer_release(struct aura_node *node, struct aura_buffer *buf)
+static void ion_buffer_release(struct aura_buffer *buf)
 {
+	struct aura_node *node = buf->owner;
 	struct nmc_private *pv = aura_get_userdata(node);
-	struct ion_buffer_descriptor *dsc = buf->transportdata;
+	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
 	int ret;
+
+	munmap(dsc->buf.data, dsc->size);
 
 	ret = ion_free(pv->ion_fd, dsc->hndl);
 	if (ret)
 		BUG(node, "Shit happened when doing ion_free(): %d", ret);
-	munmap(buf, dsc->size);
+
 	close(dsc->map_fd);
 	free(dsc);
 }
@@ -476,8 +473,7 @@ void nmc_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 	if (sizeof(void*) != 4)
 		BUG(dst->owner, "You know why we are screwed here, jerk!");
 
-	int data_offset = (sizeof(struct aura_buffer) / 4);
-	uint64_t buf_addrs = aura_buffer_to_nmc(buf) + data_offset;
+	uint64_t buf_addrs = aura_buffer_to_nmc(buf);
 	buf_addrs |= (((uint64_t) (uint32_t) buf) << 32);
 	aura_buffer_put_u64(dst, buf_addrs);
 	slog(4, SLOG_DEBUG, "nmc: serialized buf 0x%x to 0x%llx ", buf, buf_addrs);
