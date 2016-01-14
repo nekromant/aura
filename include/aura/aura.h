@@ -341,8 +341,6 @@ struct aura_buffer {
 	int                 pos;
 	/** object assosiated with this buffer */
 	struct aura_object *object;
-	/** Transport-specific data associated with this buffer */
-	void               *transportdata;
 	/** The node that owns the buffer */
 	struct aura_node   *owner;
 	/** list_entry. Used to link buffers in queue keep in buffer pool */
