@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <ion/ion.h>
