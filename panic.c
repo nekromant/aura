@@ -34,7 +34,7 @@ void __attribute__((noreturn)) aura_panic(struct aura_node *node)
   size = backtrace (array, TRACE_LEN);
   strings = backtrace_symbols (array, size);
 
-  slog(0, SLOG_DEBUG, "--- Dumping aura stack ---");
+  slog(0, SLOG_DEBUG, "--- Dumping aura stack (%d entries) ---", size);
   for (i = 0; i < size; i++)
 	  slog(0, SLOG_DEBUG, "%s", strings[i]);
 #else
