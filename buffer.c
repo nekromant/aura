@@ -27,13 +27,11 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *nd,
 
 
 /**
- * Request an aura_buffer for this node big enough to contain at least size bytes of data.
- *
- * The buffer's userdata will be set to point to the  
- *
+ * Request an buffer for this node big enough to contain at least size bytes of data.
+ * The data is returned in struct aura_buffer
  * 
  * If the node transport overrides buffer allocation - transport-specific allocation function
- * will be called.
+ * will be called
  *
  * @param nd
  * @param size
@@ -41,7 +39,7 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *nd,
  */
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
 	struct aura_buffer *ret = NULL;
-	int act_size = sizeof(struct aura_buffer) + size;
+	int act_size = size;
 	act_size += nd->tr->buffer_overhead;
 
 #ifdef AURA_USE_BUFFER_POOL
@@ -53,20 +51,20 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size) {
 
 	/* Fallback to alloc() */
 	if (!nd->tr->buffer_request) {
-		char *data = malloc(act_size);
+		char *data = malloc(act_size + sizeof(struct aura_buffer));
 		ret = (struct aura_buffer *) data;
 		if (!ret)
 			BUG(nd, "FATAL: malloc() failed");
 		ret->data = &data[sizeof(*ret)];
 	} else {
-		ret = nd->tr->buffer_request(nd, size);
+		ret = nd->tr->buffer_request(nd, act_size);
 		if (!ret)
 			BUG(nd, "FATAL: buffer allocation by transport failed");
 	}
 	
 bailout:
 	ret->magic = AURA_BUFFER_MAGIC_ID;
-	ret->size = act_size - sizeof(struct aura_buffer);
+	ret->size = act_size;
 	ret->owner = nd;
 	aura_buffer_rewind(ret);
 	return ret;
@@ -151,6 +149,7 @@ void aura_bufferpool_preheat(struct aura_node *nd, int size, int count)
 	while (count--) {
 		struct aura_buffer *buf = aura_buffer_request(nd, size);
 		aura_buffer_release(buf);
+		slog(0, SLOG_DEBUG, "!");
 	}
 }
 
