@@ -64,12 +64,13 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 {
 	slog(0, SLOG_DEBUG, "dummy: serializing buf 0x%x", buf);
-	aura_buffer_put_u64(dst, (uint64_t) buf);
+	uint64_t ptr = (uintptr_t) buf;
+	aura_buffer_put_u64(dst, ptr);
 }
 
 struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
 {
-	struct aura_buffer *ret = (struct aura_buffer *) aura_buffer_get_u64(buf);
+	struct aura_buffer *ret = (struct aura_buffer *) (uintptr_t) aura_buffer_get_u64(buf);
 	slog(0, SLOG_DEBUG, "dummy: deserializing buf 0x%x", ret);
 	return ret;
 }
