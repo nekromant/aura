@@ -251,17 +251,17 @@ void slog(int level, int flag, const char *msg, ...)
                 break;
 	default:
                 break;
-
-		/* Print output */
-		fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
-
-		/* Save log in file */
-		if (slg.to_file)
-		{
-			output = slog_sprintf("%s\n", string);
-			log_to_file(output, slg.fname, &mdate);
-		}
 	}
+
+	/* Print output */
+	fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
+
+	/* Save log in file */
+	if (slg.to_file)
+	{
+		output = slog_sprintf("%s\n", string);
+		log_to_file(output, slg.fname, &mdate);
+	}	
 }
 
 
