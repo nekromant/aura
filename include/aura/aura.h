@@ -80,7 +80,7 @@ struct aura_node {
 	void *etable_changed_arg;
 	void (*etable_changed_cb)(struct aura_node *node, 
 				  struct aura_export_table *old, 
-				  struct aura_export_table *new, 
+				  struct aura_export_table *newtbl, 
 				  void *arg);
 
 	void *object_migration_failed_arg;
@@ -717,7 +717,7 @@ const void *aura_buffer_get_ptr(struct aura_buffer *buf);
 void aura_etable_changed_cb(struct aura_node *node, 
 			    void (*cb)(struct aura_node *node, 
 				       struct aura_export_table *old, 
-				       struct aura_export_table *new, 
+				       struct aura_export_table *newtbl, 
 				       void *arg),
 			    void *arg);
 
