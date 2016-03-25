@@ -1,8 +1,8 @@
 #include <aura/aura.h>
 #include <aura/private.h>
 #include <aura/crc.h>
+#include <aura/packetizer.h>
 
-#define PACKET_START 0x7f
 
 /*
  *
@@ -14,42 +14,6 @@ enum packetizer_state {
 	STATE_READ_HEADER,
 	STATE_READ_DATA
 };
-
-struct __attribute__((packed)) aura_packet8  {
-	uint8_t start;
-	uint8_t cont;
-	uint8_t datalen;
-	uint8_t invdatalen;
-	uint8_t crc8;
-	char data[];
-};
-
-struct aura_packetizer {
-	int			endian;
-	uint8_t			cont;
-	uint8_t			expect_cont;
-
-	struct aura_node *	node;
-
-	/* Packetizer callbacks */
-
-	void			(*recvcb)(struct aura_buffer *buf, void *arg);
-	void *			recvarg;
-
-	struct aura_buffer *	(*packet_packfn)(struct aura_buffer *buf, void *arg);
-	void *			packarg;
-
-	struct aura_buffer *	(*packet_unpackfn)(struct aura_buffer *buf, void *arg);
-	void *			unpackarg;
-
-	int			state;
-	struct aura_buffer *	curbuf;
-
-	int			copied;
-	struct aura_packet8	headerbuf; /* FixMe: ... */
-};
-
-
 
 int aura_packetizer_max_overhead()
 {
@@ -89,32 +53,14 @@ void aura_packetizer_set_receive_cb(
 	pkt->recvarg = arg;
 }
 
-void aura_packetizer_set_pack_cb(
-	struct aura_packetizer *pkt,
-	struct aura_buffer *(*packet_packfn)(struct aura_buffer *buf, void *arg),
-	void *arg)
-{
-	pkt->packet_packfn = packet_packfn;
-	pkt->packarg = arg;
-}
-
-void aura_packetizer_set_unpack_cb(
-	struct aura_packetizer *pkt,
-	struct aura_buffer *(*packet_unpackfn)(struct aura_buffer *buf, void *arg),
-	void *arg)
-{
-	pkt->packet_unpackfn = packet_unpackfn;
-	pkt->unpackarg = arg;
-}
-
 int aura_packetizer_verify_header(struct aura_packetizer *pkt, struct aura_packet8 *packet)
 {
 	if (packet->start != PACKET_START)
 		return -1;
-	if (packet->datalen != ~(packet->invdatalen))
-		return -1;
+	if (packet->datalen != ((~packet->invdatalen) & 0xff))
+		return -2;
 	if (packet->cont != pkt->expect_cont)
-		return -1;
+		return -3;
 	return 0;
 }
 
@@ -123,13 +69,12 @@ int aura_packetizer_verify_data(struct aura_packetizer *pkt, struct aura_packet8
 	return !(packet->crc8 == crc8(0, (unsigned char *)packet->data, packet->datalen));
 }
 
-void aura_packetizer_encapsulate(struct aura_packetizer *pkt, struct aura_buffer *buf)
+void aura_packetizer_encapsulate(struct aura_packetizer *	pkt,
+				 struct aura_packet8 *		packet,
+				 size_t				len)
 {
-	struct aura_packet8 *packet = (struct aura_packet8 *)buf->data;
-	int len = buf->pos - sizeof(*packet);
-
 	if (len > 255)
-		BUG(buf->owner, "Packet size is too big");
+		BUG(pkt->node, "Packet size is too big");
 
 	packet->start = PACKET_START;
 	packet->cont = (pkt->cont++ & 0xff);
@@ -139,51 +84,94 @@ void aura_packetizer_encapsulate(struct aura_packetizer *pkt, struct aura_buffer
 	packet->crc8 = crc8(0, (unsigned char *)packet->data, packet->datalen);
 }
 
-void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)
+void aura_packetizer_reset(struct aura_packetizer *pkt)
+{
+	pkt->state = STATE_SEARCH_START;
+	pkt->copied = 0;
+	if (pkt->curbuf) {
+		aura_buffer_release(pkt->curbuf);
+		pkt->curbuf = NULL;
+	}
+}
+
+static void packetizer_dispatch_packet(struct aura_packetizer *pkt)
+{
+	slog(4, SLOG_DEBUG, "packetizer: dispatching packet");
+	if (pkt->recvcb)
+		pkt->recvcb(pkt->curbuf, pkt->recvarg);
+	else /* No callback? Free the buffer */
+		aura_buffer_release(pkt->curbuf);
+	pkt->curbuf = NULL;
+}
+
+int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, size_t len)
 {
 	int pos = 0;
 
-	while (pos < len) {
-		switch (pkt->state) {
-		case STATE_SEARCH_START:
-		{
-			while ((pos < len) && data[pos] != PACKET_START)
-				pos++;
-			if (pos < len) {
-				pkt->state = STATE_READ_HEADER;
+	switch (pkt->state) {
+	case STATE_SEARCH_START:
+		while ((pos < len) && data[pos] != PACKET_START)
+			pos++;
+		if (pos < len) {
+			pkt->state = STATE_READ_HEADER;
+			pkt->copied = 0;
+			slog(4, SLOG_DEBUG, "packetizer: Found start at %d", pos);
+		}
+		break;
+	case STATE_READ_HEADER:
+	{
+		int tocopy = min_t(int, sizeof(struct aura_packet8) - pkt->copied, len);
+		char *dest = (char *)&pkt->headerbuf;
+		int ret;
+		slog(4, SLOG_DEBUG, "tocopy %d copied %d/%d", tocopy, pkt->copied,
+		     sizeof(struct aura_packet8));
+		memcpy(&dest[pkt->copied], &data[pos], tocopy);
+		pkt->copied += tocopy;
+		pos += tocopy;
+		if (0 == (sizeof(struct aura_packet8) - pkt->copied)) {
+			ret = aura_packetizer_verify_header(pkt, &pkt->headerbuf);
+			if (0 == ret) {
+				pkt->state = STATE_READ_DATA;
 				pkt->copied = 0;
+				if (pkt->curbuf)
+					BUG(pkt->node, "Internal packetizer bug");
+				pkt->curbuf = aura_buffer_request(pkt->node, pkt->headerbuf.datalen);
+				if (!pkt->curbuf)
+					BUG(pkt->node, "Packetizer failed to alloc buffer");
+				memcpy(
+					pkt->curbuf->data,
+					&pkt->headerbuf,
+					sizeof(pkt->headerbuf)
+					);
+				slog(4, SLOG_DEBUG, "packetizer: Got header");
+			} else {
+				slog(4, SLOG_DEBUG, "Dropping bad header, reason: %d", ret);
+				aura_packetizer_reset(pkt);
 			}
-			break;
 		}
-		case STATE_READ_HEADER:
-		{
-			int tocopy = min_t(int, sizeof(struct aura_packet8) - pkt->copied, len);
-			struct aura_packet8 *packet = (struct aura_packet8 *)&pkt->headerbuf;
-			memcpy(&pkt->headerbuf, &data[pos], tocopy);
-			pkt->copied += tocopy;
-			pos += tocopy;
-			if (0 == (sizeof(struct aura_packet8) - pkt->copied)) {
-				if (0 == aura_packetizer_verify_header(pkt, &pkt->headerbuf)) {
-					pkt->state = STATE_READ_DATA;
-					if (pkt->curbuf)
-						BUG(pkt->node, "Internal packetizer bug");
-					pkt->curbuf = aura_buffer_request(pkt->node, packet->datalen);
-					if (!pkt->curbuf)
-						BUG(pkt->node, "Packetizer failed to alloc buffer");
-					memcpy(
-						pkt->curbuf->data,
-						&pkt->headerbuf,
-						sizeof(pkt->headerbuf)
-						);
-				}
-			}
-			break;
-		}
-		case STATE_READ_DATA:
-		{
-			int tocopy = min_t(int, sizeof(struct aura_packet8) - pkt->copied, len);
-			break;
-		}
-		}
+		break;
 	}
+	case STATE_READ_DATA:
+	{
+		int tocopy = min_t(int, pkt->headerbuf.datalen - pkt->copied, len);
+		aura_buffer_put_bin(pkt->curbuf, &data[pos], tocopy);
+		pos += tocopy;
+		pkt->copied += tocopy;
+		if (pkt->copied == pkt->headerbuf.datalen) {
+			if (0 == aura_packetizer_verify_data(pkt,
+							     (struct aura_packet8 *)pkt->curbuf->data))
+				packetizer_dispatch_packet(pkt);
+				aura_packetizer_reset(pkt);
+		}
+		break;
+	}
+	}
+	return pos;
+}
+
+void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)
+{
+	int pos=0;
+	while (pos < len)
+		pos+= aura_packetizer_feed_once(pkt, &data[pos], len-pos);
 }
