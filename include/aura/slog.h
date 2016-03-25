@@ -17,6 +17,7 @@
 
 #ifndef  SLOG_H
 #define SLOG_H
+#include <stdarg.h>
 
 /* For include header in CPP code */
 #ifdef __cplusplus
@@ -101,13 +102,7 @@ char* slog_sprintf(char *msg, ...);
  * logging level and flag is slog flags defined in slog.h header.
  */
 void slog(int level, int flag, const char *msg, ...);
-
-#define dbg(msg, ...) slog(SLOG_DEBUG, SLOG_DEBUG, msg, ##__VA_ARGS__);
-
-#define BUG(node, msg, ...) { \
-		slog(0, SLOG_FATAL, msg, ##__VA_ARGS__);	\
-		aura_panic(node);					\
-	}
+void slogv(int level, int flag, const char *msg, va_list args);
 
 /* For include header in CPP code */
 #ifdef __cplusplus

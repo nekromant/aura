@@ -198,59 +198,53 @@ char* slog_sprintf(char *msg, ...)
     return output;
 }
 
-
-/*
- * slog - Log exiting process. Function takes arguments and saves
- * log in file if LOGTOFILE flag is enabled from config. Otherwise
- * it just prints log without saveing in file. Argument level is
- * logging level and flag is slog flags defined in slog.h header.
- */
-void slog(int level, int flag, const char *msg, ...)
+/**
+* Same as slog, but takes a va_list instead
+* @param level loglevel
+* @param flag  Flag
+* @param msg   logmessage
+* @param args  argument list
+*/
+void slogv(int level, int flag, const char *msg, va_list args)
 {
+	if(level > slg.level)
+		return;
 
-	/* Used variables */
 	SystemDate mdate;
 	char string[MAXMSG];
 	char prints[MAXMSG];
 	char *output;
 
-	if(level > slg.level)
-		return; 
-
 	/* Initialise system date */
 	get_system_date(&mdate);
 
 	/* Read args */
-	va_list args;
-	va_start(args, msg);
 	vsprintf(string, msg, args);
-	va_end(args);
-
-        /* Handle flags */
-        switch(flag) {
+		/* Handle flags */
+		switch(flag) {
 	case 1:
-                sprintf(prints, "[LIVE]  %s", string);
-                break;
+				sprintf(prints, "[LIVE]  %s", string);
+				break;
 	case 2:
-                sprintf(prints, "[%s]  %s", strclr(1, "INFO"), string);
-                break;
+				sprintf(prints, "[%s]  %s", strclr(1, "INFO"), string);
+				break;
 	case 3:
-                sprintf(prints, "[%s]  %s", strclr(3, "WARN"), string);
-                break;
+				sprintf(prints, "[%s]  %s", strclr(3, "WARN"), string);
+				break;
 	case 4:
-                sprintf(prints, "[%s] %s", strclr(4, "DEBUG"), string);
-                break;
+				sprintf(prints, "[%s] %s", strclr(4, "DEBUG"), string);
+				break;
 	case 5:
-                sprintf(prints, "[%s] %s", strclr(2, "ERROR"), string);
-                break;
+				sprintf(prints, "[%s] %s", strclr(2, "ERROR"), string);
+				break;
 	case 6:
-                sprintf(prints, "[%s] %s", strclr(2, "FATAL"), string);
-                break;
+				sprintf(prints, "[%s] %s", strclr(2, "FATAL"), string);
+				break;
 	case 7:
-                sprintf(prints, "%s", string);
-                break;
+				sprintf(prints, "%s", string);
+				break;
 	default:
-                break;
+				break;
 	}
 
 	/* Print output */
@@ -261,7 +255,21 @@ void slog(int level, int flag, const char *msg, ...)
 	{
 		output = slog_sprintf("%s\n", string);
 		log_to_file(output, slg.fname, &mdate);
-	}	
+	}
+}
+
+/*
+ * slog - Log exiting process. Function takes arguments and saves
+ * log in file if LOGTOFILE flag is enabled from config. Otherwise
+ * it just prints log without saveing in file. Argument level is
+ * logging level and flag is slog flags defined in slog.h header.
+ */
+void slog(int level, int flag, const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	slogv(level, flag, msg, args);
+	va_end(args);
 }
 
 
