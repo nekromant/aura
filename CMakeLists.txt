@@ -5,7 +5,6 @@ SET(PROJECT_VERSION   0.1.2)
 SET(AURA_API_VERSION  1)
 
 enable_testing()
-include(./utils.cmake)
 #TODO: Move out linux-specific stuff
 
 SET(SRCS
@@ -27,8 +26,6 @@ PKG_CHECK_MODULES(LIBUSB libusb-1.0)
 PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
-
-nc_build_library(aura 1 0.1.2 "${SRCS}")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 #Version handling
