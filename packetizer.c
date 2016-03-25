@@ -159,9 +159,25 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 		pkt->copied += tocopy;
 		if (pkt->copied == pkt->headerbuf.datalen) {
 			if (0 == aura_packetizer_verify_data(pkt,
-							     (struct aura_packet8 *)pkt->curbuf->data))
+							     (struct aura_packet8 *)pkt->curbuf->data)){
 				packetizer_dispatch_packet(pkt);
+			} else {
+				struct aura_buffer *tmp = pkt->curbuf;
+				pkt->curbuf = NULL;
+				aura_buffer_rewind(tmp);
 				aura_packetizer_reset(pkt);
+				aura_packetizer_feed(pkt, aura_buffer_get_bin(tmp, pkt->copied),
+									pkt->copied);
+				aura_buffer_release(tmp);
+
+				/*
+				WARNING: In the rare case we haev a HUUUGE invalid packet, with
+				payload full of valid headers + invalid data fields
+				this will cause a stack overflow.
+				Let it be like this until it becomes a REAL issue
+				*/
+
+			}
 		}
 		break;
 	}
