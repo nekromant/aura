@@ -5,18 +5,20 @@ SET(PROJECT_VERSION   0.1.2)
 SET(AURA_API_VERSION  1)
 
 enable_testing()
-
+include(./utils.cmake)
 #TODO: Move out linux-specific stuff
 
-SET(SRCS   
+SET(SRCS
   buffer.c
-  slog.c panic.c utils.c 
-  transport.c eventloop.c aura.c export.c serdes.c 
+  slog.c panic.c utils.c
+  transport.c eventloop.c aura.c export.c serdes.c
   retparse.c queue.c utils-linux.c
   eventsys-epoll.c
   transport-dummy.c
   transport-sysfs-gpio.c
-  transport-serial.c
+  packetizer.c
+  crc.c
+#  transport-serial.c
 )
 SET(TRANSPORTS dummy sysfs-gpio serial)
 
@@ -26,8 +28,9 @@ PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
 
+nc_build_library(aura 1 0.1.2 "${SRCS}")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 #Version handling
 EXECUTE_PROCESS(COMMAND git rev-parse HEAD
     OUTPUT_VARIABLE PROJECT_VERSION_GIT
@@ -43,7 +46,7 @@ if(AURA_USE_BUFFER_POOL)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
 endif()
 
-# Let's auto detect a suitable lua version 
+# Let's auto detect a suitable lua version
 if(LUA52_FOUND)
   SET(LUA_INCLUDE_DIRS ${LUA52_INCLUDE_DIRS})
   SET(LUA_LIBRARIES ${LUA52_LIBRARIES})
@@ -116,13 +119,20 @@ TARGET_LINK_LIBRARIES(aurashared
     -lrt -lm
 )
 
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+file(WRITE ${CMAKE_SOURCE_DIR}/.clang_complete "")
+foreach(dir ${dirs})
+  file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "-I${dir}\n")
+endforeach()
+message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
+
 # UNIT TESTS OF THE CORE API
 file(GLOB UNITS
     "${CMAKE_SOURCE_DIR}/tests/*.c"
 )
 
 foreach(file ${UNITS})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   ADD_TEST(${f} ${f})
@@ -130,7 +140,7 @@ foreach(file ${UNITS})
     ADD_TEST(memcheck-${f} valgrind
       --error-exitcode=1 --read-var-info=yes
       --leak-check=full  --show-leak-kinds=all
-      --undef-value-errors=no --xml=yes --xml-file=${f}.xml 
+      --undef-value-errors=no --xml=yes --xml-file=${f}.xml
       ./${f})
   endif()
 endforeach(file)
@@ -141,7 +151,7 @@ file(GLOB BENCHES
 )
 
 foreach(file ${BENCHES})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
   ADD_EXECUTABLE(bench-${f} ${file})
   TARGET_LINK_LIBRARIES(bench-${f} aurashared)
 endforeach(file)
@@ -152,7 +162,7 @@ file(GLOB TTESTS
 )
 
 foreach(file ${TTESTS})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)  
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   if (TEST_TRANSPORTS)
@@ -161,7 +171,7 @@ foreach(file ${TTESTS})
       ADD_TEST(memcheck-${f} valgrind
 	--error-exitcode=1 --read-var-info=yes
 	--leak-check=full  --show-leak-kinds=all
-	--undef-value-errors=no --xml=yes --xml-file=${f}.xml 
+	--undef-value-errors=no --xml=yes --xml-file=${f}.xml
 	./${f})
     endif()
   endif()
@@ -206,7 +216,7 @@ INSTALL(FILES ${LUA_SCRIPTS}
 INSTALL(FILES lua/aura.lua
        DESTINATION ${LUA_LPATH})
 
-#FixMe: Hack. CMake symlink handling is shitty and obscure 
+#FixMe: Hack. CMake symlink handling is shitty and obscure
 add_custom_command(TARGET aurashared POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:aurashared> auracore.so
 )
