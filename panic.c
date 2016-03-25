@@ -8,6 +8,15 @@
 
 #define TRACE_LEN 36
 
+int BUG(struct aura_node *node, const char *msg, ...)
+{
+        va_list ap;
+        va_start(ap, msg);
+		slogv(0, SLOG_FATAL, msg, ap);
+        va_end(ap);
+		aura_panic(node);
+}
+
 
 /**  \addtogroup misc
  *  @{
@@ -42,7 +51,7 @@ void __attribute__((noreturn)) aura_panic(struct aura_node *node)
 #endif
 
   /* TODO: Dump interesting stuff from node var */
-  
+
   free (strings);
   exit(128);
 }
@@ -58,12 +67,10 @@ static void handler(int sig, siginfo_t *si, void *unused)
 }
 
 
-void __attribute__((constructor (101))) reg_seg_handler() {	   
+void __attribute__((constructor (101))) reg_seg_handler() {
 	struct sigaction sa;
 	sa.sa_flags = SA_SIGINFO;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_sigaction = handler;
 	sigaction(SIGSEGV, &sa, NULL);
 }
-
-
