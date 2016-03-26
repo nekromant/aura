@@ -133,7 +133,7 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 	{
 		int tocopy = min_t(int, sizeof(struct aura_packet8) - pkt->copied, len);
 		char *dest = (char *)&pkt->headerbuf;
-		memcpy(&dest[pkt->copied], &data[pos], tocopy);
+		memmove(&dest[pkt->copied], &data[pos], tocopy);
 		pkt->copied += tocopy;
 		pos += tocopy;
 		if ((sizeof(struct aura_packet8) == pkt->copied)) {
