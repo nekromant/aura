@@ -1,10 +1,11 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/packetizer.h>
 
 static int dummy_open(struct aura_node *node, const char *opts)
 {
 	slog(1, SLOG_INFO, "Opening dummy transport");
-	
+
 	return 0;
 }
 
@@ -26,7 +27,7 @@ static void dummy_populate_etable(struct aura_node *node)
 	aura_etable_add(etbl, "echo_bin", "s32.s32.", "s32.s32.");
 	aura_etable_add(etbl, "echo_buf", "b", "b");
 	aura_etable_add(etbl, "echo_u64", "4", "4");
-	aura_etable_activate(etbl);	
+	aura_etable_activate(etbl);
 }
 
 static void dummy_close(struct aura_node *node)
@@ -50,8 +51,8 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	buf->object = aura_etable_find(node->tbl, "ping");
 	aura_queue_buffer(&node->inbound_buffers, buf);
 
-	while(1) { 
-		buf = aura_dequeue_buffer(&node->outbound_buffers); 
+	while(1) {
+		buf = aura_dequeue_buffer(&node->outbound_buffers);
 		if (!buf)
 			break;
 		o = buf->object;
@@ -75,13 +76,13 @@ static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
 	return ret;
 }
 
-static struct aura_transport dummy = { 
+static struct aura_transport dummy = {
 	.name = "dummy",
 	.open = dummy_open,
 	.close = dummy_close,
 	.loop  = dummy_loop,
-	.buffer_overhead = 16, 
-	.buffer_offset = 8,
+	.buffer_overhead = sizeof(struct aura_packet8),
+	.buffer_offset = sizeof(struct aura_packet8),
 	.buffer_get = dummy_buffer_get,
 	.buffer_put = dummy_buffer_put,
 };

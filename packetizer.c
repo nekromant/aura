@@ -66,7 +66,8 @@ int aura_packetizer_verify_header(struct aura_packetizer *pkt, struct aura_packe
 
 int aura_packetizer_verify_data(struct aura_packetizer *pkt, struct aura_packet8 *packet)
 {
-	return !(packet->crc8 == crc8(0, (unsigned char *)packet->data, packet->datalen));
+	uint8_t crc = crc8(0, (unsigned char *)packet->data, packet->datalen);
+	return !(packet->crc8 == crc);
 }
 
 void aura_packetizer_encapsulate(struct aura_packetizer *	pkt,
@@ -74,7 +75,7 @@ void aura_packetizer_encapsulate(struct aura_packetizer *	pkt,
 				 size_t				len)
 {
 	if (len > 255)
-		BUG(pkt->node, "Packet size is too big");
+		BUG(pkt->node, "Packet is too big");
 
 	packet->start = PACKET_START;
 	packet->cont = (pkt->cont++ & 0xff);
@@ -97,17 +98,27 @@ void aura_packetizer_reset(struct aura_packetizer *pkt)
 static void packetizer_dispatch_packet(struct aura_packetizer *pkt)
 {
 	slog(4, SLOG_DEBUG, "packetizer: dispatching packet");
+	aura_buffer_rewind(pkt->curbuf);
 	if (pkt->recvcb)
 		pkt->recvcb(pkt->curbuf, pkt->recvarg);
 	else /* No callback? Free the buffer */
 		aura_buffer_release(pkt->curbuf);
 	pkt->curbuf = NULL;
+	aura_packetizer_reset(pkt);
 }
 
+/**
+ * Feeds at most one packet into the packetizer
+ * @param  pkt  packetizer instance
+ * @param  data data to feed
+ * @param  len  the length of the data
+ * @return      The number of bytes consumed
+ */
 int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, size_t len)
 {
 	int pos = 0;
-
+	int ret;
+	struct aura_packet8 *hdr = &pkt->headerbuf;
 	switch (pkt->state) {
 	case STATE_SEARCH_START:
 		while ((pos < len) && data[pos] != PACKET_START)
@@ -122,20 +133,17 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 	{
 		int tocopy = min_t(int, sizeof(struct aura_packet8) - pkt->copied, len);
 		char *dest = (char *)&pkt->headerbuf;
-		int ret;
-		slog(4, SLOG_DEBUG, "tocopy %d copied %d/%d", tocopy, pkt->copied,
-		     sizeof(struct aura_packet8));
 		memcpy(&dest[pkt->copied], &data[pos], tocopy);
 		pkt->copied += tocopy;
 		pos += tocopy;
-		if (0 == (sizeof(struct aura_packet8) - pkt->copied)) {
+		if ((sizeof(struct aura_packet8) == pkt->copied)) {
 			ret = aura_packetizer_verify_header(pkt, &pkt->headerbuf);
 			if (0 == ret) {
 				pkt->state = STATE_READ_DATA;
 				pkt->copied = 0;
 				if (pkt->curbuf)
 					BUG(pkt->node, "Internal packetizer bug");
-				pkt->curbuf = aura_buffer_request(pkt->node, pkt->headerbuf.datalen);
+				pkt->curbuf = aura_buffer_request(pkt->node, hdr->datalen);
 				if (!pkt->curbuf)
 					BUG(pkt->node, "Packetizer failed to alloc buffer");
 				memcpy(
@@ -143,40 +151,35 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 					&pkt->headerbuf,
 					sizeof(pkt->headerbuf)
 					);
-				slog(4, SLOG_DEBUG, "packetizer: Got header");
 			} else {
-				slog(4, SLOG_DEBUG, "Dropping bad header, reason: %d", ret);
 				aura_packetizer_reset(pkt);
+				aura_packetizer_feed(pkt, &dest[1],
+									sizeof(struct aura_packet8) - 1);
 			}
 		}
 		break;
 	}
 	case STATE_READ_DATA:
 	{
-		int tocopy = min_t(int, pkt->headerbuf.datalen - pkt->copied, len);
+		int tocopy = min_t(int, hdr->datalen - pkt->copied, len);
 		aura_buffer_put_bin(pkt->curbuf, &data[pos], tocopy);
 		pos += tocopy;
 		pkt->copied += tocopy;
-		if (pkt->copied == pkt->headerbuf.datalen) {
-			if (0 == aura_packetizer_verify_data(pkt,
-							     (struct aura_packet8 *)pkt->curbuf->data)){
+		if (pkt->copied == hdr->datalen) {
+			aura_hexdump("out", pkt->curbuf->data, pkt->curbuf->pos);;
+			ret = aura_packetizer_verify_data(pkt,
+							     (struct aura_packet8 *) pkt->curbuf->data);
+			if (ret == 0) {
 				packetizer_dispatch_packet(pkt);
 			} else {
 				struct aura_buffer *tmp = pkt->curbuf;
+				int torefeed = pkt->copied;
 				pkt->curbuf = NULL;
 				aura_buffer_rewind(tmp);
 				aura_packetizer_reset(pkt);
-				aura_packetizer_feed(pkt, aura_buffer_get_bin(tmp, pkt->copied),
-									pkt->copied);
+				aura_packetizer_feed(pkt, aura_buffer_get_bin(tmp, torefeed),
+									torefeed);
 				aura_buffer_release(tmp);
-
-				/*
-				WARNING: In the rare case we haev a HUUUGE invalid packet, with
-				payload full of valid headers + invalid data fields
-				this will cause a stack overflow.
-				Let it be like this until it becomes a REAL issue
-				*/
-
 			}
 		}
 		break;
@@ -184,7 +187,13 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 	}
 	return pos;
 }
-
+/**
+ * Feed all of the buffer into the packetizer. This may result in no to several
+ * callbacks from the packetizer core
+ * @param pkt  packetizer instance
+ * @param data buffer to feed into the packetizer
+ * @param len  the length of the buffer in bytes
+ */
 void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)
 {
 	int pos=0;
