@@ -292,7 +292,7 @@ SET(PKG_CONFIG_LIBS
     "-L\${libdir} -l:libaura.so.${PROJECT_VERSION}"
 )
 SET(PKG_CONFIG_CFLAGS
-    "-I\${includedir}"
+    "-I\${includedir} -D_GNU_SOURCE"
 )
 
 CONFIGURE_FILE(
