@@ -7,17 +7,20 @@ SET(AURA_API_VERSION  1)
 enable_testing()
 #TODO: Move out linux-specific stuff
 
+#DEVELOPER HACKS. Enable only when hacking around aura
+SET(AURA_USE_LIBEVENT no)
+SET(AURA_USE_BUFFER_POOL yes)
+
 SET(SRCS
   buffer.c
   slog.c panic.c utils.c
   transport.c eventloop.c aura.c export.c serdes.c
   retparse.c queue.c utils-linux.c
-  eventsys-epoll.c
   transport-dummy.c
+  transport-bench.c
   transport-sysfs-gpio.c
   packetizer.c
   crc.c
-#  transport-serial.c
 )
 SET(TRANSPORTS dummy sysfs-gpio serial)
 
@@ -26,8 +29,13 @@ PKG_CHECK_MODULES(LIBUSB libusb-1.0)
 PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
+if (AURA_USE_LIBEVENT)
+PKG_CHECK_MODULES(LIBEVENT libevent)
+endif()
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE -g")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
+
 #Version handling
 EXECUTE_PROCESS(COMMAND git rev-parse HEAD
     OUTPUT_VARIABLE PROJECT_VERSION_GIT
@@ -37,10 +45,17 @@ STRING(REGEX REPLACE "\n" "" PROJECT_VERSION_GIT ${PROJECT_VERSION_GIT})
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION='\"${PROJECT_VERSION}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION_GIT='\"${PROJECT_VERSION_GIT}\"'")
 
-#Enable by default
-SET(AURA_USE_BUFFER_POOL yes)
 if(AURA_USE_BUFFER_POOL)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
+endif()
+
+#Let's use libevent if we have and should
+if(LIBEVENT_FOUND AND AURA_USE_LIBEVENT)
+  SET(SRCS ${SRCS} eventsys-libevent.c)
+  SET(EVENTSYSTEM libevent)
+else()
+  SET(SRCS ${SRCS} eventsys-epoll.c)
+  SET(EVENTSYSTEM epoll)
 endif()
 
 # Let's auto detect a suitable lua version
@@ -95,7 +110,15 @@ INCLUDE_DIRECTORIES(
     ${LIBUSB_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIRS}
     ${EASYNMC_INCLUDE_DIRS}
+    ${LIBEVENT_INCLUDE_DIRS}
 )
+
+message(STATUS "Generating .clang_complete")
+file(WRITE ".clang_complete" "")
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  file(APPEND ".clang_complete" "-I${dir}\n")
+endforeach()
 
 ADD_LIBRARY(aura OBJECT ${SRCS})
 
@@ -105,6 +128,7 @@ TARGET_LINK_LIBRARIES(aurastatic
     ${LIBUSB_LIBRARIES}
     ${LUA_LIBRARIES}
     ${EASYNMC_LIBRARIES}
+    ${LIBEVENT_LIBRARIES}
 )
 
 ADD_LIBRARY(aurashared SHARED $<TARGET_OBJECTS:aura>)
@@ -113,6 +137,7 @@ TARGET_LINK_LIBRARIES(aurashared
     ${LIBUSB_LIBRARIES}
     ${LUA_LIBRARIES}
     ${EASYNMC_LIBRARIES}
+    ${LIBEVENT_LIBRARIES}
     -lrt -lm
 )
 
@@ -183,6 +208,7 @@ message("libaura git commit:        ${PROJECT_VERSION_GIT}")
 message("Enabled transports:        ${TRANSPORTS}")
 message("Enabled language bindings: ${BINDINGS}")
 message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
+message("Event system:              ${EVENTSYSTEM}")
 
 if (AURA_USE_BUFFER_POOL)
 message("Buffer pooling:            enabled")
