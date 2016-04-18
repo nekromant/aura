@@ -6,6 +6,7 @@
 static void *aura_eventsys_get_autocreate(struct aura_node *node)
 {
 	struct aura_eventloop *loop = aura_eventloop_get_data(node);
+
 	if (loop == NULL) {
 		slog(3, SLOG_DEBUG, "aura: Auto-creating eventsystem for node");
 		loop = aura_eventloop_create(node);
@@ -34,14 +35,15 @@ static void *aura_eventsys_get_autocreate(struct aura_node *node)
 struct aura_node *aura_open(const char *name, const char *opts)
 {
 	struct aura_node *node = calloc(1, sizeof(*node));
-	int ret = 0; 
+	int ret = 0;
+
 	if (!node)
 		return NULL;
 	node->is_opening = true;
 
 	node->poll_timeout = 250; /* 250 ms default */
-	node->tr = aura_transport_lookup(name); 
-	if (!node->tr) { 
+	node->tr = aura_transport_lookup(name);
+	if (!node->tr) {
 		slog(0, SLOG_FATAL, "Invalid transport name: %s", name);
 		goto err_free_node;
 	}
@@ -54,17 +56,17 @@ struct aura_node *aura_open(const char *name, const char *opts)
 
 	node->status = AURA_STATUS_OFFLINE;
 
-	/*  Eventsystem will be either lazy-initialized or created via 
-	 *  aura_eventloop_* functions 
+	/*  Eventsystem will be either lazy-initialized or created via
+	 *  aura_eventloop_* functions
 	 */
 
 	if (node->tr->open)
 		ret = node->tr->open(node, opts);
 
-	if (ret != 0) 
+	if (ret != 0)
 		goto err_free_node;
-	
-	slog(6, SLOG_LIVE, "Created a node using transport: %s", name); 
+
+	slog(6, SLOG_LIVE, "Created a node using transport: %s", name);
 	node->is_opening = false;
 	return node;
 
@@ -80,13 +82,15 @@ static void cleanup_buffer_queue(struct list_head *q, bool destroy)
 	int i = 0;
 
 	struct list_head *pos, *tmp;
+
 	list_for_each_safe(pos, tmp, q) {
-		struct aura_buffer *b; 
-		b = list_entry(pos, struct aura_buffer, qentry); 
+		struct aura_buffer *b;
+
+		b = list_entry(pos, struct aura_buffer, qentry);
 		list_del(pos);
-		if (!destroy) /* Just return it to the pool */
+		if (!destroy)   /* Just return it to the pool */
 			aura_buffer_release(b);
-		else /* Nuke it, we're closing down */
+		else            /* Nuke it, we're closing down */
 			aura_buffer_destroy(b);
 		i++;
 	}
@@ -101,20 +105,20 @@ static void cleanup_buffer_queue(struct list_head *q, bool destroy)
  */
 void aura_close(struct aura_node *node)
 {
-	struct aura_eventloop *loop = aura_eventloop_get_data(node); 
-	
+	struct aura_eventloop *loop = aura_eventloop_get_data(node);
+
 	if (node->tr->close)
 		node->tr->close(node);
 
-	if (loop) { 
+	if (loop) {
 		if (loop->autocreated)
 			aura_eventloop_destroy(loop);
 		else
 			aura_eventloop_del(node);
 	}
 
-	/* After transport shutdown we need to clean up 
-	   remaining buffers */
+	/* After transport shutdown we need to clean up
+	 * remaining buffers */
 	cleanup_buffer_queue(&node->inbound_buffers, true);
 	cleanup_buffer_queue(&node->outbound_buffers, true);
 	cleanup_buffer_queue(&node->buffer_pool, true);
@@ -126,7 +130,7 @@ void aura_close(struct aura_node *node)
 	/* Free file descriptors */
 	if (node->fds)
 		free(node->fds);
-	
+
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
 }
@@ -139,36 +143,36 @@ void aura_close(struct aura_node *node)
 /* This one is small, but tricky */
 static void aura_handle_inbound(struct aura_node *node)
 {
-	while(1) {
+	while (1) {
 		struct aura_buffer *buf;
-		struct aura_object *o;	
+		struct aura_object *o;
 
-		buf = aura_dequeue_buffer(&node->inbound_buffers); 
+		buf = aura_dequeue_buffer(&node->inbound_buffers);
 		if (!buf)
 			break;
 
 		o = buf->object;
-		node->current_object = o; 
+		node->current_object = o;
 		aura_buffer_rewind(buf);
 
-		slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d", 
-		     object_is_method(o) ? "response" : "event", 
+		slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d",
+		     object_is_method(o) ? "response" : "event",
 		     o->id, o->name, node->sync_call_running);
 
-		if (object_is_method(o) && !o->pending) { 
-			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)", 
+		if (object_is_method(o) && !o->pending) {
+			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)",
 			     o->id, o->name);
 			aura_buffer_release(buf);
-		} else if (o->calldonecb) { 
+		} else if (o->calldonecb) {
 			slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
 			     o->id, o->name);
 			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
 			aura_buffer_release(buf);
-		} else if (object_is_method(o) && (node->sync_call_running)) { 
+		} else if (object_is_method(o) && (node->sync_call_running)) {
 			slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
 			     o->id, o->name);
 			node->sync_call_result = AURA_CALL_COMPLETED;
-			node->sync_ret_buf = buf; 
+			node->sync_ret_buf = buf;
 			o->pending--;
 			if (o->pending < 0)
 				BUG(node, "Internal BUG: pending evt count lesser than zero");
@@ -188,13 +192,13 @@ static void aura_handle_inbound(struct aura_node *node)
 				/* Now just queue the next one */
 				aura_queue_buffer(&node->event_buffers, buf);
 				node->sync_event_count++;
-				slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout", 
+				slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout",
 				     o->id, o->name);
 			} else {
 				/* Last resort - try the catch-all event callback */
 				if (node->unhandled_evt_cb)
 					node->unhandled_evt_cb(node, buf, node->unhandled_evt_arg);
-				else /* Or just drop it with a warning */
+				else    /* Or just drop it with a warning */
 					slog(0, SLOG_WARN, "Dropping event %d (%s)",
 					     o->id, o->name);
 				aura_buffer_release(buf);
@@ -202,7 +206,7 @@ static void aura_handle_inbound(struct aura_node *node)
 		}
 	}
 
-	node->current_object = NULL; 
+	node->current_object = NULL;
 }
 
 /**
@@ -211,33 +215,33 @@ static void aura_handle_inbound(struct aura_node *node)
  */
 
 
-/** 
+/**
  * \brief Obtain the pointer to the current aura_object
- *  
+ *
  * This function can be used while in the callback to get the pointer to the struct aura_object
- * that caused this callback. 
+ * that caused this callback.
  *
  * Calling this function outside the callback will return NULL and spit out a warning to the log
  *
- * @param node 
- * 
- * @return 
+ * @param node
+ *
+ * @return
  */
 const struct aura_object *aura_get_current_object(struct aura_node *node)
 {
 	/* Make some noise */
-	if (!node->current_object) { 
+	if (!node->current_object) {
 		slog(0, SLOG_WARN, "Looks like you're calling aura_get_current_object() outside the callback");
 		slog(0, SLOG_WARN, "Don't do that - read the docs!");
 	}
 	return node->current_object;
 }
 
-/** 
+/**
  * Get the eventloop associated with this node
- * 
- * @param node 
- * 
+ *
+ * @param node
+ *
  * @return Pointer to node's eventloop or NULL if node has none
  */
 struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node)
@@ -255,7 +259,7 @@ struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node)
  * @param cb
  * @param arg
  */
-void aura_status_changed_cb(struct aura_node *node, 
+void aura_status_changed_cb(struct aura_node *node,
 			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
 			    void *arg)
 {
@@ -272,17 +276,18 @@ void aura_status_changed_cb(struct aura_node *node,
  * @param cb
  * @param arg
  */
-void aura_fd_changed_cb(struct aura_node *node, 
+void aura_fd_changed_cb(struct aura_node *node,
 			void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
 			void *arg)
 {
 	int i;
 	const struct aura_pollfds *fds;
 	int count = aura_get_pollfds(node, &fds);
+
 	node->fd_changed_arg = arg;
 	node->fd_changed_cb = cb;
 	if (node->fd_changed_cb)
-		for (i=0; i<count; i++) 
+		for (i = 0; i < count; i++)
 			node->fd_changed_cb(&fds[i], AURA_FD_ADDED, node->fd_changed_arg);
 }
 
@@ -292,30 +297,30 @@ void aura_fd_changed_cb(struct aura_node *node,
  * @param cb
  * @param arg
  */
-void aura_etable_changed_cb(struct aura_node *node, 
-			    void (*cb)(struct aura_node *node, 
-				       struct aura_export_table *old, 
-				       struct aura_export_table *new, 
-				       void *arg),
-			    void *arg)
+void aura_etable_changed_cb(struct aura_node *								node,
+			    void (*									cb)(struct aura_node *node,
+									    struct aura_export_table *	old,
+									    struct aura_export_table *	new,
+									    void *			arg),
+			    void *									arg)
 {
 	node->etable_changed_arg = arg;
 	node->etable_changed_cb = cb;
 }
 
-/** 
+/**
  * Set up a generic callback to catch all events that have no callbacks installed.
  * Warning: This callback will not be called if you enable synchronous event processing
- * 
- * @param node 
+ *
+ * @param node
  * @param cb The callback function to call
  * @param arg Argument that will be passed to the callback function
  */
-void aura_unhandled_evt_cb(struct aura_node *node, 
-			   void (*cb)(struct aura_node *node, 
-				      struct aura_buffer *buf, 
-				      void *arg),
-			   void *arg)
+void aura_unhandled_evt_cb(struct aura_node *						node,
+			   void (*							cb)(struct aura_node *node,
+								    struct aura_buffer *buf,
+								    void *		arg),
+			   void *							arg)
 {
 	node->unhandled_evt_cb = cb;
 	node->unhandled_evt_arg = arg;
@@ -327,22 +332,22 @@ void aura_unhandled_evt_cb(struct aura_node *node,
  * @{
  */
 
-/** 
- * When a node goes offline and online aura will try to migrate all the callbacks to a 
+/**
+ * When a node goes offline and online aura will try to migrate all the callbacks to a
  * newly created export table
  * Warning: This callback will not be called if you enable synchronous event processing
- * 
- * @param node 
+ *
+ * @param node
  * @param cb The callback function to call
  * @param arg Argument that will be passed to the callback function
  */
-void aura_object_migration_failed_cb(struct aura_node *node, 
-				     void (*cb)(struct aura_node *node, 
-						struct aura_object *failed, 
-						void *arg),
-				     void *arg)
+void aura_object_migration_failed_cb(struct aura_node *						node,
+				     void (*							cb)(struct aura_node *node,
+									    struct aura_object *failed,
+									    void *		arg),
+				     void *							arg)
 {
-	node->object_migration_failed_cb  = cb;
+	node->object_migration_failed_cb = cb;
 	node->object_migration_failed_arg = arg;
 }
 
@@ -358,11 +363,11 @@ void aura_object_migration_failed_cb(struct aura_node *node,
  * @param buf
  * @return
  */
-int aura_core_start_call(struct aura_node *node, 
-		    struct aura_object *o,
-		    void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-		    void *arg,
-		    struct aura_buffer *buf)
+int aura_core_start_call(struct aura_node *node,
+			 struct aura_object *o,
+			 void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
+			 void *arg,
+			 struct aura_buffer *buf)
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 	int isfirst;
@@ -370,19 +375,19 @@ int aura_core_start_call(struct aura_node *node,
 	if (!o)
 		return -EBADSLT;
 
-	if(node->status != AURA_STATUS_ONLINE) 
+	if (node->status != AURA_STATUS_ONLINE)
 		return -ENOEXEC;
-		
-	if (o->pending) 
-		return -EIO; 
+
+	if (o->pending)
+		return -EIO;
 
 	if (!loop)
 		BUG(node, "Node has no assosiated event system. Fix your code!");
 
 	isfirst = list_empty(&node->outbound_buffers);
 
-	o->calldonecb = calldonecb; 
-	o->arg = arg; 
+	o->calldonecb = calldonecb;
+	o->arg = arg;
 	buf->object = o;
 	o->pending++;
 
@@ -393,50 +398,50 @@ int aura_core_start_call(struct aura_node *node,
 		slog(4, SLOG_DEBUG, "Notifying transport of queue status change");
 		node->last_checked = 0;
 		aura_eventloop_interrupt(loop);
-	};
+	}
+	;
 
 	return 0;
 }
 
-/** 
+/**
  * Synchronously call an object. arguments should be placed in argbuf.
- * The retbuf will be set to point to response buffer if the call succeeds. 
- * 
- * @param node 
- * @param o 
- * @param retbuf 
- * @param argbuf 
- * 
- * @return 
+ * The retbuf will be set to point to response buffer if the call succeeds.
+ *
+ * @param node
+ * @param o
+ * @param retbuf
+ * @param argbuf
+ *
+ * @return
  */
 int aura_core_call(
-	struct aura_node *node, 
-	struct aura_object *o,
-	struct aura_buffer **retbuf,
-	struct aura_buffer *argbuf)
+	struct aura_node *	node,
+	struct aura_object *	o,
+	struct aura_buffer **	retbuf,
+	struct aura_buffer *	argbuf)
 {
 	int ret;
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
-	
-	if (node->sync_call_running) 
+
+	if (node->sync_call_running)
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
 
 	node->sync_call_running = true;
- 
-	if ((ret=aura_core_start_call(node, o, NULL, NULL, argbuf))) {
+
+	if ((ret = aura_core_start_call(node, o, NULL, NULL, argbuf))) {
 		node->sync_call_result = ret;
 		goto bailout;
 	}
 
-	while (o->pending) {
+	while (o->pending)
 		aura_handle_events(loop);
-	}	
 
 	slog(4, SLOG_DEBUG, "Call completed");
-	*retbuf =  node->sync_ret_buf;
+	*retbuf = node->sync_ret_buf;
 
 bailout:
-	node->sync_call_running = false; 
+	node->sync_call_running = false;
 	return node->sync_call_result;
 }
 
@@ -445,7 +450,7 @@ bailout:
  * \addtogroup async
  * @{
  */
- 
+
 
 /**
  * Start a call for the object identified by its id the export table.
@@ -456,21 +461,22 @@ bailout:
  * @param calldonecb
  * @param arg
  * @return -EBADSLT if the requested id is not in etable
- * 		   -EIO if serialization failed or another synchronous call for this id is pending
- * 		   -ENOEXEC if the node is currently offline
+ *                 -EIO if serialization failed or another synchronous call for this id is pending
+ *                 -ENOEXEC if the node is currently offline
  */
 int aura_start_call_raw(
-	struct aura_node *node, 
+	struct aura_node *node,
 	int id,
 	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
 	void *arg,
 	...)
 {
 	va_list ap;
-	struct aura_buffer *buf; 
-	int ret; 
+	struct aura_buffer *buf;
+	int ret;
 
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
+
 	if (!o)
 		return -EBADSLT;
 
@@ -478,9 +484,9 @@ int aura_start_call_raw(
 	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 
-	if (!buf) 
+	if (!buf)
 		return -EIO;
-	
+
 	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
 
 	if (ret != 0)
@@ -509,6 +515,7 @@ int aura_set_event_callback_raw(
 	void *arg)
 {
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
+
 	if (!o)
 		return -EBADSLT;
 
@@ -540,6 +547,7 @@ int aura_set_event_callback(
 	void *arg)
 {
 	struct aura_object *o = aura_etable_find(node->tbl, event);
+
 	if (!o)
 		return -EBADSLT;
 
@@ -558,31 +566,31 @@ int aura_set_event_callback(
  * @param calldonecb
  * @param arg
  * @return -EBADSLT if the requested id is not in etable
- * 		   -EIO if serialization failed or another synchronous call for this id is pending
- * 		   -ENOEXEC if the node is currently offline
+ *                 -EIO if serialization failed or another synchronous call for this id is pending
+ *                 -ENOEXEC if the node is currently offline
  */
 int aura_start_call(
-	struct aura_node *node, 
+	struct aura_node *node,
 	const char *name,
 	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
 	void *arg,
 	...)
 {
-	struct aura_object *o; 
+	struct aura_object *o;
 	va_list ap;
-	struct aura_buffer *buf; 
-	int ret; 
+	struct aura_buffer *buf;
+	int ret;
 
 	o = aura_etable_find(node->tbl, name);
-	if (!o) 
-		return -ENOENT; 
+	if (!o)
+		return -ENOENT;
 
 	va_start(ap, arg);
 	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
-	if (!buf) 
+	if (!buf)
 		return -EIO;
-	
+
 	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
 
 	if (ret != 0)
@@ -607,6 +615,7 @@ int aura_start_call(
 void aura_wait_status(struct aura_node *node, int status)
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+
 	while (node->status != status)
 		aura_handle_events(loop);
 }
@@ -624,22 +633,22 @@ void aura_wait_status(struct aura_node *node, int status)
  * @return
  */
 int aura_call_raw(
-	struct aura_node *node, 
-	int id,
-	struct aura_buffer **retbuf,
+	struct aura_node *	node,
+	int			id,
+	struct aura_buffer **	retbuf,
 	...)
 {
 	va_list ap;
-	struct aura_buffer *buf; 
+	struct aura_buffer *buf;
 
 	struct aura_object *o = aura_etable_find_id(node->tbl, id);
 
-	if (node->sync_call_running) 
+	if (node->sync_call_running)
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
 
 	if (!o)
 		return -EBADSLT;
-	
+
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
@@ -653,7 +662,7 @@ int aura_call_raw(
 }
 
 /**
- * Synchronously call a remote method of node identified by name. 
+ * Synchronously call a remote method of node identified by name.
  * If the call succeeds, retbuf will be the pointer to aura_buffer containing
  * the values. It's your responsibility to call aura_buffer_release() on the retbuf
  * after you are done working with resulting values
@@ -664,18 +673,18 @@ int aura_call_raw(
  * @return
  */
 int aura_call(
-	struct aura_node *node, 
-	const char *name,
-	struct aura_buffer **retbuf,
+	struct aura_node *	node,
+	const char *		name,
+	struct aura_buffer **	retbuf,
 	...)
 {
 	va_list ap;
-	struct aura_buffer *buf; 
+	struct aura_buffer *buf;
 	struct aura_object *o = aura_etable_find(node->tbl, name);
-	
+
 	if (!o)
 		return -EBADSLT;
-	
+
 	va_start(ap, retbuf);
 	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
@@ -684,7 +693,7 @@ int aura_call(
 		slog(2, SLOG_WARN, "Serialization failed");
 		return -EIO;
 	}
-	
+
 	return aura_core_call(node, o, retbuf, buf);
 }
 
@@ -710,11 +719,11 @@ int aura_call(
  */
 void aura_enable_sync_events(struct aura_node *node, int count)
 {
-	while(node->sync_event_max >= count) {
+	while (node->sync_event_max >= count) {
 		const struct aura_object *o;
 		struct aura_buffer *buf;
 		int ret = aura_get_next_event(node, &o, &buf);
-		if (ret!=0)
+		if (ret != 0)
 			BUG(node, "Internal bug while resizing event queue (failed to drop some events)");
 		aura_buffer_release(buf);
 	}
@@ -750,13 +759,12 @@ int aura_get_pending_events(struct aura_node *node)
  * @param retbuf
  * @return 0 if the event has been read out.
  */
-int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj, struct aura_buffer **retbuf)
+int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf)
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
-	while (!node->sync_event_count) {
+	while (!node->sync_event_count)
 		aura_handle_events(loop);
-	}
 
 	*retbuf = aura_dequeue_buffer(&node->event_buffers);
 	if (!(*retbuf))
@@ -778,13 +786,13 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
  * @{
  */
 
-/** 
- * Report this call as failed to the core 
- * 
- * 
- * @param node 
- * @param o 
- * @param buf 
+/**
+ * Report this call as failed to the core
+ *
+ *
+ * @param node
+ * @param o
+ * @param buf
  */
 void aura_call_fail(struct aura_node *node, struct aura_object *o)
 {
@@ -808,20 +816,21 @@ void aura_call_fail(struct aura_node *node, struct aura_object *o)
 void aura_set_status(struct aura_node *node, int status)
 {
 	int oldstatus = node->status;
+
 	node->status = status;
 
 	if (oldstatus == status)
 		return;
 
 	if (node->is_opening)
-		BUG(node, "Transport BUG: Do not call aura_set_status in open()");		
-		
+		BUG(node, "Transport BUG: Do not call aura_set_status in open()");
+
 	if ((oldstatus == AURA_STATUS_OFFLINE) && (status == AURA_STATUS_ONLINE)) {
 		/* Dump etable */
 		int i;
 		slog(2, SLOG_INFO, "Node %s is now going online", node->tr->name);
 		slog(2, SLOG_INFO, "--- Dumping export table ---");
-		for (i=0; i< node->tbl->next; i++) {
+		for (i = 0; i < node->tbl->next; i++) {
 			slog(2, SLOG_INFO, "%d. %s %s %s(%s )  [out %d bytes] | [in %d bytes] ",
 			     node->tbl->objects[i].id,
 			     object_is_method((&node->tbl->objects[i])) ? "METHOD" : "EVENT ",
@@ -842,9 +851,9 @@ void aura_set_status(struct aura_node *node, int status)
 		/* Handle any remaining inbound messages */
 		aura_handle_inbound(node);
 		/* Cancel any pending calls */
-		for (i=0; i < node->tbl->next; i++) {
+		for (i = 0; i < node->tbl->next; i++) {
 			struct aura_object *o;
-			o=&node->tbl->objects[i];
+			o = &node->tbl->objects[i];
 			if (o->pending && o->calldonecb)
 				o->calldonecb(node, AURA_CALL_TRANSPORT_FAIL, NULL, o->arg);
 			if (o->pending)
@@ -903,5 +912,3 @@ void aura_eventloop_set_data(struct aura_node *node, struct aura_eventloop *data
 {
 	node->eventsys_data = data;
 }
-
-

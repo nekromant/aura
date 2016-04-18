@@ -1,17 +1,19 @@
 #include <aura/aura.h>
 
-int main() {
-	int ret; 
-	int i = 1632; 
+int main()
+{
+	int ret;
+	int i = 1632;
+
 	init_slog(NULL, 88);
 	struct aura_node *n = aura_open("simpleusb", "simpleusbconfigs/phototurntable.conf");
-	if (!n) { 
+	if (!n) {
 		printf("err\n");
 		return -1;
 	}
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
-	struct aura_buffer *retbuf; 
+	struct aura_buffer *retbuf;
 	ret = aura_call(n, "turnTheLedOn", &retbuf, 0x1);
 	slog(0, SLOG_DEBUG, "call ret %d", ret);
 	if (0 == ret) {
@@ -19,8 +21,8 @@ int main() {
 		ret = aura_buffer_get_u8(retbuf);
 	}
 	printf("====> GOT %d from device\n", ret);
-	aura_buffer_release(n, retbuf); 
-	while(i--) {
+	aura_buffer_release(n, retbuf);
+	while (i--) {
 		aura_loop_once(n);
 		usleep(10000);
 	}

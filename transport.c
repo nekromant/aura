@@ -2,13 +2,13 @@
 
 static LIST_HEAD(transports);
 
-#define required(_rq)							\
-	if (!tr->_rq) {							\
-	slog(0, SLOG_WARN,						\
-	     "Transport %s missing required field aura_transport.%s; Disabled",	\
-	     tr->name, #_rq						\
-		);							\
-	return;								\
+#define required(_rq)                                                   \
+	if (!tr->_rq) {                                                 \
+		slog(0, SLOG_WARN,                                              \
+		     "Transport %s missing required field aura_transport.%s; Disabled", \
+		     tr->name, #_rq                                             \
+		     );                                                      \
+		return;                                                         \
 	}
 
 
@@ -20,8 +20,7 @@ void aura_transport_register(struct aura_transport *tr)
 	required(close);
 	required(loop);
 
-	if ((tr->buffer_get) || (tr->buffer_put))
-	{
+	if ((tr->buffer_get) || (tr->buffer_put)) {
 		required(buffer_get);
 		required(buffer_put)
 	}
@@ -38,35 +37,37 @@ void aura_transport_register(struct aura_transport *tr)
 	list_add_tail(&tr->registry, &transports);
 }
 
-/** 
+/**
  * Find a transport identified by it's name
- * 
- * @param name 
- * 
+ *
+ * @param name
+ *
  * @return struct aura_transport or NULL
  */
 const struct aura_transport *aura_transport_lookup(const char *name)
 {
 	struct aura_transport *pos;
+
 	list_for_each_entry(pos, &transports, registry)
-		if (strcmp(pos->name, name) == 0 ) {
-			pos->usage++;
-			return pos;
-		}
+	if (strcmp(pos->name, name) == 0) {
+		pos->usage++;
+		return pos;
+	}
 	return NULL;
 }
 
 void aura_transport_release(const struct aura_transport *tr)
 {
-	((struct aura_transport* ) tr)->usage--;
+	((struct aura_transport *)tr)->usage--;
 }
 
 void aura_transport_dump_usage()
 {
 	struct aura_transport *pos;
+
 	slog(0, SLOG_INFO, "--- Registered transports ---");
 	list_for_each_entry(pos, &transports, registry)
-		slog(0, SLOG_INFO, "%s (%d instances in use)", pos->name, pos->usage);
+	slog(0, SLOG_INFO, "%s (%d instances in use)", pos->name, pos->usage);
 }
 
 /**
@@ -84,13 +85,13 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
 	return node->nextfd;
 }
 
-/** 
- * Add a file descriptor to be polled by the event system. 
- * Events are a bitmask from poll.h 
- * 
- * @param node 
- * @param fd 
- * @param events 
+/**
+ * Add a file descriptor to be polled by the event system.
+ * Events are a bitmask from poll.h
+ *
+ * @param node
+ * @param fd
+ * @param events
  */
 void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 {
@@ -98,7 +99,7 @@ void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 
 	if (!node->fds) {
 		/* Start with 8 fds. Unlikely more will be needed */
-		node->fds    = calloc(8, sizeof(*node->fds));
+		node->fds = calloc(8, sizeof(*node->fds));
 		node->numfds = 8;
 		node->nextfd = 0;
 		slog(4, SLOG_DEBUG, "node: %d descriptor slots available", node->numfds);
@@ -106,7 +107,7 @@ void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 
 	if (node->nextfd >= node->numfds) {
 		int count = node->numfds * 2;
-		node->fds    = realloc(node->fds, count * sizeof(*node->fds));
+		node->fds = realloc(node->fds, count * sizeof(*node->fds));
 		node->numfds = count;
 		slog(4, SLOG_DEBUG, "node: Resized. %d descriptor slots available", node->numfds);
 	}
@@ -125,16 +126,17 @@ void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
 }
 
-/** 
+/**
  * Remove a descriptor from the list of the descriptors to be polled.
- * 
- * @param node 
- * @param fd 
+ *
+ * @param node
+ * @param fd
  */
 void aura_del_pollfds(struct aura_node *node, int fd)
 {
 	int i;
-	for (i=0; i < node->nextfd; i++) {
+
+	for (i = 0; i < node->nextfd; i++) {
 		struct aura_pollfds *fds = &node->fds[i];
 		if (fds->fd == fd)
 			break;
@@ -149,9 +151,8 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 		node->fd_changed_cb(&node->fds[i], AURA_FD_REMOVED,
 				    node->fd_changed_arg);
 
-	memmove(&node->fds[i], &node->fds[i+1],
+	memmove(&node->fds[i], &node->fds[i + 1],
 		sizeof(struct aura_pollfds) * (node->nextfd - i - 1));
 	node->nextfd--;
 	bzero(&node->fds[node->nextfd], sizeof(struct aura_pollfds));
 }
-

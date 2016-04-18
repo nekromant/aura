@@ -5,6 +5,7 @@ struct aura_export_table *aura_etable_create(struct aura_node *owner, int n)
 {
 	/* man hsearch: recommends at least 25% more to avoid collisions */
 	int nel = n + (n / 4);
+
 	slog(4, SLOG_DEBUG, "etable: Creating etable for %d elements, %d hash entries", n, nel);
 	struct aura_export_table *tbl = calloc(1,
 					       sizeof(struct aura_export_table) +
@@ -14,17 +15,17 @@ struct aura_export_table *aura_etable_create(struct aura_node *owner, int n)
 
 	hcreate_r(nel, &tbl->index);
 	tbl->owner = owner;
-	tbl->next  = 0;
-	tbl->size  = n;
+	tbl->next = 0;
+	tbl->size = n;
 
 	return tbl;
 }
 
 
-void aura_etable_add(struct aura_export_table *tbl,
-		    const char *name,
-		    const char *argfmt,
-		    const char *retfmt)
+void aura_etable_add(struct aura_export_table * tbl,
+		     const char *		name,
+		     const char *		argfmt,
+		     const char *		retfmt)
 {
 	int ret;
 	ENTRY e, *ep;
@@ -40,12 +41,11 @@ void aura_etable_add(struct aura_export_table *tbl,
 		BUG(tbl->owner, "Internal BUG: Duplicate export table entry: %s", name);
 
 	target = &tbl->objects[tbl->next];
-	target->id      = tbl->next++;
-	if (!name) {
+	target->id = tbl->next++;
+	if (!name)
 		BUG(tbl->owner, "Internal BUG: object name can't be nil");
-	} else {
-		target->name    = strdup(name);
-	}
+	else
+		target->name = strdup(name);
 
 	if (argfmt)
 		target->arg_fmt = strdup(argfmt);
@@ -63,25 +63,23 @@ void aura_etable_add(struct aura_export_table *tbl,
 		target->ret_pprinted = aura_fmt_pretty_print(retfmt, &ret_valid, &target->num_rets);
 
 	target->valid = arg_valid && ret_valid;
-	if (!target->valid) {
+	if (!target->valid)
 		slog(0, SLOG_WARN, "Object %d (%s) has corrupt export table",
 		     target->id, target->name);
-	}
 	/* Calculate the sizes required */
 	target->arglen = aura_fmt_len(tbl->owner, argfmt);
 	target->retlen = aura_fmt_len(tbl->owner, retfmt);
 
 	/* Add this shit to index */
-	e.key  = target->name;
-	e.data = (char *) target;
+	e.key = target->name;
+	e.data = (char *)target;
 	ret = hsearch_r(e, ENTER, &ep, &tbl->index);
 	if (!ret)
 		BUG(tbl->owner, "Internal BUG: Error adding entry to hash table");
-
 }
 
-struct aura_object *aura_etable_find(struct aura_export_table *tbl,
-				     const char *name)
+struct aura_object *aura_etable_find(struct aura_export_table * tbl,
+				     const char *		name)
 {
 	int ret;
 	ENTRY e, *ep;
@@ -90,16 +88,16 @@ struct aura_object *aura_etable_find(struct aura_export_table *tbl,
 	if (!tbl)
 		return NULL;
 
-	e.key  = (char *) name;
+	e.key = (char *)name;
 	e.data = NULL;
 	ret = hsearch_r(e, FIND, &ep, &tbl->index);
 	if (ret)
-		target = (struct aura_object *) ep->data;
+		target = (struct aura_object *)ep->data;
 	return target;
 }
 
-struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
-					int id)
+struct aura_object *aura_etable_find_id(struct aura_export_table *	tbl,
+					int				id)
 {
 	if (id >= tbl->next)
 		return NULL;
@@ -107,8 +105,8 @@ struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
 }
 
 #define format_matches(one, two) \
-		((!one && !two) || \
-		(one && two && strcmp(one, two)))
+	((!one && !two) || \
+	 (one && two && strcmp(one, two)))
 
 static int object_is_equal(struct aura_object *one, struct aura_object *two)
 {
@@ -137,7 +135,7 @@ static int migrate_object(struct aura_object *src, struct aura_object *dst)
 	if (object_is_equal(src, dst)) {
 		dst->calldonecb = src->calldonecb;
 		dst->arg = src->arg;
-		slog(4, SLOG_DEBUG, "etable: Successful migration of obj %d->%d (%s)",src->id, dst->id, dst->name);
+		slog(4, SLOG_DEBUG, "etable: Successful migration of obj %d->%d (%s)", src->id, dst->id, dst->name);
 		return 1;
 	}
 	return 0;
@@ -146,6 +144,7 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 {
 	int i;
 	struct aura_node *node;
+
 	/* Sanity checking */
 	if (!old || !new) /* Nothing to migrate */
 		return;
@@ -166,7 +165,7 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 	 * If that fails - we do a hash-search of the name in the new table, and try to migrate our callbacks there
 	 *
 	 */
-	for(i=0; i < old->next; i++) {
+	for (i = 0; i < old->next; i++) {
 		struct aura_object *src = &old->objects[i];
 		struct aura_object *dst = &new->objects[i];
 
@@ -181,12 +180,12 @@ static void etable_migrate(struct aura_export_table *old, struct aura_export_tab
 
 		if (src->calldonecb) {
 			/* Migration failed, object had a callback set.
-			   We need to notify the application about a potential problem
+			 * We need to notify the application about a potential problem
 			 */
-			if (node->object_migration_failed_cb)
+			if (node->object_migration_failed_cb) {
 				node->object_migration_failed_cb(node, src,
 								 node->object_migration_failed_arg);
-			else {
+			} else {
 				slog(1, SLOG_WARN,
 				     "Migration of callbacks for object %s failed\n", src->name);
 				slog(1, SLOG_WARN,
@@ -216,8 +215,6 @@ void aura_etable_activate(struct aura_export_table *tbl)
 		aura_etable_destroy(node->tbl);
 	}
 	node->tbl = tbl;
-
-
 }
 
 void aura_etable_destroy(struct aura_export_table *tbl)
@@ -225,9 +222,9 @@ void aura_etable_destroy(struct aura_export_table *tbl)
 	/* Iterate over the table and free all the strings */
 	int i;
 
-	for (i=0; i < tbl->next; i++) {
+	for (i = 0; i < tbl->next; i++) {
 		struct aura_object *tmp;
-		tmp=&tbl->objects[i];
+		tmp = &tbl->objects[i];
 		free(tmp->name);
 		if (tmp->arg_fmt)
 			free(tmp->arg_fmt);

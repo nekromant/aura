@@ -50,6 +50,7 @@ void get_system_date(SystemDate *mdate)
 {
 	time_t rawtime;
 	struct tm *timeinfo;
+
 	rawtime = time(NULL);
 	timeinfo = localtime(&rawtime);
 	if (!timeinfo) {
@@ -57,8 +58,8 @@ void get_system_date(SystemDate *mdate)
 		return;
 	}
 	/* Get System Date */
-	mdate->year = timeinfo->tm_year+1900;
-	mdate->mon = timeinfo->tm_mon+1;
+	mdate->year = timeinfo->tm_year + 1900;
+	mdate->mon = timeinfo->tm_mon + 1;
 	mdate->day = timeinfo->tm_mday;
 	mdate->hour = timeinfo->tm_hour;
 	mdate->min = timeinfo->tm_min;
@@ -72,19 +73,19 @@ void get_system_date(SystemDate *mdate)
  * format. If min is 0, function returns version in full  format, if flag
  * is 1 function returns only version number, For examle: 1.3.0
  */
-const char* slog_version(int min)
+const char *slog_version(int min)
 {
-    static char verstr[128];
+	static char verstr[128];
 
-    /* Version short */
-    if (min) sprintf(verstr, "%d.%d.%d",
-        SLOGVERSION_MAX, SLOGVERSION_MIN, SLOGBUILD_NUM);
+	/* Version short */
+	if (min) sprintf(verstr, "%d.%d.%d",
+			 SLOGVERSION_MAX, SLOGVERSION_MIN, SLOGBUILD_NUM);
 
-    /* Version long */
-    else sprintf(verstr, "%d.%d build %d (%s)",
-        SLOGVERSION_MAX, SLOGVERSION_MIN, SLOGBUILD_NUM, __DATE__);
+	/* Version long */
+	else sprintf(verstr, "%d.%d build %d (%s)",
+		     SLOGVERSION_MAX, SLOGVERSION_MIN, SLOGBUILD_NUM, __DATE__);
 
-    return verstr;
+	return verstr;
 }
 
 
@@ -94,51 +95,51 @@ const char* slog_version(int min)
  * is color value (if it is invalid, function retunrs NULL) and second
  * is string with va_list of arguments which one we want to colorize.
  */
-char* strclr(int clr, char* str, ...)
+char *strclr(int clr, char *str, ...)
 {
-    /* String buffers */
-    static char output[MAXMSG];
-    char string[MAXMSG];
+	/* String buffers */
+	static char output[MAXMSG];
+	char string[MAXMSG];
 
-    /* Read args */
-    va_list args;
-    va_start(args, str);
-    vsprintf(string, str, args);
-    va_end(args);
+	/* Read args */
+	va_list args;
 
-    /* Handle colors */
-    switch(clr)
-    {
-        case 0:
-            sprintf(output, "%s%s%s", CLR_NORM, string, CLR_RESET);
-            break;
-        case 1:
-            sprintf(output, "%s%s%s", CLR_GREEN, string, CLR_RESET);
-            break;
-        case 2:
-            sprintf(output, "%s%s%s", CLR_RED, string, CLR_RESET);
-            break;
-        case 3:
-            sprintf(output, "%s%s%s", CLR_YELLOW, string, CLR_RESET);
-            break;
-        case 4:
-            sprintf(output, "%s%s%s", CLR_BLUE, string, CLR_RESET);
-            break;
-        case 5:
-            sprintf(output, "%s%s%s", CLR_NAGENTA, string, CLR_RESET);
-            break;
-        case 6:
-            sprintf(output, "%s%s%s", CLR_CYAN, string, CLR_RESET);
-            break;
-        case 7:
-            sprintf(output, "%s%s%s", CLR_WHITE, string, CLR_RESET);
-            break;
-        default:
-            return NULL;
-    }
+	va_start(args, str);
+	vsprintf(string, str, args);
+	va_end(args);
 
-    /* Return output */
-    return output;
+	/* Handle colors */
+	switch (clr) {
+	case 0:
+		sprintf(output, "%s%s%s", CLR_NORM, string, CLR_RESET);
+		break;
+	case 1:
+		sprintf(output, "%s%s%s", CLR_GREEN, string, CLR_RESET);
+		break;
+	case 2:
+		sprintf(output, "%s%s%s", CLR_RED, string, CLR_RESET);
+		break;
+	case 3:
+		sprintf(output, "%s%s%s", CLR_YELLOW, string, CLR_RESET);
+		break;
+	case 4:
+		sprintf(output, "%s%s%s", CLR_BLUE, string, CLR_RESET);
+		break;
+	case 5:
+		sprintf(output, "%s%s%s", CLR_NAGENTA, string, CLR_RESET);
+		break;
+	case 6:
+		sprintf(output, "%s%s%s", CLR_CYAN, string, CLR_RESET);
+		break;
+	case 7:
+		sprintf(output, "%s%s%s", CLR_WHITE, string, CLR_RESET);
+		break;
+	default:
+		return NULL;
+	}
+
+	/* Return output */
+	return output;
 }
 
 
@@ -149,22 +150,22 @@ char* strclr(int clr, char* str, ...)
  */
 void log_to_file(char *out, const char *fname, SystemDate *mdate)
 {
-    /* Used variables */
-    char filename[PATH_MAX];
+	/* Used variables */
+	char filename[PATH_MAX];
 
-    /* Create log filename with date */
-    sprintf(filename, "%s-%02d-%02d-%02d.log",
-        fname, mdate->year, mdate->mon, mdate->day);
+	/* Create log filename with date */
+	sprintf(filename, "%s-%02d-%02d-%02d.log",
+		fname, mdate->year, mdate->mon, mdate->day);
 
-    /* Open file pointer */
-    FILE *fp = fopen(filename, "a");
-    if (fp == NULL) return;
+	/* Open file pointer */
+	FILE *fp = fopen(filename, "a");
+	if (fp == NULL) return;
 
-    /* Write key in file */
-    fprintf(fp, "%s", out);
+	/* Write key in file */
+	fprintf(fp, "%s", out);
 
-    /* Close file pointer */
-    fclose(fp);
+	/* Close file pointer */
+	fclose(fp);
 }
 
 
@@ -173,41 +174,41 @@ void log_to_file(char *out, const char *fname, SystemDate *mdate)
  * and returns string in slog format without printing and
  * saveing in file. Return value is char pointer.
  */
-char* slog_sprintf(char *msg, ...)
+char *slog_sprintf(char *msg, ...)
 {
-    /* Used variables */
-    static char output[MAXMSG];
-    char string[MAXMSG];
-    SystemDate mdate;
+	/* Used variables */
+	static char output[MAXMSG];
+	char string[MAXMSG];
+	SystemDate mdate;
 
-    /* initialise system date */
-    get_system_date(&mdate);
+	/* initialise system date */
+	get_system_date(&mdate);
 
-    /* Read args */
-    va_list args;
-    va_start(args, msg);
-    vsprintf(string, msg, args);
-    va_end(args);
+	/* Read args */
+	va_list args;
+	va_start(args, msg);
+	vsprintf(string, msg, args);
+	va_end(args);
 
-    /* Generate output string with date */
-    sprintf(output, "%02d.%02d.%02d-%02d:%02d:%02d - %s",
-        mdate.year, mdate.mon, mdate.day, mdate.hour,
-        mdate.min, mdate.sec, string);
+	/* Generate output string with date */
+	sprintf(output, "%02d.%02d.%02d-%02d:%02d:%02d - %s",
+		mdate.year, mdate.mon, mdate.day, mdate.hour,
+		mdate.min, mdate.sec, string);
 
-    /* Return output */
-    return output;
+	/* Return output */
+	return output;
 }
 
 /**
-* Same as slog, but takes a va_list instead
-* @param level loglevel
-* @param flag  Flag
-* @param msg   logmessage
-* @param args  argument list
-*/
+ * Same as slog, but takes a va_list instead
+ * @param level loglevel
+ * @param flag  Flag
+ * @param msg   logmessage
+ * @param args  argument list
+ */
 void slogv(int level, int flag, const char *msg, va_list args)
 {
-	if(level > slg.level)
+	if (level > slg.level)
 		return;
 
 	SystemDate mdate;
@@ -220,39 +221,38 @@ void slogv(int level, int flag, const char *msg, va_list args)
 
 	/* Read args */
 	vsprintf(string, msg, args);
-		/* Handle flags */
-		switch(flag) {
+	/* Handle flags */
+	switch (flag) {
 	case 1:
-				sprintf(prints, "[LIVE]  %s", string);
-				break;
+		sprintf(prints, "[LIVE]  %s", string);
+		break;
 	case 2:
-				sprintf(prints, "[%s]  %s", strclr(1, "INFO"), string);
-				break;
+		sprintf(prints, "[%s]  %s", strclr(1, "INFO"), string);
+		break;
 	case 3:
-				sprintf(prints, "[%s]  %s", strclr(3, "WARN"), string);
-				break;
+		sprintf(prints, "[%s]  %s", strclr(3, "WARN"), string);
+		break;
 	case 4:
-				sprintf(prints, "[%s] %s", strclr(4, "DEBUG"), string);
-				break;
+		sprintf(prints, "[%s] %s", strclr(4, "DEBUG"), string);
+		break;
 	case 5:
-				sprintf(prints, "[%s] %s", strclr(2, "ERROR"), string);
-				break;
+		sprintf(prints, "[%s] %s", strclr(2, "ERROR"), string);
+		break;
 	case 6:
-				sprintf(prints, "[%s] %s", strclr(2, "FATAL"), string);
-				break;
+		sprintf(prints, "[%s] %s", strclr(2, "FATAL"), string);
+		break;
 	case 7:
-				sprintf(prints, "%s", string);
-				break;
+		sprintf(prints, "%s", string);
+		break;
 	default:
-				break;
+		break;
 	}
 
 	/* Print output */
 	fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
 
 	/* Save log in file */
-	if (slg.to_file)
-	{
+	if (slg.to_file) {
 		output = slog_sprintf("%s\n", string);
 		log_to_file(output, slg.fname, &mdate);
 	}
@@ -267,6 +267,7 @@ void slogv(int level, int flag, const char *msg, va_list args)
 void slog(int level, int flag, const char *msg, ...)
 {
 	va_list args;
+
 	va_start(args, msg);
 	slogv(level, flag, msg, args);
 	va_end(args);
@@ -279,12 +280,12 @@ void slog(int level, int flag, const char *msg, ...)
  * where log will be saved and second argument conf is config file path
  * to be parsed and third argument lvl is log level for this message.
  */
-void slog_init(const char* fname, int lvl)
+void slog_init(const char *fname, int lvl)
 {
-    slg.level = lvl;
-    slg.fname = fname;
-    if (fname)
-	    slg.to_file = 1;
-    else
-	    slg.to_file = 0;
+	slg.level = lvl;
+	slg.fname = fname;
+	if (fname)
+		slg.to_file = 1;
+	else
+		slg.to_file = 0;
 }

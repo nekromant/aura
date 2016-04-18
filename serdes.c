@@ -12,43 +12,43 @@
  */
 int  aura_fmt_len(struct aura_node *node, const char *fmt)
 {
-	int len=0;
-	int tmp; 
+	int len = 0;
+	int tmp;
 
 	if (!fmt)
 		return 0;
 
 	while (*fmt) {
-		switch (*fmt++) { 
+		switch (*fmt++) {
 		case URPC_U8:
- 		case URPC_S8:
+		case URPC_S8:
 			len += 1;
 			break;
 		case URPC_U16:
- 		case URPC_S16:
+		case URPC_S16:
 			len += 2;
 			break;
 		case URPC_U32:
- 		case URPC_S32:
+		case URPC_S32:
 			len += 4;
 			break;
 		case URPC_U64:
- 		case URPC_S64:
+		case URPC_S64:
 		case URPC_BUF:
 			len += 8;
 			break;
-		case URPC_BIN: 
+		case URPC_BIN:
 			tmp = atoi(fmt);
-			if (tmp == 0) 
+			if (tmp == 0)
 				BUG(node, "Internal serilizer bug processing: %s", fmt);
-			len += tmp; 
+			len += tmp;
 			while (*fmt && (*fmt++ != '.'));
 			break;
 		default:
-			BUG(node, "Serializer failed at token: %s", fmt); 
+			BUG(node, "Serializer failed at token: %s", fmt);
 		}
 	}
- 	return len;
+	return len;
 }
 
 /**
@@ -64,12 +64,12 @@ int  aura_fmt_len(struct aura_node *node, const char *fmt)
  * @param num_args The number of arguments this format contains
  * @return
  */
-char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
+char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args)
 {
 	*valid = 1;
 	*num_args = 0;
 	if (!fmt) {
-		char* str; 
+		char *str;
 		asprintf(&str, "(null)");
 		return str;
 	}
@@ -79,13 +79,13 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 	*str = 0x0;
 	char *tmp = str;
 	int shift = 0;
-	int len; 
-	int pos = 0; 
+	int len;
+	int pos = 0;
 	while (*fmt) {
-		pos+=shift; 
+		pos += shift;
 		tmp = &tmp[shift];
-		switch (*fmt++) { 
-		case URPC_U8: 
+		switch (*fmt++) {
+		case URPC_U8:
 			shift = sprintf(tmp, " uint8_t");
 			break;
 		case URPC_U16:
@@ -97,7 +97,7 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		case URPC_U64:
 			shift = sprintf(tmp, " uint64_t");
 			break;
-			
+
 		case URPC_S8:
 			shift = sprintf(tmp, " int8_t");
 			break;
@@ -113,9 +113,9 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 		case URPC_BUF:
 			shift = sprintf(tmp, " buf");
 			break;
-		case URPC_BIN: 
+		case URPC_BIN:
 			len = atoi(fmt);
-			if (len == 0) 
+			if (len == 0)
 				BUG(NULL, "Internal serilizer bug processing: %s", fmt);
 			shift = sprintf(tmp, " bin(%d)", len);
 			while (*fmt && (*fmt++ != '.'));
@@ -135,100 +135,100 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 
 
 
-//FixMe: This is likely to get messy due to integer promotion 
+//FixMe: This is likely to get messy due to integer promotion
 //       on different platforms
 
 #define AURA_SERDES_PARANOID
 
 #ifdef AURA_SERDES_PARANOID
-#define CHECK_BOUNDS(buf,src) 	if (buf->pos + sizeof(src) > buf->size)	\
+#define CHECK_BOUNDS(buf, src)   if (buf->pos + sizeof(src) > buf->size) \
 		BUG(NULL, "SERDES: Out of buffer bounds");
 #else
 #define CHECK_BOUNDS()
 #endif
 
 
-#define CHECK_AND_PUT(buf, src)					\
-	CHECK_BOUNDS(buf,src);					\
-	memcpy(&buf->data[buf->pos], &src, sizeof(src));	\
-	buf->pos+=sizeof(src);					\
-	
+#define CHECK_AND_PUT(buf, src)                                 \
+	CHECK_BOUNDS(buf, src);                                  \
+	memcpy(&buf->data[buf->pos], &src, sizeof(src));        \
+	buf->pos += sizeof(src);                                  \
 
-#define va_put_U8(buf, ap, swap)				\
-	{							\
-		uint8_t v = (uint8_t) va_arg(ap, unsigned int); \
-		CHECK_AND_PUT(buf, v);				\
+
+#define va_put_U8(buf, ap, swap)                                \
+	{                                                       \
+		uint8_t v = (uint8_t)va_arg(ap, unsigned int); \
+		CHECK_AND_PUT(buf, v);                          \
 	}
 
-#define va_put_S8(buf, ap, swap)				\
-	{							\
-		int8_t v = (int8_t) va_arg(ap, int);		\
-		CHECK_AND_PUT(buf, v);				\
-	}							\
+#define va_put_S8(buf, ap, swap)                                \
+	{                                                       \
+		int8_t v = (int8_t)va_arg(ap, int);            \
+		CHECK_AND_PUT(buf, v);                          \
+	}                                                       \
 
-#define va_put_U16(buf, ap, swap)					\
-	{								\
-		uint16_t v = (uint16_t) va_arg(ap, unsigned int);	\
-		if (swap)						\
-			v = __swap16(v);				\
-		CHECK_AND_PUT(buf, v);					\
+#define va_put_U16(buf, ap, swap)                                       \
+	{                                                               \
+		uint16_t v = (uint16_t)va_arg(ap, unsigned int);       \
+		if (swap)                                               \
+			v = __swap16(v);                                \
+		CHECK_AND_PUT(buf, v);                                  \
 	}
 
-#define va_put_S16(buf, ap, swap)				\
-	{							\
-		int16_t v = (int16_t) va_arg(ap, int);		\
-		if (swap)					\
-			v = __swap16(v);			\
-		CHECK_AND_PUT(buf, v);				\
+#define va_put_S16(buf, ap, swap)                               \
+	{                                                       \
+		int16_t v = (int16_t)va_arg(ap, int);          \
+		if (swap)                                       \
+			v = __swap16(v);                        \
+		CHECK_AND_PUT(buf, v);                          \
 	}
 
 /* FixMe: Portability, we assume no promotion here for now */
-#define va_put_U32(buf, ap, swap)				\
-	{							\
-		uint32_t v = (uint32_t) va_arg(ap, uint32_t);	\
-		if (swap)					\
-			v = __swap32(v);			\
-		CHECK_AND_PUT(buf, v);				\
+#define va_put_U32(buf, ap, swap)                               \
+	{                                                       \
+		uint32_t v = (uint32_t)va_arg(ap, uint32_t);   \
+		if (swap)                                       \
+			v = __swap32(v);                        \
+		CHECK_AND_PUT(buf, v);                          \
 	}
 
-#define va_put_S32(buf, ap, swap)				\
-	{							\
-		int32_t v = (int32_t) va_arg(ap, int32_t);	\
-		if (swap)					\
-			v = __swap32(v);			\
-		CHECK_AND_PUT(buf, v);				\
+#define va_put_S32(buf, ap, swap)                               \
+	{                                                       \
+		int32_t v = (int32_t)va_arg(ap, int32_t);      \
+		if (swap)                                       \
+			v = __swap32(v);                        \
+		CHECK_AND_PUT(buf, v);                          \
 	}
 
-#define va_put_U64(buf, ap, swap)				\
-	{							\
-		uint64_t v = (uint64_t) va_arg(ap, uint64_t);	\
-		if (swap)					\
-			v = __swap64(v);			\
-		CHECK_AND_PUT(buf, v);				\
+#define va_put_U64(buf, ap, swap)                               \
+	{                                                       \
+		uint64_t v = (uint64_t)va_arg(ap, uint64_t);   \
+		if (swap)                                       \
+			v = __swap64(v);                        \
+		CHECK_AND_PUT(buf, v);                          \
 	}
 
-#define va_put_S64(buf, ap, swap)				\
-	{							\
-		int64_t v = (int64_t) va_arg(ap, uint64_t);	\
-		if (swap)					\
-			v = __swap64(v);			\
-		CHECK_AND_PUT(buf, v);				\
-	}							\
+#define va_put_S64(buf, ap, swap)                               \
+	{                                                       \
+		int64_t v = (int64_t)va_arg(ap, uint64_t);     \
+		if (swap)                                       \
+			v = __swap64(v);                        \
+		CHECK_AND_PUT(buf, v);                          \
+	}                                                       \
 
-#define va_put_BIN(buf, len, ap)			\
-	{						\
-		void *ptr = va_arg(ap, void *);		\
-		memcpy(&buf->data[buf->pos], ptr, len);	\
-		buf->pos+=len;				\
+#define va_put_BIN(buf, len, ap)                        \
+	{                                               \
+		void *ptr = va_arg(ap, void *);         \
+		memcpy(&buf->data[buf->pos], ptr, len); \
+		buf->pos += len;                          \
 	}
 
-#define va_put_BUF(buf, ap, swap)					\
-	{								\
-		struct aura_buffer *out = va_arg(ap, void *);		\
-		struct aura_node *_node = buf->owner;			\
-		if (!_node->tr->buffer_put)				\
+#define va_put_BUF(buf, ap, swap)                                       \
+	{                                                               \
+		struct aura_buffer *out = va_arg(ap, void *);           \
+		struct aura_node *_node = buf->owner;                   \
+		if (!_node->tr->buffer_put)                             \
 			BUG(_node, "This node doesn't support aura_buffer as argument"); \
-		_node->tr->buffer_put(buf, out);			\
+		_node->tr->buffer_put(buf, out);                        \
 	}
 
 
@@ -244,16 +244,17 @@ char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args)
 struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap)
 {
 	struct aura_buffer *buf = aura_buffer_request(node, size);
+
 	if (!buf)
 		return NULL;
 
-#define PUT(n)							\
-	case URPC_ ## n:					\
-		va_put_ ## n(buf, ap, node->need_endian_swap);	\
-		break;						\
-		
+#define PUT(n)                                                  \
+case URPC_ ## n:                                        \
+	va_put_ ## n(buf, ap, node->need_endian_swap);  \
+	break;                                          \
+
 	while (*fmt) {
-		switch (*fmt++) { 
+		switch (*fmt++) {
 			PUT(U8);
 			PUT(S8);
 			PUT(U16);
@@ -266,13 +267,15 @@ struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int 
 		case URPC_BIN:
 		{
 			int len = atoi(fmt);
-			if (len == 0) 
+			if (len == 0)
 				BUG(NULL, "Internal serilizer bug processing: %s", fmt);
 			va_put_BIN(buf, len, ap);
 			while (*fmt && (*fmt++ != '.'));
 			break;
 		}
-		};
-	};
+		}
+		;
+	}
+	;
 	return buf;
 }

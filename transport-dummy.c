@@ -13,6 +13,7 @@ static int dummy_open(struct aura_node *node, const char *opts)
 static void dummy_populate_etable(struct aura_node *node)
 {
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
+
 	if (!etbl)
 		BUG(node, "Failed to create etable");
 	aura_etable_add(etbl, "echo_str", "s128.", "s128.");
@@ -51,7 +52,7 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	buf->object = aura_etable_find(node->tbl, "ping");
 	aura_queue_buffer(&node->inbound_buffers, buf);
 
-	while(1) {
+	while (1) {
 		buf = aura_dequeue_buffer(&node->outbound_buffers);
 		if (!buf)
 			break;
@@ -65,25 +66,26 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 static void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 {
 	slog(0, SLOG_DEBUG, "dummy: serializing buf 0x%x", buf);
-	uint64_t ptr = (uintptr_t) buf;
+	uint64_t ptr = (uintptr_t)buf;
 	aura_buffer_put_u64(dst, ptr);
 }
 
 static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
 {
-	struct aura_buffer *ret = (struct aura_buffer *) (uintptr_t) aura_buffer_get_u64(buf);
+	struct aura_buffer *ret = (struct aura_buffer *)(uintptr_t)aura_buffer_get_u64(buf);
+
 	slog(0, SLOG_DEBUG, "dummy: deserializing buf 0x%x", ret);
 	return ret;
 }
 
 static struct aura_transport dummy = {
-	.name = "dummy",
-	.open = dummy_open,
-	.close = dummy_close,
-	.loop  = dummy_loop,
-	.buffer_overhead = sizeof(struct aura_packet8),
-	.buffer_offset = sizeof(struct aura_packet8),
-	.buffer_get = dummy_buffer_get,
-	.buffer_put = dummy_buffer_put,
+	.name			= "dummy",
+	.open			= dummy_open,
+	.close			= dummy_close,
+	.loop			= dummy_loop,
+	.buffer_overhead	= sizeof(struct aura_packet8),
+	.buffer_offset		= sizeof(struct aura_packet8),
+	.buffer_get		= dummy_buffer_get,
+	.buffer_put		= dummy_buffer_put,
 };
 AURA_TRANSPORT(dummy);

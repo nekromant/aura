@@ -8,22 +8,24 @@
 
 static int file_get(const char *path, char *dbuf, int dlen)
 {
-	int ret; 
+	int ret;
 	int fd = open(path, O_RDONLY);
+
 	if (-1 == fd) {
 		slog(0, SLOG_ERROR, "sysfsgpio: Failed to open %s for reading", path);
 		return -1;
 	}
 	ret = read(fd, dbuf, dlen);
-	dbuf[ret]=0x0;
+	dbuf[ret] = 0x0;
 	close(fd);
 	return ret;
 }
 
 static int file_put(const char *path, const char *dbuf)
 {
-	int ret; 
+	int ret;
 	int fd = open(path, O_WRONLY);
+
 	if (-1 == fd) {
 		slog(0, SLOG_ERROR, "sysfsgpio: Failed to open %s for writing", path);
 		return -1;
@@ -36,30 +38,31 @@ static int file_put(const char *path, const char *dbuf)
 static int gpio_export(int gpio)
 {
 	char tmp[128];
+
 	sprintf(tmp, "/sys/class/gpio/gpio%d", gpio);
-	if (0 == access(tmp, F_OK)) { 
+	if (0 == access(tmp, F_OK)) {
 		slog(0, SLOG_WARN, "sysfsgpio: GPIO %d already exported", gpio);
 		return 0;
 	}
 
 	sprintf(tmp, "%d", gpio);
-	if (0 < file_put("/sys/class/gpio/export", tmp)) 
+	if (0 < file_put("/sys/class/gpio/export", tmp))
 		return 0;
 	return -1;
 }
 
 static int check_exported(int gpio)
 {
-	int ret; 
+	int ret;
 	char tmp[256];
+
 	sprintf(tmp, "/sys/class/gpio/gpio%d", gpio);
-	if (0 != access(tmp, F_OK)) { 
+	if (0 != access(tmp, F_OK)) {
 		slog(0, SLOG_WARN, "sysfsgpio: GPIO %d not exported, exporting", gpio);
 		if ((ret = gpio_export(gpio)))
 			return ret;
 	}
 	return 0;
-	
 }
 
 static int gpio_write(int gpio, int value)
@@ -68,10 +71,10 @@ static int gpio_write(int gpio, int value)
 	char tmp[256];
 
 	if ((ret = check_exported(gpio)))
-		return ret; 
+		return ret;
 
 	sprintf(tmp, "/sys/class/gpio%d/value", gpio);
-	if (0 < file_put(tmp, value ? "1" : "0")) 
+	if (0 < file_put(tmp, value ? "1" : "0"))
 		return 0;
 
 	return -EIO;
@@ -83,10 +86,10 @@ static int gpio_read(int gpio, int *value)
 	char tmp[256];
 
 	if ((ret = check_exported(gpio)))
-		return ret; 
+		return ret;
 
 	sprintf(tmp, "/sys/class/gpio%d/value", gpio);
-	if (0 < file_get(tmp, tmp, 256)) 
+	if (0 < file_get(tmp, tmp, 256))
 		return 0;
 
 	*value = atoi(tmp);
@@ -100,10 +103,10 @@ static int gpio_in(int gpio)
 	char tmp[256];
 
 	if ((ret = check_exported(gpio)))
-		return ret; 
+		return ret;
 
 	sprintf(tmp, "/sys/class/gpio%d/direction", gpio);
-	if (0 < file_put(tmp, "in")) 
+	if (0 < file_put(tmp, "in"))
 		return 0;
 
 	return -EIO;
@@ -115,10 +118,10 @@ static int gpio_out(int gpio)
 	char tmp[256];
 
 	if ((ret = check_exported(gpio)))
-		return ret; 
+		return ret;
 
 	sprintf(tmp, "/sys/class/gpio%d/direction", gpio);
-	if (0 < file_put(tmp, "out")) 
+	if (0 < file_put(tmp, "out"))
 		return 0;
 
 	return -EIO;
@@ -149,11 +152,12 @@ static void gpio_close(struct aura_node *node)
 	slog(0, SLOG_INFO, "Closing dummy transport");
 }
 
-#define OPCODE(_name) (strcmp(o->name, _name)==0)
+#define OPCODE(_name) (strcmp(o->name, _name) == 0)
 
 static void handle_outbound(struct aura_node *node, struct aura_object *o, struct aura_buffer *buf)
 {
 	int ret = -EIO;
+
 	if (OPCODE("export")) {
 		int gpio = aura_buffer_get_u32(buf);
 		slog(4, SLOG_DEBUG, "gpio: export %d", gpio);
@@ -168,7 +172,7 @@ static void handle_outbound(struct aura_node *node, struct aura_object *o, struc
 		ret = gpio_in(gpio);
 	} else if (OPCODE("out")) {
 		int gpio = aura_buffer_get_u32(buf);
-		ret = gpio_out(gpio);		
+		ret = gpio_out(gpio);
 	} else if (OPCODE("read")) {
 		int gpio = aura_buffer_get_u32(buf);
 		ret = gpio_read(gpio, &gpio);
@@ -188,8 +192,8 @@ static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	struct aura_buffer *buf;
 	struct aura_object *o;
 
-	while(1) { 
-		buf = aura_dequeue_buffer(&node->outbound_buffers); 
+	while (1) {
+		buf = aura_dequeue_buffer(&node->outbound_buffers);
 		if (!buf)
 			break;
 		o = buf->object;
@@ -199,11 +203,11 @@ static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	}
 }
 
-static struct aura_transport gpio = { 
-	.name = "gpio",
-	.open = gpio_open,
-	.close = gpio_close,
-	.loop  = gpio_loop,
+static struct aura_transport gpio = {
+	.name	= "gpio",
+	.open	= gpio_open,
+	.close	= gpio_close,
+	.loop	= gpio_loop,
 };
 
 AURA_TRANSPORT(gpio);

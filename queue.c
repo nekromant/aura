@@ -1,12 +1,12 @@
 #include <aura/aura.h>
 
- /**
+/**
  * \addtogroup trapi
  * @{
  */
 
 /**
- * Add an aura_buffer to a queue. 
+ * Add an aura_buffer to a queue.
  * This functions sets buffer's internal data pointer
  * to the beginning of serialized data by calling aura_buffer_rewind() internally
  *
@@ -14,7 +14,7 @@
  * @param buf
  */
 void aura_queue_buffer(struct list_head *queue, struct aura_buffer *buf)
-{ 
+{
 	list_add_tail(&buf->qentry, queue);
 	aura_buffer_rewind(buf);
 }
@@ -28,7 +28,7 @@ void aura_queue_buffer(struct list_head *queue, struct aura_buffer *buf)
 struct aura_buffer *aura_peek_buffer(struct list_head *head)
 {
 	struct aura_buffer *ret;
-	
+
 	if (list_empty(head))
 		return NULL;
 	ret = list_entry(head->next, struct aura_buffer, qentry);
@@ -45,6 +45,7 @@ struct aura_buffer *aura_peek_buffer(struct list_head *head)
 struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
 {
 	struct aura_buffer *ret;
+
 	ret = aura_peek_buffer(head);
 	if (ret) {
 		list_del(head->next);
@@ -54,14 +55,13 @@ struct aura_buffer *aura_dequeue_buffer(struct list_head *head)
 }
 
 /**
- * Put the buffer back to the start of the queue. 
+ * Put the buffer back to the start of the queue.
  * @param head
  * @return
  */
-
 void aura_requeue_buffer(struct list_head *list, struct aura_buffer *buf)
 {
-	list_add(&buf->qentry, list);	
+	list_add(&buf->qentry, list);
 }
 
 /**

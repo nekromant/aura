@@ -67,6 +67,7 @@ int aura_packetizer_verify_header(struct aura_packetizer *pkt, struct aura_packe
 int aura_packetizer_verify_data(struct aura_packetizer *pkt, struct aura_packet8 *packet)
 {
 	uint8_t crc = crc8(0, (unsigned char *)packet->data, packet->datalen);
+
 	return !(packet->crc8 == crc);
 }
 
@@ -101,7 +102,7 @@ static void packetizer_dispatch_packet(struct aura_packetizer *pkt)
 	aura_buffer_rewind(pkt->curbuf);
 	if (pkt->recvcb)
 		pkt->recvcb(pkt->curbuf, pkt->recvarg);
-	else /* No callback? Free the buffer */
+	else    /* No callback? Free the buffer */
 		aura_buffer_release(pkt->curbuf);
 	pkt->curbuf = NULL;
 	aura_packetizer_reset(pkt);
@@ -119,6 +120,7 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 	int pos = 0;
 	int ret;
 	struct aura_packet8 *hdr = &pkt->headerbuf;
+
 	switch (pkt->state) {
 	case STATE_SEARCH_START:
 		while ((pos < len) && data[pos] != PACKET_START)
@@ -154,7 +156,7 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 			} else {
 				aura_packetizer_reset(pkt);
 				aura_packetizer_feed(pkt, &dest[1],
-									sizeof(struct aura_packet8) - 1);
+						     sizeof(struct aura_packet8) - 1);
 			}
 		}
 		break;
@@ -168,7 +170,7 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 		if (pkt->copied == hdr->datalen) {
 			aura_hexdump("out", pkt->curbuf->data, pkt->curbuf->pos);;
 			ret = aura_packetizer_verify_data(pkt,
-							     (struct aura_packet8 *) pkt->curbuf->data);
+							  (struct aura_packet8 *)pkt->curbuf->data);
 			if (ret == 0) {
 				packetizer_dispatch_packet(pkt);
 			} else {
@@ -178,7 +180,7 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
 				aura_buffer_rewind(tmp);
 				aura_packetizer_reset(pkt);
 				aura_packetizer_feed(pkt, aura_buffer_get_bin(tmp, torefeed),
-									torefeed);
+						     torefeed);
 				aura_buffer_release(tmp);
 			}
 		}
@@ -196,7 +198,8 @@ int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, siz
  */
 void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)
 {
-	int pos=0;
+	int pos = 0;
+
 	while (pos < len)
-		pos+= aura_packetizer_feed_once(pkt, &data[pos], len-pos);
+		pos += aura_packetizer_feed_once(pkt, &data[pos], len - pos);
 }
