@@ -335,7 +335,15 @@ static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)
 	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
 	uint32_t nmaddress;
 
-	if (dsc->share_fd == -1) { /* Already shared? */
+	/* If the object requires no buffer we should bail out
+	 * However if we return NULL and nmc code is buggy - the app will
+	 * overwrite IPL code ultimately causing a fail.
+	 * Returning -1 (e.g. 0xffffffff) is a little bit safer
+	 */
+	if (!buf->data)
+		return -1;
+
+	if (dsc->share_fd == -1) { /* Share it! */
 		int ret = ion_share(pv->ion_fd, dsc->hndl, &dsc->share_fd);
 		if (ret)
 			BUG(node, "ion_share() failed");
@@ -431,14 +439,18 @@ struct aura_buffer *ion_buffer_request(struct aura_node *node, int size)
 	if (!dsc)
 		BUG(node, "malloc failed!");
 
-	ret = ion_alloc(pv->ion_fd, size, 0x8, 0xf, 0, &hndl);
-	if (ret)
-		BUG(node, "ION allocation of %d bytes failed: %d", size, ret);
+	if (size) {
+		ret = ion_alloc(pv->ion_fd, size, 0x8, 0xf, 0, &hndl);
+		if (ret)
+			BUG(node, "ION allocation of %d bytes failed: %d", size, ret);
 
-	ret = ion_map(pv->ion_fd, hndl, size, (PROT_READ | PROT_WRITE),
-		      MAP_SHARED, 0, (void *)&dsc->buf.data, &map_fd);
-	if (ret)
-		BUG(node, "ION mmap failed");
+		ret = ion_map(pv->ion_fd, hndl, size, (PROT_READ | PROT_WRITE),
+			      MAP_SHARED, 0, (void *)&dsc->buf.data, &map_fd);
+		if (ret)
+			BUG(node, "ION mmap failed");
+	} else {
+		dsc->buf.data = NULL;
+	}
 
 	dsc->map_fd = map_fd;
 	dsc->hndl = hndl;
@@ -454,13 +466,15 @@ static void ion_buffer_release(struct aura_buffer *buf)
 	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
 	int ret;
 
-	munmap(dsc->buf.data, dsc->size);
+	if (dsc->buf.data) {
+		munmap(dsc->buf.data, dsc->size);
 
-	ret = ion_free(pv->ion_fd, dsc->hndl);
-	if (ret)
-		BUG(node, "Shit happened when doing ion_free(): %d", ret);
+		ret = ion_free(pv->ion_fd, dsc->hndl);
+		if (ret)
+			BUG(node, "Shit happened when doing ion_free(): %d", ret);
 
-	close(dsc->map_fd);
+		close(dsc->map_fd);
+	}
 	free(dsc);
 }
 
