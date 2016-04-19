@@ -292,3 +292,20 @@ void aura_eventloop_report_event(struct aura_eventloop *loop, struct aura_pollfd
 		}
 	}
 }
+
+/**
+ * Get a pointer to struct event_base * when using libevent
+ * Calling this function when compiled with no libevent will
+ * trigger a BUG()
+ *
+ *
+ * @param  loop current eventloop
+ * @return Underlying (struct event_base*)
+ */
+struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop)
+{
+	struct event_base *ret = aura_eventsys_backend_get_ebase(loop->eventsysdata);
+	if (!ret)
+		BUG(NULL, "Failed to retrieve ebase: no libevent support?");
+	return ret;
+}

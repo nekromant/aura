@@ -43,6 +43,7 @@ struct aura_pollfds {
 	struct aura_node *node;
 	int fd;
 	uint32_t events;
+	void *eventsysdata; /* Private eventsystem data */
 };
 
 struct aura_object;
@@ -773,6 +774,7 @@ void *aura_eventloop_create_empty();
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node);
 void aura_eventloop_del(struct aura_node *node);
 void aura_eventloop_break(struct aura_eventloop *loop);
+struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop);
 
 
 void aura_handle_events(struct aura_eventloop *loop);

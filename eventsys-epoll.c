@@ -48,7 +48,10 @@ void aura_eventsys_backend_destroy(void *backend)
 	free(epd);
 }
 
-void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *ap, int action)
+void aura_eventsys_backend_fd_action(
+	void *backend,
+	const struct aura_pollfds *ap,
+	int action)
 {
 	struct aura_node *node = ap->node;
 	struct epoll_event ev;
@@ -110,4 +113,9 @@ void aura_eventsys_backend_interrupt(void *backend)
 	uint64_t tmp = 1;
 
 	write(epd->evtfd.fd, &tmp, sizeof(uint64_t));
+}
+
+struct event_base *aura_eventsys_backend_get_ebase(void *backend)
+{
+	return NULL;
 }

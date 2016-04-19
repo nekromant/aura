@@ -1,13 +1,25 @@
 #include <aura/aura.h>
 #include <event.h>
+#include <aura/private.h>
 
 struct aura_libevent_data {
 	struct aura_pollfds	evtfd;
 	void *			loopdata;
+	struct event_base *	ebase;
+	struct event *		ievt;
 };
+
+static void interrupt_cb_fn(evutil_socket_t fd, short evt, void *arg)
+{
+	struct aura_libevent_data *epd = arg;
+	slog(4, SLOG_DEBUG, "evtsys-libevent: Interrupt why %d", evt);
+	aura_eventloop_report_event(epd->loopdata, NULL);
+	event_base_loopbreak(epd->ebase);
+}
 
 void *aura_eventsys_backend_create(void *loopdata)
 {
+	slog(3, SLOG_WARN, "evtsys-libevent: Using experimental libevent backend");
 	struct aura_libevent_data *epd = calloc(1, sizeof(*epd));
 
 	if (!epd)
@@ -15,21 +27,18 @@ void *aura_eventsys_backend_create(void *loopdata)
 	epd->loopdata = loopdata;
 	epd->ebase = event_base_new();
 
-	if (!epd->epollfd)
+	if (!epd->ebase)
 		goto errfreeepd;
 
-	/* We use eventfd here to interrupt things */
-
-	epd->evtfd.fd = eventfd(0, EFD_NONBLOCK);
-	epd->evtfd.events = EPOLLIN;
-	if (-1 == epd->evtfd.fd)
+	epd->ievt = event_new(epd->ebase, -1, EV_READ,
+		interrupt_cb_fn, epd);
+	if (!epd->ievt)
 		goto errepolldestroy;
 
-	aura_eventsys_backend_fd_action(epd, &epd->evtfd, AURA_FD_ADDED);
-
 	return epd;
+
 errepolldestroy:
-	close(epd->epollfd);
+	event_base_free(epd->ebase);
 errfreeepd:
 	free(epd);
 	return NULL;
@@ -38,72 +47,76 @@ errfreeepd:
 void aura_eventsys_backend_destroy(void *backend)
 {
 	struct aura_libevent_data *epd = backend;
-
-	close(epd->epollfd);
-	close(epd->evtfd.fd);
+	event_del(epd->ievt);
+	event_free(epd->ievt);
+	event_base_free(epd->ebase);
 	free(epd);
 }
 
-void aura_eventsys_backend_fd_action(void *backend, const struct aura_pollfds *ap, int action)
+static void dispatch_cb_fn(evutil_socket_t fd, short evt, void *arg)
 {
+	struct aura_pollfds *ap = arg;
 	struct aura_node *node = ap->node;
-	struct epoll_event ev;
-	struct aura_libevent_data *epd = backend;
+	struct aura_eventloop *l = aura_eventloop_get_data(node);
+	struct aura_libevent_data *epd = l->eventsysdata;
 
-	((struct aura_pollfds *)ap)->magic = 0xdeadbeaf;
-	int ret;
-	int op = (action == AURA_FD_ADDED) ? EPOLL_CTL_ADD : EPOLL_CTL_DEL;
-	slog(4, SLOG_DEBUG, "epoll: Descriptor %d %s to/from epoll",
-	     ap->fd, (action == AURA_FD_ADDED) ? "added" : "removed");
-	ev.events = ap->events;
-	ev.data.ptr = (void *)ap;
-	ret = epoll_ctl(epd->epollfd, op, ap->fd, &ev);
-	if (ret != 0)
-		BUG(node, "Event System failed to add/remove a descriptor");
+	aura_eventloop_report_event(epd->loopdata, ap);
+
+}
+void aura_eventsys_backend_fd_action(
+	void *backend,
+	const struct aura_pollfds *app,
+	int action)
+{
+	struct aura_pollfds *ap = (struct aura_pollfds *) app;
+	struct aura_node *node = ap->node;
+	struct aura_libevent_data *epd = backend;
+	ap->magic = 0xdeadbeaf;
+
+	if (ap->eventsysdata) {
+		/* TODO: Error checking */
+		event_del(ap->eventsysdata);
+		event_free(ap->eventsysdata);
+		ap->eventsysdata = NULL;
+	}
+
+	if (action == AURA_FD_ADDED) {
+		ap->eventsysdata = event_new(epd->ebase, ap->fd, ap->events | EV_PERSIST,
+									dispatch_cb_fn, ap);
+		if (!ap->eventsysdata)
+			BUG(node, "evtsys-libevent: Failed to create event");
+		event_add(ap->eventsysdata, NULL);
+	}
 }
 
 #define NUM_EVTS 1
 int aura_eventsys_backend_wait(void *backend, int timeout_ms)
 {
 	struct aura_libevent_data *epd = backend;
-	struct epoll_event ev[NUM_EVTS];
-	int i;
-	int ret = epoll_wait(epd->epollfd, ev, NUM_EVTS, timeout_ms);
 
-	slog(4, SLOG_LIVE, "epoll: reported %d events", ret);
-	if (ret < 0) {
-		slog(0, SLOG_ERROR, "epoll: returned -1: %s", strerror(errno));
-		aura_panic(NULL);
-		return -1; /* Never reached */
-	}
+	struct timeval delay;
+	delay.tv_usec = timeout_ms*1000;
+	delay.tv_sec = 0;
 
-	for (i = 0; i < ret; i++) {
-		struct aura_pollfds *ap;
-		ap = ev[i].data.ptr;
-		if (ap == &epd->evtfd) {
-			/* Read out our event */
-			uint64_t tmp;
-			ap = NULL;
-			read(epd->evtfd.fd, &tmp, sizeof(uint64_t));
-		} else {
-			ap->events = ev[i].events;
-		}
+	if (0 != event_add(epd->ievt, &delay))
+		return BUG(NULL, "evtsys-libevent: Failed to add event");
 
-		slog(4, SLOG_LIVE, "events: %s %s %s",
-		     (ev[i].events & EPOLLIN) ? "IN" : "",
-		     (ev[i].events & EPOLLOUT) ? "OUT" : "",
-		     (ev[i].events & EPOLLPRI) ? "PRI" : ""
-		     );
 
-		aura_eventloop_report_event(epd->loopdata, ap);
-	}
+	int ret = event_base_dispatch(epd->ebase);
+	if (-1 == ret)
+		return BUG(NULL, "event_base_dispatch returned -1");
+
 	return ret;
 }
 
 void aura_eventsys_backend_interrupt(void *backend)
 {
 	struct aura_libevent_data *epd = backend;
-	uint64_t tmp = 1;
+	event_active(epd->ievt, EV_READ, 0);
+}
 
-	write(epd->evtfd.fd, &tmp, sizeof(uint64_t));
+struct event_base *aura_eventsys_backend_get_ebase(void *backend)
+{
+	struct aura_libevent_data *epd = backend;
+	return epd->ebase;
 }
