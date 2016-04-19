@@ -65,6 +65,8 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
 			BUG(nd, "FATAL: buffer allocation by transport failed");
 	}
 
+	/* Shut up compiler warning when buffer pool is disabled */
+	goto bailout;
 bailout:
 	ret->magic = AURA_BUFFER_MAGIC_ID;
 	ret->size = act_size;
