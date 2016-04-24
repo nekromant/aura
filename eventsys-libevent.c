@@ -12,7 +12,6 @@ struct aura_libevent_data {
 static void interrupt_cb_fn(evutil_socket_t fd, short evt, void *arg)
 {
 	struct aura_libevent_data *epd = arg;
-	slog(4, SLOG_DEBUG, "evtsys-libevent: Interrupt why %d", evt);
 	aura_eventloop_report_event(epd->loopdata, NULL);
 	event_base_loopbreak(epd->ebase);
 }
