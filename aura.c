@@ -159,26 +159,33 @@ static void aura_handle_inbound(struct aura_node *node)
 		     object_is_method(o) ? "response" : "event",
 		     o->id, o->name, node->sync_call_running);
 
-		if (object_is_method(o) && !o->pending) {
-			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)",
-			     o->id, o->name);
-			aura_buffer_release(buf);
-		} else if (o->calldonecb) {
-			slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
-			     o->id, o->name);
-			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
-			aura_buffer_release(buf);
-		} else if (object_is_method(o) && (node->sync_call_running)) {
-			slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
-			     o->id, o->name);
-			node->sync_call_result = AURA_CALL_COMPLETED;
-			node->sync_ret_buf = buf;
+		if (object_is_method(o)) {
+			if (!o->pending) {
+				slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)",
+				     o->id, o->name);
+				aura_buffer_release(buf);
+			} else if (o->calldonecb) {
+				slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
+				     o->id, o->name);
+				o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
+				aura_buffer_release(buf);
+			} else if (node->sync_call_running) {
+				slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
+				     o->id, o->name);
+				node->sync_call_result = AURA_CALL_COMPLETED;
+				node->sync_ret_buf = buf;
+			}
 			o->pending--;
 			if (o->pending < 0)
 				BUG(node, "Internal BUG: pending evt count lesser than zero");
 		} else {
 			/* This one is tricky. We have an event with no callback */
-			if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
+			if (o->calldonecb) {
+				slog(4, SLOG_DEBUG, "Callback for event %d (%s)",
+				     o->id, o->name);
+				o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
+				aura_buffer_release(buf);
+			} else if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
 				/* If we have an overrun - drop the oldest event to free up space first*/
 				if (node->sync_event_max <= node->sync_event_count) {
 					struct aura_buffer *todrop;
