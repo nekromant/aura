@@ -8,8 +8,9 @@ enable_testing()
 #TODO: Move out linux-specific stuff
 
 #DEVELOPER HACKS. Enable only when hacking around aura
-SET(AURA_USE_LIBEVENT no)
-SET(AURA_USE_BUFFER_POOL yes)
+SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
+SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
+
 
 SET(SRCS
   buffer.c
@@ -59,10 +60,11 @@ STRING(REGEX REPLACE "\n" "" PROJECT_VERSION_GIT ${PROJECT_VERSION_GIT})
 
 SITE_NAME(AURA_BUILD_HOSTNAME)
 TODAY(AURA_BUILD_DATE)
-SET(PROJECT_BUILD_TAG "$ENV{USER}@${AURA_BUILD_HOSTNAME} at ${AURA_BUILD_DATE}")
+SET(PROJECT_BUILD_TAG "$ENV{USER}@${AURA_BUILD_HOSTNAME}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION='\"${PROJECT_VERSION}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION_GIT='\"${PROJECT_VERSION_GIT}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_BUILD_TAG='\"${PROJECT_BUILD_TAG}\"'")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_BUILD_DATE='\"${AURA_BUILD_DATE}\"'")
 
 if(AURA_USE_BUFFER_POOL)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
@@ -132,13 +134,6 @@ INCLUDE_DIRECTORIES(
     ${LIBEVENT_INCLUDE_DIRS}
 )
 
-message(STATUS "Generating .clang_complete")
-file(WRITE ".clang_complete" "")
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-  file(APPEND ".clang_complete" "-I${dir}\n")
-endforeach()
-
 ADD_LIBRARY(aura OBJECT ${SRCS})
 
 ADD_LIBRARY(aurastatic STATIC $<TARGET_OBJECTS:aura>)
@@ -160,12 +155,19 @@ TARGET_LINK_LIBRARIES(aurashared
     -lrt -lm
 )
 
+message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 file(WRITE ${CMAKE_SOURCE_DIR}/.clang_complete "")
 foreach(dir ${dirs})
   file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "-I${dir}\n")
 endforeach()
-message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
+string(REPLACE "'" "" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS})
+string(REPLACE " " ";" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS_SPLIT})
+foreach(flag ${CMAKE_C_FLAGS_SPLIT})
+  file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
+endforeach()
+
+
 
 # UNIT TESTS OF THE CORE API
 file(GLOB UNITS
