@@ -27,7 +27,7 @@ enum aura_endianness aura_get_host_endianness()
  */
 const char *aura_get_version()
 {
-	return AURA_VERSION " " AURA_VERSION_GIT " " AURA_BUILD_TAG;
+	return AURA_VERSION " " AURA_VERSION_GIT " " AURA_BUILD_TAG " built on " AURA_BUILD_DATE;
 }
 
 /**
