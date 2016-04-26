@@ -204,6 +204,7 @@ void aura_etable_activate(struct aura_export_table *tbl)
 		aura_panic(node);
 	}
 
+	/* If we allow to activate etable in open() - etable_changed_cb() will not fire */
 	if (node->is_opening)
 		BUG(node, "Transport BUG: Do not call aura_etable_activate in open()");
 
