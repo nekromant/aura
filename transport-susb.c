@@ -244,6 +244,12 @@ static void susb_close(struct aura_node *node)
 	if (inf->handle)
 		libusb_close(inf->handle);
 
+	/* If we've created etable but have NOT yet activated it
+	 *	we have to take care and free it ourselves
+	 */
+	if (node->tbl != inf->etbl)
+		aura_etable_destroy(inf->etbl);
+
 	libusb_exit(inf->ctx);
 	free(inf);
 }
