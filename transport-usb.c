@@ -311,7 +311,13 @@ static void cb_got_dev_info(struct libusb_transfer *transfer)
 	request_object(node, inf->current_object++);
 }
 
-static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
+static void usb_stop_ops(void *arg)
+{
+	struct usb_dev_info *inf = arg;
+	usb_panic_and_reset_state(inf->node);
+}
+
+static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 {
 	/* FixMe: Reading descriptors is synchronos. This is not needed
 	 * often, but leaves a possibility of a flaky usb device to
@@ -338,14 +344,14 @@ static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	ret = libusb_submit_transfer(inf->ctransfer);
 	if (ret != 0) {
 		libusb_close(inf->handle);
-		return -1;
+		usb_panic_and_reset_state(inf->node);
+		return;
 	}
 
 	inf->state = AUSB_DEVICE_INIT; /* Change our state */
 	inf->cbusy = true;
 
 	slog(4, SLOG_DEBUG, "usb: Device opened, info packet requested");
-	return 0;
 };
 
 
@@ -395,6 +401,7 @@ static int usb_open(struct aura_node *node, const char *opts)
 	inf->io_buf_size = 256;
 	inf->optbuf = strdup(opts);
 	inf->dev_descr.device_found_func = usb_start_ops;
+	inf->dev_descr.device_left_func = usb_stop_ops;
 	inf->dev_descr.arg = inf;
 	inf->node = node;
 	parse_params(inf);

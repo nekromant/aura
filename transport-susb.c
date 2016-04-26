@@ -76,7 +76,14 @@ static int check_control(struct libusb_transfer *transfer)
 	return ret;
 }
 
-static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
+static void usb_stop_ops(void *arg)
+{
+	struct usb_dev_info *inf = arg;
+	usb_panic_and_reset_state(inf->node);
+	slog(2, SLOG_INFO, "susb: Device disconnect detected!");
+}
+
+static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 {
 	/* FixMe: Reading descriptors is synchronos. This is not needed
 	 * often, but leaves a possibility of a flaky usb device to
@@ -85,12 +92,12 @@ static int usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	 * from a device in an async fasion in the background.
 	 */
 	struct usb_dev_info *inf = arg;
-
 	inf->handle = hndl;
+
 	inf->state = SUSB_DEVICE_OPERATIONAL;
 
-	slog(4, SLOG_DEBUG, "susb: Device opened and ready to accept calls");
-	return 0;
+	slog(2, SLOG_INFO, "susb: Device opened and ready to accept calls");
+	return;
 };
 
 
@@ -190,6 +197,7 @@ static int susb_open(struct aura_node *node, const char *conf)
 	inf->etbl = lua_touserdata(L, -1);
 
 	inf->dev_descr.device_found_func = usb_start_ops;
+	inf->dev_descr.device_left_func = usb_stop_ops;
 	inf->dev_descr.arg = inf;
 	inf->node = node;
 

@@ -123,14 +123,23 @@ struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx,
 static int hotplug_callback_fn(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event, void *user_data)
 {
 	struct ncusb_devwatch_data *d = user_data;
-	struct libusb_device_handle *hndl = ncusb_try_device(ctx, device,
-							     d->vid, d->pid,
-							     d->vendor, d->product, d->serial);
 
-	if (hndl) {
-		d->device_found_func(hndl, d->arg);
-		/* Thanks, we're good from now on */
-		return 1;
+	slog(4, SLOG_DEBUG, "usb-helpers: hotplug event: %d cur 0x%x dev 0x%x",
+	     event, d->current_device, device);
+
+	if ((!d->current_device) && (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED)) {
+		struct libusb_device_handle *hndl = ncusb_try_device(ctx, device,
+								     d->vid, d->pid,
+								     d->vendor, d->product, d->serial);
+		if (hndl) {
+			d->current_device = device;
+			d->device_found_func(hndl, d->arg);
+		}
+	}
+
+	if ((device == d->current_device) && (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT)) {
+		d->device_left_func(d->arg);
+		d->current_device = NULL;
 	}
 
 	return 0;
@@ -166,7 +175,8 @@ void ncusb_start_descriptor_watching(struct aura_node *node, libusb_context *ctx
 int ncusb_watch_for_device(libusb_context *		ctx,
 			   struct ncusb_devwatch_data * dwatch)
 {
-	return libusb_hotplug_register_callback(ctx, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED,
+	return libusb_hotplug_register_callback(ctx,
+						LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT,
 						LIBUSB_HOTPLUG_ENUMERATE, dwatch->vid, dwatch->pid,
 						LIBUSB_HOTPLUG_MATCH_ANY,
 						hotplug_callback_fn,
