@@ -1,8 +1,6 @@
-| **Travis CI (Core Unit Tests)** | **Jenkins (transports, real hardware )** |
-|------------------|----------------------|
-| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/badge/icon?ts=1)](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/)|
-
-[![Coverage Status](https://coveralls.io/repos/github/nekromant/aura/badge.svg?branch=HEAD)](https://coveralls.io/github/nekromant/aura?branch=HEAD)
+| **Travis CI (Core Unit Tests)** | **Jenkins (transports, real hardware )** | **Test Coverage** |
+|------------------|----------------------|----------------------|
+| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/badge/icon?ts=1)](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/) | [![Coverage Status](https://coveralls.io/repos/github/nekromant/aura/badge.svg?branch=HEAD)](https://coveralls.io/github/nekromant/aura?branch=HEAD) |
 
 # AURA: Another Universal RPC, Actually
 
