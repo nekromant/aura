@@ -20,6 +20,6 @@ int main() {
 	}
 
 	aura_close(n);
-
+	aura_eventloop_destroy(l);
 	return 0;
 }
