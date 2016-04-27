@@ -126,8 +126,13 @@ void aura_close(struct aura_node *node)
 
 	aura_transport_release(node->tr);
 	/* Check if we have an export table registered and nuke it */
-	if (node->tbl)
+	if (node->tbl) {
+		/* Fire the callback one last time */
+		if (node->etable_changed_cb)
+			node->etable_changed_cb(node, node->tbl, NULL, node->etable_changed_arg);
+		/* Nuke it ! */
 		aura_etable_destroy(node->tbl);
+	}
 
 	/* Free file descriptors */
 	if (node->fds)
