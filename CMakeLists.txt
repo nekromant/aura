@@ -5,6 +5,9 @@ SET(PROJECT_VERSION   0.1.2)
 SET(AURA_API_VERSION  1)
 
 enable_testing()
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+
 #TODO: Move out linux-specific stuff
 
 #DEVELOPER HACKS. Enable only when hacking around aura
@@ -12,6 +15,7 @@ SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing")
 SET(AURA_TEST_TRANSPORTS no CACHE BOOL "Run transport module test suite (requires hardware)")
+SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
 
 SET(SRCS
   buffer.c
@@ -136,6 +140,14 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_LIBRARY(aura OBJECT ${SRCS})
+if (AURA_COVERALLS)
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+    coveralls_setup(
+       "${SRCS}" # The source files.
+       ON                 # If we should upload.
+       )
+endif()
 
 ADD_LIBRARY(aurastatic STATIC $<TARGET_OBJECTS:aura>)
 SET_TARGET_PROPERTIES(aurastatic PROPERTIES OUTPUT_NAME aura)
@@ -231,6 +243,7 @@ message("Enabled transports:        ${TRANSPORTS}")
 message("Enabled language bindings: ${BINDINGS}")
 message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
 message("Event system:              ${EVENTSYSTEM}")
+message("Test coverage upload:      ${AURA_COVERALLS}")
 
 if (AURA_USE_BUFFER_POOL)
 message("Buffer pooling:            enabled")

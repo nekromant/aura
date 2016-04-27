@@ -2,6 +2,8 @@
 |------------------|----------------------|
 | [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/badge/icon?ts=1)](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/)|
 
+[![Coverage Status](https://coveralls.io/repos/github/nekromant/aura/badge.svg?branch=master)](https://coveralls.io/github/nekromant/aura?branch=master)
+
 # AURA: Another Universal RPC, Actually
 
 Aura is a simple and fast universal RPC library that allows you to quickly interface
@@ -226,10 +228,11 @@ To match *ANY* serial, product, vendor:
 You can use this transport to call remote methods running on RC Module's NeuroMatrix DSP core. This transport requires that you run it on a SoC with NeuroMatrix DSP and experimental easynmc driver, e.g. K1879ХБ1Я.
 
 #TODO (For 0.3-release)
-
-#### Refactor function naming (e.g. aura_open -> aura_node_open)
+#### Better node timeout handling in eventloop code
+#### Provide backend-agnostic event flags, do not rely on poll.h/epoll.h
+#### Fix reconnect event delivery in susb code on libevent backend
 #### Rework eventloop functions to be more libevent like
 #### Implement proper serial port transport
 #### Implement event delivery mechanism in Neuromatrix DSP transport
 #### Make libevent backend default and stable
-#### Better node timeout handling in eventloop code
+#### Refactor function naming (e.g. aura_open -> aura_node_open)
