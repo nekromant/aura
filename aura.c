@@ -90,7 +90,7 @@ static void cleanup_buffer_queue(struct list_head *q, bool destroy)
 		list_del(pos);
 		if (!destroy)   /* Just return it to the pool */
 			aura_buffer_release(b);
-		else            /* Nuke it, we're closing down */
+		else            /* Nuke it, we're closing down anyway*/
 			aura_buffer_destroy(b);
 		i++;
 	}
@@ -121,7 +121,9 @@ void aura_close(struct aura_node *node)
 	 * remaining buffers */
 	cleanup_buffer_queue(&node->inbound_buffers, true);
 	cleanup_buffer_queue(&node->outbound_buffers, true);
+	cleanup_buffer_queue(&node->event_buffers, true);
 	cleanup_buffer_queue(&node->buffer_pool, true);
+
 	aura_transport_release(node->tr);
 	/* Check if we have an export table registered and nuke it */
 	if (node->tbl)
