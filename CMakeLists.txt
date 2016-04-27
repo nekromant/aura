@@ -10,7 +10,8 @@ enable_testing()
 #DEVELOPER HACKS. Enable only when hacking around aura
 SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
-
+SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing")
+SET(AURA_TEST_TRANSPORTS no CACHE BOOL "Run transport module test suite (requires hardware)")
 
 SET(SRCS
   buffer.c
@@ -179,7 +180,7 @@ foreach(file ${UNITS})
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   ADD_TEST(${f} ${f})
-  if (TEST_LEAKS)
+  if (AURA_TEST_LEAKS)
     ADD_TEST(memcheck-${f} valgrind
       --error-exitcode=1 --read-var-info=yes
       --leak-check=full  --show-leak-kinds=all
@@ -208,7 +209,7 @@ foreach(file ${TTESTS})
   GET_FILENAME_COMPONENT(f ${file} NAME_WE)
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
-  if (TEST_TRANSPORTS)
+  if (AURA_TEST_TRANSPORTS)
     ADD_TEST(${f} ${f})
     if (TEST_LEAKS)
       ADD_TEST(memcheck-${f} valgrind
