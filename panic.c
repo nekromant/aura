@@ -8,7 +8,7 @@
 
 #define TRACE_LEN 36
 
-int BUG(struct aura_node *node, const char *msg, ...)
+int __attribute__((noreturn)) BUG(struct aura_node *node, const char *msg, ...)
 {
 	va_list ap;
 

@@ -139,7 +139,6 @@ struct aura_eventloop {
 	void *eventsysdata;
 };
 
-
 #define object_is_event(o)  (o->arg_fmt==NULL)
 #define object_is_method(o) (o->arg_fmt!=NULL)
 
@@ -456,7 +455,7 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj,
 
 
 void __attribute__((noreturn)) aura_panic(struct aura_node *node);
-int BUG(struct aura_node *node, const char *msg, ...);
+int  __attribute__((noreturn))  BUG(struct aura_node *node, const char *msg, ...);
 
 /** \addtogroup retparse
  *  @{
