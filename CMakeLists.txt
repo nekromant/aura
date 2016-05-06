@@ -11,7 +11,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 #TODO: Move out linux-specific stuff
 
 #DEVELOPER HACKS. Enable only when hacking around aura
-SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
+SET(AURA_USE_LIBEVENT yes CACHE BOOL "Use libevent-based eventloop")
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing")
 SET(AURA_TEST_TRANSPORTS no CACHE BOOL "Run transport module test suite (requires hardware)")
@@ -177,7 +177,19 @@ endforeach()
 string(REPLACE "'" "" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS})
 string(REPLACE " " ";" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS_SPLIT})
 foreach(flag ${CMAKE_C_FLAGS_SPLIT})
-  file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
+# FixMe: Ugly hack
+  if (NOT "${flag}" MATCHES "-Wall")
+    if (NOT "${flag}" MATCHES "-g")
+      if (NOT "${flag}" MATCHES "-fPIC")
+        file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
+      endif()
+    endif()
+  endif()
+endforeach()
+
+file(WRITE ${CMAKE_SOURCE_DIR}/.core_sources "")
+foreach(f ${SRCS})
+  file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "${f} ")
 endforeach()
 
 
@@ -189,6 +201,7 @@ file(GLOB UNITS
 
 foreach(file ${UNITS})
   GET_FILENAME_COMPONENT(f ${file} NAME_WE)
+  file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "${f} ")
   ADD_EXECUTABLE(${f} ${file})
   TARGET_LINK_LIBRARIES(${f} aurashared)
   ADD_TEST(${f} ${f})
