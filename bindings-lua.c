@@ -559,7 +559,14 @@ static int l_node_index(lua_State *L)
 	/* FixMe: Can this get gc-d by the time we actually use it? */
 	lnode->current_call = name;
 
+	if (AURA_STATUS_ONLINE != aura_get_status(lnode->node))
+		return luaL_error(L, "Attempt to call remote method %s when node offline",
+			lnode->current_call);
+	
 	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
+	if (!o)
+		return luaL_error(L, "Internal aura bug: failed to lookup object: %s",
+			lnode->current_call);
 
 	if (strcmp("__", name) == 0)
 		lua_pushcfunction(L, laura_do_async_call);
