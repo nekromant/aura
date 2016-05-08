@@ -29,6 +29,7 @@ static void dummy_populate_etable(struct aura_node *node)
 	aura_etable_add(etbl, "echo_buf", "b", "b");
 	aura_etable_add(etbl, "echo_u64", "4", "4");
 	aura_etable_add(etbl, "echo_i8", "6", "6");
+	aura_etable_add(etbl, "echo_i64", "9", "9");
 	aura_etable_activate(etbl);
 }
 
