@@ -10,9 +10,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 #TODO: Move out linux-specific stuff
 
-#DEVELOPER HACKS. Enable only when hacking around aura
-SET(AURA_USE_LIBEVENT yes CACHE BOOL "Use libevent-based eventloop")
+#Safe to enable, pool is stable
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
+
+#DEVELOPER HACKS. Enable only when hacking around aura
+SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing")
 SET(AURA_TEST_TRANSPORTS no CACHE BOOL "Run transport module test suite (requires hardware)")
 SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
@@ -214,10 +216,28 @@ foreach(file ${UNITS})
   endif()
 endforeach(file)
 
+file(GLOB LUA_UNITS
+    "${CMAKE_SOURCE_DIR}/tests-lua/*.lua"
+)
+
 # BENCHMARKS OF THE CORE API (We won't run them during CI)
 file(GLOB BENCHES
     "${CMAKE_SOURCE_DIR}/benchmarks/*.c"
 )
+
+message(${LUA_UNITS})
+foreach(file ${LUA_UNITS})
+  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
+  ADD_TEST(lua-${f} ${file})
+  if (AURA_TEST_LEAKS)
+    ADD_TEST(memcheck-lua-${f} valgrind
+      --error-exitcode=1 --read-var-info=yes
+      --leak-check=full  --show-leak-kinds=definite,indirect,possible
+      --undef-value-errors=no --xml=yes --xml-file=lua-${f}.xml
+    ${file})
+    endif()
+endforeach()
+
 
 foreach(file ${BENCHES})
   GET_FILENAME_COMPONENT(f ${file} NAME_WE)

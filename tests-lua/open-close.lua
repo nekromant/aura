@@ -1,5 +1,5 @@
 #!/usr/bin/lua
-package.cpath="./lib?.so;"..package.cpath
+package.cpath="./?.so;"..package.cpath
 package.path="./../lua/?.lua;"..package.path
 
 aura = require("aura");
