@@ -14,11 +14,22 @@ aura = require("aura");
 aura.slog_init(nil, 99);
 n = aura.open("dummy", "blah");
 
-aura.wait_status(n, aura.STATUS_ONLINE);
-test_echo(n, "echo_u16", 128);
-test_echo(n, "echo_i16", -128);
-test_echo(n, "echo_i16", -128);
 
+math.randomseed( os.time() )
+
+
+aura.wait_status(n, aura.STATUS_ONLINE);
+
+test_echo(n, "echo_u8", math.random(0, 255));
+test_echo(n, "echo_i8", math.random(-125, 125));
+test_echo(n, "echo_u16", math.random(0, 64000));
+test_echo(n, "echo_i16", math.random(-30000, 30000));
+
+test_echo(n, "echo_u32", math.random(0, 4294967296));
+test_echo(n, "echo_i32", math.random(-2147483645, 2147483645));
+
+test_echo(n, "echo_u64", math.random(0, 1.8e+19))
+test_echo(n, "echo_i64", math.random(-9.2e+19, 9.2e+19))
 
 aura.close(n)
 n = nil;
