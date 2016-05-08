@@ -6,6 +6,7 @@ package.path="./../lua/?.lua;"..package.path
 function test_echo(node, method, value)
     local ret = node[method](node, value);
     if (ret ~= value) then
+        print("OOOPS: expected ".. value.. "got" .. ret .. "("..method..")")
         os.exit(1);
     end
 end
@@ -29,7 +30,7 @@ test_echo(n, "echo_u32", math.random(0, 4294967296));
 test_echo(n, "echo_i32", math.random(-2147483645, 2147483645));
 
 test_echo(n, "echo_u64", math.random(0, 1.8e+19))
-test_echo(n, "echo_i64", math.random(-9.2e+19, 9.2e+19))
+test_echo(n, "echo_i64", math.random(-9.2e+18, 9.2e+18))
 
 aura.close(n)
 n = nil;
