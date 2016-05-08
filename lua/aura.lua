@@ -22,18 +22,18 @@ aura.open = function(name, params)
       return self.__node[idx];
    end
 
-   setmetatable(node_tbl, mt);   
+   setmetatable(node_tbl, mt);
    node_tbl.__node = node;
 
    aura.set_node_containing_table(node, node_tbl);
-   -- Store open node table here to avoid GC. 
-   -- GC will do a close() on node, but close is SYNC, 
+   -- Store open node table here to avoid GC.
+   -- GC will do a close() on node, but close is SYNC,
    -- This may make nasty stuff happen
    table.insert(aura.nodes, node_tbl);
    return node_tbl;
 end
 
-aura.eventloop = function(...)   
+aura.eventloop = function(...)
    local loop = copy(require("aura/loop"))
    loop:init(...);
    loop.init = nil;
@@ -46,8 +46,8 @@ aura.dumpnodes = function()
    end
 end
 
-aura.close = function(node) 
-   aura.core_close(node);
+aura.close = function(node)
+   aura.core_close(node.__node);
 end
 
 return aura
