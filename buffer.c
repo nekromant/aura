@@ -12,11 +12,10 @@ void aura_buffer_internal_free(struct aura_buffer *buf);
 static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *	nd,
 						  int			size)
 {
-	struct aura_buffer *buf = NULL;
 	struct list_head *pos, *tmp;
 
 	list_for_each_safe(pos, tmp, &nd->buffer_pool){
-		buf = list_entry(pos, struct aura_buffer, qentry);
+		struct aura_buffer *buf = list_entry(pos, struct aura_buffer, qentry);
 		if (buf->size >= size) {
 			list_del(pos);
 			nd->num_buffers_in_pool--;
@@ -25,7 +24,6 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *	nd,
 	}
 	return NULL;
 }
-
 
 /**
  * Request an buffer for this node big enough to contain at least size bytes of data.

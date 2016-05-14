@@ -80,9 +80,7 @@ char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args)
 	char *tmp = str;
 	int shift = 0;
 	int len;
-	int pos = 0;
 	while (*fmt) {
-		pos += shift;
 		tmp = &tmp[shift];
 		switch (*fmt++) {
 		case URPC_U8:

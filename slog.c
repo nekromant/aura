@@ -214,7 +214,6 @@ void slogv(int level, int flag, const char *msg, va_list args)
 	SystemDate mdate;
 	char string[MAXMSG];
 	char prints[MAXMSG];
-	char *output;
 
 	/* Initialise system date */
 	get_system_date(&mdate);
@@ -253,7 +252,7 @@ void slogv(int level, int flag, const char *msg, va_list args)
 
 	/* Save log in file */
 	if (slg.to_file) {
-		output = slog_sprintf("%s\n", string);
+		char *output = slog_sprintf("%s\n", string);
 		log_to_file(output, slg.fname, &mdate);
 	}
 }
