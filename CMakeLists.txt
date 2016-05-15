@@ -213,6 +213,7 @@ message("Enabled transports:        ${TRANSPORTS}")
 message("Enabled language bindings: ${BINDINGS}")
 message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
 message("Event system:              ${EVENTSYSTEM}")
+message("Test suites to run:        ${AURA_TEST_SUITES_TO_RUN}")
 message("Test coverage upload:      ${AURA_COVERALLS}")
 
 if (AURA_USE_BUFFER_POOL)
