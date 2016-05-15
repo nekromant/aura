@@ -15,8 +15,11 @@ SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 
 #DEVELOPER HACKS. Enable only when hacking around aura
 SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
-SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing")
-SET(AURA_TEST_TRANSPORTS no CACHE BOOL "Run transport module test suite (requires hardware)")
+SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing (Runs each test twice)")
+SET(AURA_TEST_USB_TRANSPORT no CACHE BOOL "Run usb/susb transport module test suite (requires hardware)")
+SET(AURA_TEST_NMC_TRANSPORT no CACHE BOOL "Run Neuromatrix(r) DSP transport module test suite (requires hardware)")
+SET(AURA_TEST_DUMMY yes CACHE BOOL "Run basic test suite on a dummy transport (no hw required)")
+SET(AURA_TEST_BINDINGS yes CACHE BOOL "Run basic lua bindings test suite (no hw required)")
 SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
 
 SET(SRCS
@@ -194,78 +197,12 @@ foreach(f ${SRCS})
   file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "${f} ")
 endforeach()
 
+include(${CMAKE_SOURCE_DIR}/tests/tests.cmake)
 
-
-# UNIT TESTS OF THE CORE API
-file(GLOB UNITS
-    "${CMAKE_SOURCE_DIR}/tests/*.c"
-)
-
-foreach(file ${UNITS})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
-  file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "${f} ")
-  ADD_EXECUTABLE(${f} ${file})
-  TARGET_LINK_LIBRARIES(${f} aurashared)
-  ADD_TEST(${f} ${f})
-  if (AURA_TEST_LEAKS)
-    ADD_TEST(memcheck-${f} valgrind
-      --error-exitcode=1 --read-var-info=yes
-      --leak-check=full  --show-leak-kinds=all
-      --undef-value-errors=no --xml=yes --xml-file=${f}.xml
-      ./${f})
-  endif()
-endforeach(file)
-
-file(GLOB LUA_UNITS
-    "${CMAKE_SOURCE_DIR}/tests-lua/*.lua"
-)
-
-# BENCHMARKS OF THE CORE API (We won't run them during CI)
-file(GLOB BENCHES
-    "${CMAKE_SOURCE_DIR}/benchmarks/*.c"
-)
-
-message(${LUA_UNITS})
-foreach(file ${LUA_UNITS})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
-  ADD_TEST(lua-${f} ${file})
-  if (AURA_TEST_LEAKS)
-    ADD_TEST(memcheck-lua-${f} valgrind
-      --error-exitcode=1 --read-var-info=yes
-      --leak-check=full  --show-leak-kinds=definite,indirect,possible
-      --undef-value-errors=no --xml=yes --xml-file=lua-${f}.xml
-    ${file})
-    endif()
-endforeach()
-
-
-foreach(file ${BENCHES})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
-  ADD_EXECUTABLE(bench-${f} ${file})
-  TARGET_LINK_LIBRARIES(bench-${f} aurashared)
-endforeach(file)
-
-# Transport plugins tests (need hardware to run)
-file(GLOB TTESTS
-    "${CMAKE_SOURCE_DIR}/tests-transports/*.c"
-)
-
-foreach(file ${TTESTS})
-  GET_FILENAME_COMPONENT(f ${file} NAME_WE)
-  ADD_EXECUTABLE(${f} ${file})
-  TARGET_LINK_LIBRARIES(${f} aurashared)
-  if (AURA_TEST_TRANSPORTS)
-    ADD_TEST(${f} ${f})
-    if (TEST_LEAKS)
-      ADD_TEST(memcheck-${f} valgrind
-	--error-exitcode=1 --read-var-info=yes
-	--leak-check=full  --show-leak-kinds=all
-	--undef-value-errors=no --xml=yes --xml-file=${f}.xml
-	./${f})
-    endif()
-  endif()
-endforeach(file)
-
+ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
+ADD_SCRIPT_TEST_DIRECTORY(lua bindings lua ${AURA_TEST_BINDINGS} ${AURA_TEST_LEAKS})
+ADD_C_TEST_DIRECTORY(xUSB xusb ${AURA_TEST_USB_TRANSPORT} ${AURA_TEST_LEAKS})
+ADD_C_TEST_DIRECTORY(nmc nmc ${AURA_TEST_NMC_TRANSPORT} ${AURA_TEST_LEAKS})
 
 SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
   VERSION ${AURA_API_VERSION})
