@@ -66,7 +66,7 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
 		COMMAND ${CMAKE_COMMAND} -DPROJECT_BINARY_DIR="${PROJECT_BINARY_DIR}" -P "${_CMAKE_SCRIPT_PATH}/CoverallsClear.cmake"
 
 		# Run regress tests.
-		COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+		COMMAND ${CMAKE_CTEST_COMMAND} --no-compress-output --output-on-failure
 
 		# Generate Gcov and translate it into coveralls JSON.
 		# We do this by executing an external CMake script.
@@ -123,6 +123,3 @@ macro(coveralls_turn_on_coverage)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endmacro()
-
-
-
