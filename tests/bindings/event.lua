@@ -18,4 +18,3 @@ aura.close(n);
 
 l = nil;
 n = nil;
-collectgarbage();

@@ -25,6 +25,9 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
     endforeach(file)
 endfunction(ADD_C_TEST_DIRECTORY)
 
+add_executable(lua-test-wrapper lua-test-wrapper.c utils-lua.c)
+target_link_libraries(lua-test-wrapper ${LUA_LIBRARIES})
+
 function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
     file(GLOB UNITS
         "${CMAKE_SOURCE_DIR}/tests/${directory}/*.${ext}"
@@ -33,7 +36,7 @@ function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
       GET_FILENAME_COMPONENT(f ${file} NAME_WE)
       SET(f "test-${prefix}-${f}")
       if (${RUN})
-          ADD_TEST(${f} ${file})
+          ADD_TEST(${f} ./lua-test-wrapper ${file})
       endif()
       if (${MEMCHECK})
         ADD_TEST(memcheck-${f} valgrind
@@ -41,7 +44,7 @@ function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
           --leak-check=full  --show-leak-kinds=all
           --suppressions=${CMAKE_SOURCE_DIR}/valgrind.suppress
           --undef-value-errors=no --xml=yes --xml-file=${f}.xml
-          ${file})
+      ./lua-test-wrapper ${file})
       endif()
     endforeach(file)
 endfunction(ADD_SCRIPT_TEST_DIRECTORY)

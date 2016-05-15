@@ -2,12 +2,14 @@
 package.cpath="./?.so;"..package.cpath
 package.path="./../lua/?.lua;"..package.path
 
+exitcode = 0
+
 
 function test_echo(node, method, value)
     local ret = node[method](node, value);
     if (ret ~= value) then
         print("OOOPS: expected ".. value.. "got" .. ret .. "("..method..")")
-        os.exit(1);
+        exitcode = exitcode + 1
     end
 end
 
@@ -35,4 +37,3 @@ test_echo(n, "echo_i64", math.random(-9.2e+18, 9.2e+18))
 aura.close(n)
 n = nil;
 collectgarbage();
-os.exit(0)

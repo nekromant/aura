@@ -12,3 +12,4 @@ aura.close(n)
 n = nil;
 
 collectgarbage();
+exitcode = 0
