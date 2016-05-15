@@ -28,10 +28,10 @@ struct usb_event_packet {
 enum device_state {
 	AUSB_DEVICE_SEARCHING,
 	AUSB_DEVICE_INIT,
-	AUSB_DEVICE_DISCOVER,
 	AUSB_DEVICE_OPERATIONAL,
 	AUSB_DEVICE_FAILING,
 	AUSB_DEVICE_RESTART,
+	AUSB_DEVICE_STOP
 };
 
 /*
@@ -48,6 +48,7 @@ enum device_state {
  | failing
  |  <-   err   <- err   <-      err
  | Errors reset state to 'searching'
+
  */
 
 struct usb_dev_info {
@@ -274,6 +275,8 @@ static void cb_got_dev_info(struct libusb_transfer *transfer)
 
 	check_control(transfer);
 	slog(4, SLOG_DEBUG, "usb: Got info packet from device");
+	if (inf->state != AUSB_DEVICE_INIT)
+		return; /* Wrong state */
 
 	if (transfer->actual_length < sizeof(struct usb_info_packet)) {
 		slog(0, SLOG_ERROR, "usb: short-read on info packet want %d got %d  (API mismatch?)",
@@ -338,9 +341,8 @@ static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	libusb_fill_control_setup(inf->ctrlbuf,
 				  LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
 				  RQ_GET_DEV_INFO,
-				  0, 0, inf->io_buf_size);
+				  0, 0, inf->io_buf_size - LIBUSB_CONTROL_SETUP_SIZE);
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle, inf->ctrlbuf, cb_got_dev_info, node, 1500);
-
 	ret = libusb_submit_transfer(inf->ctransfer);
 	if (ret != 0) {
 		libusb_close(inf->handle);
@@ -425,9 +427,7 @@ static int usb_open(struct aura_node *node, const char *opts)
 		goto err_free_int;
 
 	slog(1, SLOG_INFO, "usb: Now looking for a matching device");
-
 	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
-
 	return 0;
 
 err_free_int:
@@ -446,7 +446,9 @@ static void usb_close(struct aura_node *node)
 
 	inf->itransfer_enabled = false;
 	/* Waiting for pending transfers */
-	slog(4, SLOG_INFO, "usb: Waiting for transport to close...");
+	slog(4, SLOG_INFO, "usb: Waiting for transport to close from state %d",
+		inf->state);
+
 	usb_panic_and_reset_state(node);
 
 	while (inf->state != AUSB_DEVICE_RESTART)
@@ -594,7 +596,6 @@ static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		libusb_close(inf->handle);
 		inf->handle = NULL;
 		inf->state = AUSB_DEVICE_SEARCHING;
-		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 		return;
 	}
 
