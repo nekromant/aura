@@ -41,7 +41,7 @@ function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
           --leak-check=full  --show-leak-kinds=all
           --suppressions=${CMAKE_SOURCE_DIR}/valgrind.suppress
           --undef-value-errors=no --xml=yes --xml-file=${f}.xml
-          ./${file})
+          ${file})
       endif()
     endforeach(file)
 endfunction(ADD_SCRIPT_TEST_DIRECTORY)
