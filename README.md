@@ -1,6 +1,6 @@
-| **Travis CI (Core Unit Tests)** | **Jenkins (transports, real hardware )** | **Test Coverage** |
-|------------------|----------------------|----------------------|
-| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/badge/icon?ts=1)](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/) | [![Coverage Status](https://coveralls.io/repos/github/nekromant/aura/badge.svg?branch=master)](https://coveralls.io/github/nekromant/aura?branch=master) |
+| **Travis CI (Core)** | **Jenkins (Real Hardware )** | **Test Coverage %** | **Coverity Scan Results** |
+|------------------|----------------------|----------------------|----------------------|
+| [![Build Status](https://travis-ci.org/nekromant/aura.svg?branch=master)](https://travis-ci.org/nekromant/aura) |   [![Build Status](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/badge/icon?ts=1)](https://jenkins.ncrmnt.org/job/GithubCI/job/aura/) | [![Coverage Status](https://coveralls.io/repos/github/nekromant/aura/badge.svg?branch=master)](https://coveralls.io/github/nekromant/aura?branch=master) | [![Coverity Scan](https://scan.coverity.com/projects/7472/badge.svg)](https://scan.coverity.com/projects/nekromant-aura) |
 
 # AURA: Another Universal RPC, Actually
 
