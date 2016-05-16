@@ -15,8 +15,10 @@ static int file_get(const char *path, char *dbuf, int dlen)
 		slog(0, SLOG_ERROR, "sysfsgpio: Failed to open %s for reading", path);
 		return -1;
 	}
-	ret = read(fd, dbuf, dlen);
-	dbuf[ret] = 0x0;
+	ret = read(fd, dbuf, dlen - 1);
+	if (ret == -1)
+		ret = 0;
+	dbuf[ret]=0x0;
 	close(fd);
 	return ret;
 }

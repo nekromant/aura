@@ -521,7 +521,7 @@ static int laura_do_async_call(lua_State *L)
 
 	buf = lua_to_buffer(L, lnode->node, 5, o);
 	if (!buf)
-		luaL_error(L, "Serializer failed!");
+		return luaL_error(L, "Serializer failed!");
 
 	/* Let's create a table to store our callback and arg */
 	lua_newtable(L);
@@ -543,7 +543,7 @@ static int laura_do_async_call(lua_State *L)
 	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *)(long)callback_ref, buf);
 	if (ret != 0) {
 		aura_buffer_release(buf);
-		return luaL_error(L, "Async call for %s failed: %d:%s", o->name, ret, strerror(ret));
+		return luaL_error(L, "Async call for %s failed: %s", o->name, strerror(ret));
 	}
 
 	return 0;
@@ -562,7 +562,7 @@ static int l_node_index(lua_State *L)
 	if (AURA_STATUS_ONLINE != aura_get_status(lnode->node))
 		return luaL_error(L, "Attempt to call remote method %s when node offline",
 			lnode->current_call);
-	
+
 	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
 	if (!o)
 		return luaL_error(L, "Internal aura bug: failed to lookup object: %s",

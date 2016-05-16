@@ -398,7 +398,7 @@ static int usb_open(struct aura_node *node, const char *opts)
 
 	ret = libusb_init(&inf->ctx);
 	if (ret != 0)
-		return -EIO;
+		goto err_free_inf;
 
 	inf->io_buf_size = 256;
 	inf->optbuf = strdup(opts);
@@ -417,7 +417,7 @@ static int usb_open(struct aura_node *node, const char *opts)
 
 	inf->ctrlbuf = malloc(inf->io_buf_size);
 	if (!inf->ctrlbuf)
-		goto err_free_inf;
+		goto err_libusb_exit;
 	inf->itransfer = libusb_alloc_transfer(0);
 	if (!inf->itransfer)
 		goto err_free_cbuf;
@@ -434,8 +434,9 @@ err_free_int:
 	libusb_free_transfer(inf->itransfer);
 err_free_cbuf:
 	free(inf->ctrlbuf);
-err_free_inf:
+err_libusb_exit:
 	libusb_exit(inf->ctx);
+err_free_inf:
 	free(inf);
 	return -ENOMEM;
 }
