@@ -12,12 +12,12 @@ int main() {
 	if (!l)
 		return -1;
 
-	aura_enable_sync_events(n, 5);
+	aura_enable_sync_events(n, count);
 
-	while (count < 3) {
+	do {
 		count = aura_get_pending_events(n);
 		aura_handle_events(l);
-	}
+	} while (count < 5);
 
 	aura_close(n);
 	aura_eventloop_destroy(l);
