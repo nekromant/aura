@@ -543,7 +543,7 @@ static int laura_do_async_call(lua_State *L)
 	ret = aura_core_start_call(lnode->node, o, calldone_cb, (void *)(long)callback_ref, buf);
 	if (ret != 0) {
 		aura_buffer_release(buf);
-		return luaL_error(L, "Async call for %s failed: %s", o->name, strerror(ret));
+		return luaL_error(L, "Async call for %s failed: %s code (%d)", o->name, strerror(-ret), ret);
 	}
 
 	return 0;
