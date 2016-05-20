@@ -26,6 +26,43 @@ static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *	nd,
 }
 
 /**
+ * Run buffer pool garbage collection routine for the node once
+ *
+ * @param  pos node
+ * @return     1 if a buffer has been actually released, 0 otherwise
+ */
+int aura_node_buffer_pool_gc_once(struct aura_node *pos)
+{
+	/* GC: Ditch one last buffer from pool if we have too many */
+	if (pos->num_buffers_in_pool >= pos->gc_threshold) {
+		struct aura_buffer *buf;
+		pos->num_buffers_in_pool--;
+		buf = list_entry(pos->buffer_pool.prev, struct aura_buffer, qentry);
+		list_del(pos->buffer_pool.prev);
+		aura_buffer_destroy(buf);
+		return 1;
+	}
+	return 0;
+}
+
+/**
+ * Run buffer pool garbage collection until no more buffers can be released
+ *
+ * @param  pos the node to gc for
+ * @return     The number of buffers released
+ */
+int aura_node_buffer_pool_gc_full(struct aura_node *pos)
+{
+	int ret = 0;
+	int tmp;
+	do {
+		tmp = ret;
+		ret += aura_node_buffer_pool_gc_once(pos);
+	} while (ret != tmp);
+	return ret;
+}
+
+/**
  * Request an buffer for this node big enough to contain at least size bytes of data.
  * The data is returned in struct aura_buffer
  *
