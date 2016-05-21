@@ -12,8 +12,8 @@ void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, v
 }
 
 static int numevt=0;
-void unhandled_cb(struct aura_node *dev, 
-		  struct aura_buffer *retbuf, 
+void unhandled_cb(struct aura_node *dev,
+		  struct aura_buffer *retbuf,
 		  void *arg)
 {
 	const struct aura_object *o = aura_get_current_object(dev);
@@ -26,14 +26,14 @@ void unhandled_cb(struct aura_node *dev,
 	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
 	if (numevt==4) {
 		printf("Breaking the loop\n");
-		aura_eventloop_break(aura_eventloop_get_data(dev));
+		aura_eventloop_loopexit(aura_node_eventloop_get(dev), NULL);
 	}
 }
 
 int main() {
 	slog_init(NULL, 18);
 
-	int ret; 
+	int ret;
 	struct aura_node *n = aura_open("dummy", NULL);
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
@@ -44,11 +44,9 @@ int main() {
 
 	aura_unhandled_evt_cb(n, unhandled_cb, (void *) ARG2);
 	printf("event handler set with ret %d\n", ret);
-	aura_handle_events_forever(aura_eventloop_get_data(n));
+	aura_eventloop_dispatch(aura_node_eventloop_get(n), 0);
 	printf("Closing teh shop...");
 	aura_close(n);
 
 	return 0;
 }
-
-

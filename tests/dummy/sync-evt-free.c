@@ -16,7 +16,8 @@ int main() {
 
 	do {
 		count = aura_get_pending_events(n);
-		aura_handle_events(l);
+		slog(0, SLOG_DEBUG, "====> %d events in queue", count);
+		aura_eventloop_dispatch(l, AURA_EVTLOOP_ONCE);
 	} while (count < 5);
 
 	aura_close(n);

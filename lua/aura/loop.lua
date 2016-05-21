@@ -17,6 +17,8 @@ loop.init = function(self, fnode, ...)
    for i,j in ipairs({...}) do
       self:add(j);
    end
+   self.EVTLOOP_ONCE = aura.EVTLOOP_ONCE;
+   self.EVTLOOP_NONBLOCK = aura.EVTLOOP_NONBLOCK;
 end
 
 loop.add = function(self, node)
@@ -42,8 +44,12 @@ loop.destroy = function(self)
    aura.eventloop_destroy(self._handle);
 end
 
-loop.handle_events = function(self, ...)
-   aura.handle_events(self._handle, ...);
+loop.dispatch = function(self, flags)
+   return aura.eventloop_dispatch(self._handle, flags);
+end
+
+loop.loopexit = function(self, timeout_sec)
+   return aura.eventloop_loopexit(self._handle, timeout_sec);
 end
 
 return loop;

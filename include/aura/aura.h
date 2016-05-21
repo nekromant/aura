@@ -25,6 +25,10 @@ enum aura_node_status {
 	AURA_STATUS_ONLINE, //!< AURA_STATUS_ONLINE
 };
 
+#define AURA_EVTLOOP_ONCE     (1 << 1)
+#define AURA_EVTLOOP_NONBLOCK (1 << 2)
+#define AURA_EVTLOOP_NO_GC    (1 << 3)
+
 /** Remote method call status */
 enum aura_call_status {
 	AURA_CALL_COMPLETED,     //!< AURA_CALL_COMPLETED
@@ -101,11 +105,13 @@ struct aura_node {
 	int nextfd; /* Next descriptor to add */
 	struct aura_pollfds *fds; /* descriptor and event array */
 
-	void *eventsys_data; /* eventloop structure */
-	unsigned int poll_timeout;
-	uint64_t last_checked;
+	struct aura_eventloop *loop; /* eventloop structure */
+	int evtloop_is_autocreated;
+	struct timeval periodic_interval;
+	void *eventloop_data; /* eventloop module private data */
 	struct list_head eventloop_node_list;
 	const struct aura_object *current_object;
+
 };
 
 
@@ -131,13 +137,8 @@ struct aura_object {
 	void *arg;
 };
 
-struct aura_eventloop {
-	int autocreated;
-	int keep_running;
-	int poll_timeout;
-	struct list_head nodelist;
-	void *eventsysdata;
-};
+struct aura_eventloop;
+
 
 #define object_is_event(o)  (o->arg_fmt==NULL)
 #define object_is_method(o) (o->arg_fmt!=NULL)
@@ -372,11 +373,6 @@ const char *aura_get_version();
 unsigned int aura_get_version_code();
 
 void aura_set_node_endian(struct aura_node *node, enum aura_endianness en);
-
-void aura_queue_buffer(struct list_head *list, struct aura_buffer *buf);
-struct aura_buffer *aura_dequeue_buffer(struct list_head *head);
-void aura_requeue_buffer(struct list_head *head, struct aura_buffer *buf);
-struct aura_buffer *aura_peek_buffer(struct list_head *head);
 
 struct aura_export_table *aura_etable_create(struct aura_node *owner, int n);
 void aura_etable_add(struct aura_export_table *tbl,
@@ -772,13 +768,12 @@ void *aura_eventloop_create__(int dummy, ...);
 void *aura_eventloop_create_empty();
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node);
 void aura_eventloop_del(struct aura_node *node);
-void aura_eventloop_break(struct aura_eventloop *loop);
+void aura_eventloop_dispatch(struct aura_eventloop *loop, int flags);
+void aura_eventloop_loopexit(struct aura_eventloop *loop, struct timeval *tv);
+
 struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop);
 
 
-void aura_handle_events(struct aura_eventloop *loop);
-void aura_handle_events_timeout(struct aura_eventloop *loop, int timeout_ms);
-void aura_handle_events_forever(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
@@ -787,11 +782,9 @@ void aura_buffer_release(struct aura_buffer *buf);
 void aura_buffer_destroy(struct aura_buffer *buf);
 void aura_bufferpool_preheat(struct aura_node *nd, int size, int count);
 
-/* event system data access functions */
-struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node);
-
 
 #include <aura/inlines.h>
+
 
 #define min_t(type, x, y) ({                                    \
                         type __min1 = (x);                      \

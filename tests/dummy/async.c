@@ -9,7 +9,7 @@ void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, v
 	if (arg != (void *) ARG)
 		exit(1);
 	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
-	aura_eventloop_break(aura_eventloop_get_data(dev));
+	aura_eventloop_loopexit(aura_node_eventloop_get(dev), NULL);
 
 }
 
@@ -23,14 +23,14 @@ void pingcb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void 
 	aura_hexdump("Out buffer", retbuf->data, retbuf->size);
 	if (numevt==4) {
 		printf("Breaking the loop\n");
-		aura_eventloop_break(aura_eventloop_get_data(dev));
+		aura_eventloop_loopexit(aura_node_eventloop_get(dev), NULL);
 	}
 }
 
 int main() {
 	slog_init(NULL, 18);
 
-	int ret; 
+	int ret;
 	struct aura_node *n = aura_open("dummy", NULL);
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
@@ -41,12 +41,9 @@ int main() {
 
 	ret = aura_set_event_callback(n, "ping", pingcb, (void *) ARG2);
 	printf("event handler set with ret %d\n", ret);
-	aura_handle_events_forever(aura_eventloop_get_data(n));
-	printf("Closing teh shop...");
-
+	aura_eventloop_dispatch(aura_node_eventloop_get(n), 0);
+	printf("Closing the shop...");
 	aura_close(n);
 
 	return 0;
 }
-
-

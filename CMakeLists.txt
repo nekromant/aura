@@ -14,7 +14,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 
 #DEVELOPER HACKS. Enable only when hacking around aura
-SET(AURA_USE_LIBEVENT no CACHE BOOL "Use libevent-based eventloop")
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing (Runs each test twice)")
 SET(AURA_TEST_USB_TRANSPORT no CACHE BOOL "Run usb/susb transport module test suite (requires hardware)")
 SET(AURA_TEST_NMC_TRANSPORT no CACHE BOOL "Run Neuromatrix(r) DSP transport module test suite (requires hardware)")
@@ -26,6 +25,7 @@ SET(SRCS
   buffer.c
   slog.c panic.c utils.c
   transport.c eventloop.c aura.c export.c serdes.c
+  eventloop-factory.c
   retparse.c queue.c utils-linux.c
   transport-dummy.c
   transport-bench.c
@@ -40,9 +40,7 @@ PKG_CHECK_MODULES(LIBUSB libusb-1.0)
 PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
-if (AURA_USE_LIBEVENT)
 PKG_CHECK_MODULES(LIBEVENT libevent)
-endif()
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
@@ -81,13 +79,13 @@ if(AURA_USE_BUFFER_POOL)
 endif()
 
 #Let's use libevent if we have and should
-if(LIBEVENT_FOUND AND AURA_USE_LIBEVENT)
-  SET(SRCS ${SRCS} eventsys-libevent.c)
-  SET(EVENTSYSTEM libevent)
-else()
-  SET(SRCS ${SRCS} eventsys-epoll.c)
-  SET(EVENTSYSTEM epoll)
+if(LIBEVENT_FOUND)
+  SET(SRCS ${SRCS} eventloop-module-libevent.c)
+  SET(EVENTSYSTEM "${EVENTSYSTEM} libevent")
 endif()
+
+#SET(SRCS ${SRCS} eventloop-module-libevent.c)
+#SET(EVENTSYSTEM "${EVENTSYSTEM} epoll")
 
 # Let's auto detect a suitable lua version
 if(LUA52_FOUND)

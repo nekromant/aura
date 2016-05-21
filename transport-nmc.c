@@ -43,6 +43,14 @@ struct nmc_aura_syncbuffer {
 	uint32_t	outbound_buffer_ptr;
 };
 
+/* TODO: EVENTBUF is not yet implemented in easynmc */
+struct nmc_aura_eventbuf
+{
+	uint32_t pendingmask;
+	uint32_t size;
+	uint32_t events[];
+};
+
 struct nmc_export_table {
 	struct nmc_aura_header	hdr;
 	struct nmc_aura_object	objs[];
@@ -85,7 +93,8 @@ static char *nmc_fetch_str(void *nmstr)
 	uint32_t *n = nmstr;
 	int len = 0;
 
-	while (n[len++]);;
+	while (n[len++]);
+
 	uint8_t *tmp = malloc(len);
 	char *ret = (char *)tmp;
 	if (!tmp)
@@ -96,6 +105,7 @@ static char *nmc_fetch_str(void *nmstr)
 	*tmp = 0x0;
 	return ret;
 }
+
 
 static int handle_aura_rpc_section(struct easynmc_handle *h, char *name, FILE *rfd, GElf_Shdr shdr)
 {
@@ -131,6 +141,10 @@ static int handle_aura_rpc_section(struct easynmc_handle *h, char *name, FILE *r
 		}
 
 		pv->sbuf = (struct nmc_aura_syncbuffer *)&pv->h->imem[addr];
+	}
+
+	if (strcmp(name, ".aura_rpc_eventbuf") == 0) {
+		/* TODO: eventbuf */
 	}
 
 	return 0;
@@ -430,8 +444,8 @@ static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
 struct aura_buffer *ion_buffer_request(struct aura_node *node, int size)
 {
 	int ret;
-	int map_fd;
-	ion_user_handle_t hndl;
+	int map_fd=0;
+	ion_user_handle_t hndl = 0;
 	struct nmc_private *pv = aura_get_userdata(node);
 
 	struct ion_buffer_descriptor *dsc = malloc(sizeof(*dsc));

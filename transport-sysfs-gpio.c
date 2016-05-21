@@ -201,7 +201,6 @@ static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
 		o = buf->object;
 		handle_outbound(node, o, buf);
 		aura_buffer_release(buf);
-		aura_eventloop_interrupt(aura_eventloop_get_data(node));
 	}
 }
 

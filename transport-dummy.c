@@ -41,7 +41,6 @@ static void dummy_close(struct aura_node *node)
 static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
-	struct aura_object *o;
 
 	if (node->status != AURA_STATUS_ONLINE) {
 		dummy_populate_etable(node);
@@ -55,13 +54,10 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	aura_queue_buffer(&node->inbound_buffers, buf);
 
 	while (1) {
-		buf = aura_dequeue_buffer(&node->outbound_buffers);
+		buf = aura_node_queue_read(node, NODE_QUEUE_OUTBOUND);
 		if (!buf)
 			break;
-		o = buf->object;
-		slog(1, SLOG_DEBUG, "Dequeued/requeued obj id %d (%s)", o->id, o->name);
-		aura_queue_buffer(&node->inbound_buffers, buf);
-		aura_eventloop_interrupt(aura_eventloop_get_data(node));
+		aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
 	}
 }
 

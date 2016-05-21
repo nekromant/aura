@@ -13,7 +13,9 @@ n.ping = function(self, arg)
 end
 
 l = aura.eventloop(n)
-l:handle_events(1000);
+
+l:loopexit(3.45);
+l:dispatch();
 aura.close(n);
 
 l = nil;

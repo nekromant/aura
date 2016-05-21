@@ -1,11 +1,12 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/eventloop.h>
 #include <inttypes.h>
 
 
 static void *aura_eventsys_get_autocreate(struct aura_node *node)
 {
-	struct aura_eventloop *loop = aura_eventloop_get_data(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get(node);
 
 	if (loop == NULL) {
 		slog(3, SLOG_DEBUG, "aura: Auto-creating eventsystem for node");
@@ -14,8 +15,8 @@ static void *aura_eventsys_get_autocreate(struct aura_node *node)
 			slog(0, SLOG_ERROR, "aura: eventloop auto-creation failed");
 			aura_panic(node);
 		}
-		loop->autocreated = 1;
-		aura_eventloop_set_data(node, loop);
+		node->evtloop_is_autocreated = 1;
+		aura_node_eventloop_set(node, loop);
 	}
 	return loop;
 }
@@ -40,8 +41,6 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	if (!node)
 		return NULL;
 	node->is_opening = true;
-
-	node->poll_timeout = 250; /* 250 ms default */
 	node->tr = aura_transport_lookup(name);
 	if (!node->tr) {
 		slog(0, SLOG_FATAL, "Invalid transport name: %s", name);
@@ -99,19 +98,20 @@ static void cleanup_buffer_queue(struct list_head *q, bool destroy)
 
 
 /**
- * Close the node and free memory.
+ * Close the node and free memory. This call also automatically
+ * deassociates the node from the corresponding eventloop (if any).
  *
  * @param node
  */
 void aura_close(struct aura_node *node)
 {
-	struct aura_eventloop *loop = aura_eventloop_get_data(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get(node);
 
 	if (node->tr->close)
 		node->tr->close(node);
 
 	if (loop) {
-		if (loop->autocreated)
+		if (node->evtloop_is_autocreated)
 			aura_eventloop_destroy(loop);
 		else
 			aura_eventloop_del(node);
@@ -251,17 +251,6 @@ const struct aura_object *aura_get_current_object(struct aura_node *node)
 	return node->current_object;
 }
 
-/**
- * Get the eventloop associated with this node
- *
- * @param node
- *
- * @return Pointer to node's eventloop or NULL if node has none
- */
-struct aura_eventloop *aura_eventloop_get_data(struct aura_node *node)
-{
-	return node->eventsys_data;
-}
 
 
 
@@ -411,13 +400,12 @@ int aura_core_start_call(struct aura_node *node,
 
 	if (isfirst) {
 		slog(4, SLOG_DEBUG, "Notifying transport of queue status change");
-		node->last_checked = 0;
-		aura_eventloop_interrupt(loop);
+		aura_eventloop_report_event(loop, NODE_EVENT_HAVE_OUTBOUND, NULL);
 	}
-	;
 
 	return 0;
 }
+
 
 /**
  * Synchronously call an object. arguments should be placed in argbuf.
@@ -450,7 +438,7 @@ int aura_core_call(
 	}
 
 	while (o->pending)
-		aura_handle_events(loop);
+		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
 
 	slog(4, SLOG_DEBUG, "Call completed");
 	*retbuf = node->sync_ret_buf;
@@ -620,7 +608,6 @@ int aura_start_call(
  * @{
  */
 
-
 /**
  * Block until node's status becomes one of the requested
  *
@@ -630,9 +617,8 @@ int aura_start_call(
 void aura_wait_status(struct aura_node *node, int status)
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
-
 	while (node->status != status)
-		aura_handle_events(loop);
+		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
 }
 
 
@@ -756,6 +742,8 @@ int aura_get_pending_events(struct aura_node *node)
 	return node->sync_event_count;
 }
 
+
+
 /**
  * Retrieve the next event from the synchronous event queue. If there is no events in queue -
  * this function may block until the next event arrives.
@@ -778,8 +766,9 @@ int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, 
 {
 	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
 
-	while (!node->sync_event_count)
-		aura_handle_events(loop);
+	while (!node->sync_event_count) {
+		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
+	}
 
 	*retbuf = aura_dequeue_buffer(&node->event_buffers);
 	if (!(*retbuf))
@@ -909,21 +898,8 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
  */
 void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
 {
-	if (fd && node->tr->loop)
-		node->tr->loop(node, fd);
-
-	uint64_t curtime = aura_platform_timestamp();
-
-	if ((curtime - node->last_checked > node->poll_timeout) && node->tr->loop) {
-		node->tr->loop(node, NULL);
-		node->last_checked = curtime;
-	}
-
+	node->tr->loop(node, fd);
 	/* Now grab all we got from the inbound queue and fire the callbacks */
+	/* TODO: Move inbound handling away from here */
 	aura_handle_inbound(node);
-}
-
-void aura_eventloop_set_data(struct aura_node *node, struct aura_eventloop *data)
-{
-	node->eventsys_data = data;
 }

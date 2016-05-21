@@ -30,15 +30,15 @@ static inline void *aura_get_userdata(struct aura_node *node)
 	return node->user_data;
 }
 
-/** 
- *  Retrieve current node status. 
- * 
- * @param node 
- * 
- * @return 
+/**
+ *  Retrieve current node status.
+ *
+ * @param node
+ *
+ * @return
  */
 
-static inline int aura_get_status(struct aura_node *node) 
+static inline int aura_get_status(struct aura_node *node)
 {
 	return node->status;
 }
@@ -72,6 +72,35 @@ static inline void *aura_get_transportdata(struct aura_node *node)
 }
 
 /**
+ * Get the eventloop associated with this node
+ *
+ * @param node
+ *
+ * @return Pointer to node's eventloop or NULL if node has none
+ */
+static inline struct aura_eventloop *aura_node_eventloop_get(struct aura_node *node)
+{
+	return node->loop;
+}
+
+static inline void aura_node_eventloop_set(struct aura_node *node, struct aura_eventloop *loop)
+{
+	node->loop = loop;
+}
+
+static inline void  aura_node_eventloopdata_set(struct aura_node *node, void *udata)
+{
+	node->eventloop_data = udata;
+}
+
+static inline void *aura_node_eventloopdata_get(struct aura_node *node)
+{
+	return node->eventloop_data;
+}
+
+
+
+/**
  * @}
  */
 
@@ -98,6 +127,5 @@ static inline void aura_buffer_rewind(struct aura_buffer *buf) {
 /**
  * @}
  */
-
 
 #endif

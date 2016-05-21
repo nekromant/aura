@@ -3,9 +3,9 @@
 int main() {
 	slog_init(NULL, 18);
 
-	int ret; 
+	int ret;
 	struct aura_node *n = aura_open("dummy", NULL);
-	struct aura_buffer *retbuf; 
+	struct aura_buffer *retbuf;
 	struct aura_buffer *iobuf = aura_buffer_request(n, 80);
 	aura_wait_status(n, AURA_STATUS_ONLINE);
 
@@ -23,5 +23,3 @@ int main() {
 
 	return 0;
 }
-
-

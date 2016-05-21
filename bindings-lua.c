@@ -5,6 +5,7 @@
 #include <search.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <math.h>
 
 #define REF_NODE_CONTAINER (1 << 0)
 #define REF_STATUS_CB      (1 << 1)
@@ -874,10 +875,35 @@ static int l_set_status_change_cb(lua_State *L)
 	return 0;
 }
 
-static int l_handle_events(lua_State *L)
+static int l_eventloop_loopexit(lua_State *L)
+{
+	TRACE();
+	struct laura_eventloop *lloop;
+	double timeout;
+	aura_check_args(L, 1);
+	struct timeval tv;
+
+	if (!lua_isuserdata(L, 1))
+		aura_typeerror(L, 1, "ludata");
+
+	lloop = lua_touserdata(L, 1);
+
+	if (lua_gettop(L) == 2) {
+		timeout = lua_tonumber(L, 2);
+		tv.tv_sec = floor(timeout);
+		tv.tv_usec = (timeout - tv.tv_sec) * 1000000;
+	} else {
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
+	}
+	aura_eventloop_loopexit(lloop->loop, &tv);
+	return 0;
+}
+
+static int l_eventloop_dispatch(lua_State *L)
 {
 	struct laura_eventloop *lloop;
-	int timeout = -1;
+	int flags = 0;
 
 	TRACE();
 	aura_check_args(L, 1);
@@ -887,13 +913,10 @@ static int l_handle_events(lua_State *L)
 
 	lloop = lua_touserdata(L, 1);
 
-	if (lua_gettop(L) == 2) {
-		timeout = lua_tonumber(L, 2);
-		aura_handle_events_timeout(lloop->loop, timeout);
-	} else {
-		aura_handle_events_forever(lloop->loop);
-	}
+	if (lua_gettop(L) == 2)
+		flags = lua_tonumber(L, 2);
 
+	aura_eventloop_dispatch(lloop->loop, flags);
 	return 0;
 }
 
@@ -907,7 +930,7 @@ static const luaL_Reg libfuncs[] = {
 	{ "core_close",		       l_close_node	      },
 	{ "wait_status",	       l_wait_status	      },
 
-	{ "status",		       l_status		      },
+	{ "status",		       	   l_status		      },
 	{ "status_cb",		       l_set_status_change_cb },
 
 	{ "set_node_containing_table", l_set_node_container   },
@@ -916,7 +939,8 @@ static const luaL_Reg libfuncs[] = {
 	{ "eventloop_del",	       l_eventloop_del	      },
 	{ "eventloop_destroy",	       l_eventloop_destroy    },
 
-	{ "handle_events",	       l_handle_events	      },
+	{ "eventloop_dispatch",		       l_eventloop_dispatch	      },
+	{ "eventloop_loopexit",		       l_eventloop_loopexit	      },
 
 /*
  *      { "status_cb",                 l_set_status_change_cb        },
@@ -962,6 +986,8 @@ LUALIB_API int luaopen_auracore(lua_State *L)
 	lua_setfield_int(L, "CALL_COMPLETED", AURA_CALL_COMPLETED);
 	lua_setfield_int(L, "CALL_TIMEOUT", AURA_CALL_TIMEOUT);
 	lua_setfield_int(L, "CALL_TRANSPORT_FAIL", AURA_CALL_TRANSPORT_FAIL);
+	lua_setfield_int(L, "EVTLOOP_ONCE", AURA_EVTLOOP_ONCE);
+	lua_setfield_int(L, "EVTLOOP_NONBLOCK", AURA_EVTLOOP_NONBLOCK);
 
 	/* Return One result */
 	return 1;
