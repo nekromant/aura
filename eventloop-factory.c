@@ -51,10 +51,11 @@ int aura_eventloop_module_select(const char *name)
 }
 
 static void __attribute__((constructor (102))) init_factory() {
-	#ifdef AURA_DEFAULT_EVENTLOOP
-		aura_eventloop_module_select(AURA_DEFAULT_EVENTLOOP);
-	#else
-		/* Assume epoll as default for now */
-		aura_eventloop_module_select("libevent");
-	#endif
+		char *evtloop = getenv("AURA_USE_EVENTLOOP");
+		if (evtloop)
+			aura_eventloop_module_select(evtloop);
+		else
+			aura_eventloop_module_select("libevent");
+		if (!current_loop_module)
+			BUG(NULL, "Failed to select default eventloop module, check env variable AURA_USE_EVENTLOOP");
 }
