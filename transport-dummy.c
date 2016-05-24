@@ -3,18 +3,21 @@
 #include <aura/packetizer.h>
 #include <aura/timer.h>
 
-void timer_cb_fn(struct aura_node *node, void *arg)
+#define CB_ARG (void *) 0xdeadf00d
+
+static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)
 {
+	if (arg != CB_ARG)
+		BUG(NULL, "Unexpected CB arg: %x %x", arg, CB_ARG);
+
 	struct aura_object *o = aura_etable_find(node->tbl, "ping");
 	if (!o)
 		return;
 	struct aura_buffer *buf = aura_buffer_request(node, 32);
 	memset(buf->data, 12, buf->size);
 	buf->object = o;
-	if (!buf->object)
-
-	aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
-
+	if (buf->object)
+		aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
 }
 
 static void dummy_populate_etable(struct aura_node *node)
@@ -41,8 +44,10 @@ static void dummy_populate_etable(struct aura_node *node)
 }
 
 
-void online_cb_fn(struct aura_node *node, void *arg)
+static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)
 {
+	if (arg != CB_ARG)
+		BUG(NULL, "Unexpected CB arg: %x %x", arg, CB_ARG);
 	dummy_populate_etable(node);
 	aura_set_status(node, AURA_STATUS_ONLINE);
 }
@@ -50,8 +55,8 @@ void online_cb_fn(struct aura_node *node, void *arg)
 static int dummy_open(struct aura_node *node, const char *opts)
 {
 	slog(1, SLOG_INFO, "Opening dummy transport");
-	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, node);
-	struct aura_timer *online = aura_timer_create(node, online_cb_fn, node);
+	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, CB_ARG);
+	struct aura_timer *online = aura_timer_create(node, online_cb_fn, CB_ARG);
 	struct timeval tv;
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;

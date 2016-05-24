@@ -51,6 +51,8 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	INIT_LIST_HEAD(&node->inbound_buffers);
 	INIT_LIST_HEAD(&node->event_buffers);
 	INIT_LIST_HEAD(&node->buffer_pool);
+	INIT_LIST_HEAD(&node->timer_list);
+
 	node->gc_threshold = 10; /* This should be more than enough */
 
 	node->status = AURA_STATUS_OFFLINE;
@@ -109,6 +111,13 @@ void aura_close(struct aura_node *node)
 
 	if (node->tr->close)
 		node->tr->close(node);
+
+	/* Nuke all running timers */
+	struct aura_timer *pos;
+	struct aura_timer *tmp;
+	list_for_each_entry_safe(pos, tmp, &node->timer_list, entry) {
+		aura_timer_destroy(pos);
+	}
 
 	if (loop) {
 		if (node->evtloop_is_autocreated)

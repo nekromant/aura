@@ -6,8 +6,8 @@
 
 struct aura_eventloop;
 struct aura_node;
-
-typedef void (*aura_timer_cb_fn)(struct aura_node *node, void *arg);
+struct aura_timer;
+typedef void (*aura_timer_cb_fn)(struct aura_node *node, struct aura_timer *tm, void *arg);
 
 struct aura_timer {
 	struct timeval tv;

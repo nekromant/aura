@@ -23,11 +23,11 @@ struct aura_timer *aura_timer_create(struct aura_node *node, aura_timer_cb_fn ti
 	if (!tm)
 		BUG(node, "FATAL: Memory allocation failure");
 	tm->module = loop->module; /* Store current eventloop module in the name of sanity */
-	tm->callback = timer_cb_fn;
-	tm->callback_arg = arg;
 	tm->node = node;
 	loop->module->timer_create(loop, tm);
 	aura_timer_update(tm, timer_cb_fn, arg);
+	list_add_tail(&tm->entry, &node->timer_list);
+	slog(0, SLOG_DEBUG, "Create %x", tm);
 	return tm;
 }
 
@@ -35,13 +35,16 @@ void aura_timer_start(struct aura_timer *tm, int flags, struct timeval *tv)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get(tm->node);
 	if (tm->is_active) {
-		slog(0, SLOG_WARN, "Tried to activate a timer that's already active. Stop it first.");
+		slog(0, SLOG_WARN, "Tried to activate a timer that's already active. Doing nothing");
 		return;
 	}
+
 	if (!loop)
 		BUG(tm->node, "Internal bug: Node has no associated eventsystem");
+
 	tm->flags = flags;
-	tm->tv = *tv;
+	if (tv)
+		tm->tv = *tv;
 	tm->module->timer_start(loop, tm);
 	tm->is_active = true;
 }
@@ -57,11 +60,13 @@ void aura_timer_stop(struct aura_timer *timer)
 
 void aura_timer_destroy(struct aura_timer *timer)
 {
+	slog(0, SLOG_DEBUG, "Nuke %x", timer);
 	struct aura_eventloop *loop = aura_node_eventloop_get(timer->node);
 	if (!loop)
 		BUG(timer->node, "Internal bug: Node has no associated eventsystem");
 	if (timer->is_active)
 		aura_timer_stop(timer);
 	timer->module->timer_destroy(loop, timer);
+	list_del(&timer->entry);
 	free(timer);
 }

@@ -137,8 +137,10 @@ static void libevent_timer_create(struct aura_eventloop *loop, struct aura_timer
 static void timer_dispatch_fn(int fd, short events, void *arg)
 {
 	struct aura_timer *tm = arg;
-	tm->callback(tm->node, tm->callback_arg);
-	if (tm->flags & AURA_TIMER_FREE)
+	tm->callback(tm->node, tm, tm->callback_arg);
+	if (!(tm->flags & AURA_TIMER_PERIODIC))
+		tm->is_active = false;
+	else if (tm->flags & AURA_TIMER_FREE)
 		aura_timer_destroy(tm);
 }
 

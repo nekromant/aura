@@ -11,21 +11,21 @@
 
 
 /*
-static __attribute__((deprecated)) void eventloop_recalculate_timeouts(struct aura_eventloop *loop)
-{
-	loop->poll_timeout = 5000;
-	struct aura_node *pos;
-	list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
-		if (pos->poll_timeout < loop->poll_timeout)
-			loop->poll_timeout = pos->poll_timeout;
-	}
-	slog(4, SLOG_DEBUG, "Adjusted event poll timeout to %d ms", pos->poll_timeout);
-}
-*/
-
+ * static __attribute__((deprecated)) void eventloop_recalculate_timeouts(struct aura_eventloop *loop)
+ * {
+ *      loop->poll_timeout = 5000;
+ *      struct aura_node *pos;
+ *      list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
+ *              if (pos->poll_timeout < loop->poll_timeout)
+ *                      loop->poll_timeout = pos->poll_timeout;
+ *      }
+ *      slog(4, SLOG_DEBUG, "Adjusted event poll timeout to %d ms", pos->poll_timeout);
+ * }
+ */
 static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg)
 {
 	struct aura_eventloop *loop = arg;
+
 	loop->module->fd_action(loop->eventsysdata, fd, act);
 }
 
@@ -41,6 +41,7 @@ static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_
 void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 {
 	struct aura_eventloop *curloop = aura_node_eventloop_get(node);
+	struct aura_timer *pos;
 
 	/* Some sanity checking first */
 	if ((curloop != NULL) && (!node->evtloop_is_autocreated))
@@ -59,6 +60,14 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 
 	/* Set up our fdaction callback to handle descriptor changes */
 	aura_fd_changed_cb(node, eventloop_fd_changed_cb, loop);
+
+	/* Start all node's timers, if any */
+	list_for_each_entry(pos, &node->timer_list, entry) {
+		if (pos->is_active) {
+			pos->is_active = false;
+			aura_timer_start(pos, pos->flags, NULL);
+		}
+	}
 }
 
 /**
@@ -73,10 +82,19 @@ void aura_eventloop_del(struct aura_node *node)
 	const struct aura_pollfds *fds;
 	int i, count;
 	struct aura_eventloop *loop = aura_node_eventloop_get(node);
+	struct aura_timer *pos;
 
 	/* Some sanity checking first */
 	if (loop == NULL)
 		BUG(node, "Specified node is not bound to any eventloop");
+
+	/* Stop all running timers, but keep their 'running' flag */
+	list_for_each_entry(pos, &node->timer_list, entry) {
+		if (pos->is_active) {
+			aura_timer_stop(pos);
+			pos->is_active = true;
+		}
+	}
 
 	loop->module->node_removed(loop, node);
 	/* Remove our node from the list */
@@ -217,6 +235,7 @@ void aura_eventloop_loopexit(struct aura_eventloop *loop, struct timeval *tv)
 void aura_eventloop_report_event(struct aura_eventloop *loop, enum node_event event, struct aura_pollfds *ap)
 {
 	struct aura_node *node;
+
 	if (ap) {
 		if (ap->magic != 0xdeadbeaf)
 			BUG(NULL, "bad APFD: %x", ap);
@@ -243,6 +262,6 @@ struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop)
 	return NULL;
 	// struct event_base *ret = aura_eventsys_backend_get_ebase(loop->eventsysdata);
 	// if (!ret)
-	// 	BUG(NULL, "Failed to retrieve ebase: no libevent support?");
+	//      BUG(NULL, "Failed to retrieve ebase: no libevent support?");
 	// return ret;
 }
