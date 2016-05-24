@@ -1,14 +1,21 @@
 #include <aura/aura.h>
 #include <aura/private.h>
 #include <aura/packetizer.h>
+#include <aura/timer.h>
 
-static int dummy_open(struct aura_node *node, const char *opts)
+void timer_cb_fn(struct aura_node *node, void *arg)
 {
-	slog(1, SLOG_INFO, "Opening dummy transport");
+	struct aura_object *o = aura_etable_find(node->tbl, "ping");
+	if (!o)
+		return;
+	struct aura_buffer *buf = aura_buffer_request(node, 32);
+	memset(buf->data, 12, buf->size);
+	buf->object = o;
+	if (!buf->object)
 
-	return 0;
+	aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
+
 }
-
 
 static void dummy_populate_etable(struct aura_node *node)
 {
@@ -33,6 +40,30 @@ static void dummy_populate_etable(struct aura_node *node)
 	aura_etable_activate(etbl);
 }
 
+
+void online_cb_fn(struct aura_node *node, void *arg)
+{
+	dummy_populate_etable(node);
+	aura_set_status(node, AURA_STATUS_ONLINE);
+}
+
+static int dummy_open(struct aura_node *node, const char *opts)
+{
+	slog(1, SLOG_INFO, "Opening dummy transport");
+	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, node);
+	struct aura_timer *online = aura_timer_create(node, online_cb_fn, node);
+	struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	aura_timer_start(tm, AURA_TIMER_PERIODIC, &tv);
+	tv.tv_sec = 0;
+	tv.tv_usec = 1;
+	aura_timer_start(online, AURA_TIMER_FREE, &tv);
+	return 0;
+}
+
+
+
 static void dummy_close(struct aura_node *node)
 {
 	slog(1, SLOG_INFO, "Closing dummy transport");
@@ -41,17 +72,6 @@ static void dummy_close(struct aura_node *node)
 static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
-
-	if (node->status != AURA_STATUS_ONLINE) {
-		dummy_populate_etable(node);
-		aura_set_status(node, AURA_STATUS_ONLINE);
-	}
-
-	/* queue an event */
-	buf = aura_buffer_request(node, 32);
-	memset(buf->data, 12, buf->size);
-	buf->object = aura_etable_find(node->tbl, "ping");
-	aura_queue_buffer(&node->inbound_buffers, buf);
 
 	while (1) {
 		buf = aura_node_queue_read(node, NODE_QUEUE_OUTBOUND);
@@ -77,13 +97,13 @@ static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
 }
 
 static struct aura_transport dummy = {
-	.name			= "dummy",
-	.open			= dummy_open,
-	.close			= dummy_close,
-	.loop			= dummy_loop,
-	.buffer_overhead	= sizeof(struct aura_packet8),
-	.buffer_offset		= sizeof(struct aura_packet8),
-	.buffer_get		= dummy_buffer_get,
-	.buffer_put		= dummy_buffer_put,
+	.name			  = "dummy",
+	.open			  = dummy_open,
+	.close			  = dummy_close,
+	.loop			  = dummy_loop,
+	.buffer_overhead  = sizeof(struct aura_packet8),
+	.buffer_offset	  = sizeof(struct aura_packet8),
+	.buffer_get		  = dummy_buffer_get,
+	.buffer_put		  = dummy_buffer_put,
 };
 AURA_TRANSPORT(dummy);

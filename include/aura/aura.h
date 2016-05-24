@@ -107,11 +107,10 @@ struct aura_node {
 
 	struct aura_eventloop *loop; /* eventloop structure */
 	int evtloop_is_autocreated;
-	struct timeval periodic_interval;
 	void *eventloop_data; /* eventloop module private data */
 	struct list_head eventloop_node_list;
 	const struct aura_object *current_object;
-
+	struct timeval poll_interval;
 };
 
 
@@ -312,6 +311,7 @@ struct aura_transport
 	 *
 	 * List entry for global transport list */
 	struct list_head registry;
+
 };
 
 /**

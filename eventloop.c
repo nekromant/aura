@@ -57,11 +57,6 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 
 	loop->module->node_added(loop, node);
 
-	/* TODO: Fix this shit */
-	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-	loop->module->periodic(loop, node, &tv);
 	/* Set up our fdaction callback to handle descriptor changes */
 	aura_fd_changed_cb(node, eventloop_fd_changed_cb, loop);
 }

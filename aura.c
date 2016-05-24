@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 
-static void *aura_eventsys_get_autocreate(struct aura_node *node)
+void *aura_node_eventloop_get_autocreate(struct aura_node *node)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get(node);
 
@@ -373,7 +373,7 @@ int aura_core_start_call(struct aura_node *node,
 			 void *arg,
 			 struct aura_buffer *buf)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
 	int isfirst;
 
 	if (!o)
@@ -425,7 +425,7 @@ int aura_core_call(
 	struct aura_buffer *	argbuf)
 {
 	int ret;
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
 
 	if (node->sync_call_running)
 		BUG(node, "Internal bug: Synchronos call within a synchronos call");
@@ -616,7 +616,7 @@ int aura_start_call(
  */
 void aura_wait_status(struct aura_node *node, int status)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
 	while (node->status != status)
 		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
 }
@@ -764,7 +764,7 @@ int aura_get_pending_events(struct aura_node *node)
  */
 int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf)
 {
-	struct aura_eventloop *loop = aura_eventsys_get_autocreate(node);
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
 
 	while (!node->sync_event_count) {
 		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);

@@ -1,8 +1,9 @@
 #ifndef AURA_EVTLOOP_H
 #define AURA_EVTLOOP_H
 
+#include <stdbool.h>
 #include <aura/list.h>
-
+#include <aura/timer.h>
 
 struct aura_pollfds;
 struct aura_node;
@@ -17,6 +18,7 @@ struct aura_eventloop {
 struct aura_eventloop_module {
         const char *name;
         int usage;
+        int timer_size;
         struct list_head linkage;
         int  (*create)(struct aura_eventloop *loop);
         void (*destroy)(struct aura_eventloop *loop);
@@ -25,9 +27,13 @@ struct aura_eventloop_module {
                           int action);
         void (*dispatch)(struct aura_eventloop *loop, int flags);
         void (*loopbreak)(struct aura_eventloop *loop, struct timeval *tv);
-        void (*periodic)(struct aura_eventloop *loop, struct aura_node *node, struct timeval *tv);
         void (*node_added)(struct aura_eventloop *loop, struct aura_node *node);
         void (*node_removed)(struct aura_eventloop *loop, struct aura_node *node);
+
+        void (*timer_create)(struct aura_eventloop *loop, struct aura_timer *tm);
+        void (*timer_start)(struct aura_eventloop *loop, struct aura_timer *tm);
+        void (*timer_stop)(struct aura_eventloop *loop, struct aura_timer *tm);
+        void (*timer_destroy)(struct aura_eventloop *loop, struct aura_timer *tm);
 };
 
 #define AURA_EVENTLOOP_MODULE(s)                                            \
@@ -50,6 +56,6 @@ static inline void aura_eventloop_moduledata_set(struct aura_eventloop *loop,
         loop->eventsysdata = data;
 }
 
-
+void *aura_node_eventloop_get_autocreate(struct aura_node *node);
 
 #endif

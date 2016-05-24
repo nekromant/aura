@@ -25,7 +25,7 @@ SET(SRCS
   buffer.c
   slog.c panic.c utils.c
   transport.c eventloop.c aura.c export.c serdes.c
-  eventloop-factory.c
+  eventloop-factory.c timer.c
   retparse.c queue.c utils-linux.c
   transport-dummy.c
   transport-bench.c
