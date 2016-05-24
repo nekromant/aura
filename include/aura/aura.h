@@ -109,8 +109,8 @@ struct aura_node {
 	int evtloop_is_autocreated;
 	void *eventloop_data; /* eventloop module private data */
 	struct list_head eventloop_node_list;
+	struct list_head timer_list; /* List of timers associated with the node */
 	const struct aura_object *current_object;
-	struct timeval poll_interval;
 };
 
 
@@ -781,7 +781,7 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
 void aura_buffer_release(struct aura_buffer *buf);
 void aura_buffer_destroy(struct aura_buffer *buf);
 void aura_bufferpool_preheat(struct aura_node *nd, int size, int count);
-
+void aura_print_stacktrace();
 
 #include <aura/inlines.h>
 

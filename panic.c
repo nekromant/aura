@@ -19,6 +19,22 @@ int __attribute__((noreturn)) BUG(struct aura_node *node, const char *msg, ...)
 }
 
 
+void aura_print_stacktrace()
+{
+	void *array[TRACE_LEN];
+	size_t size;
+	char **strings;
+	size_t i;
+
+	size = backtrace(array, TRACE_LEN);
+	strings = backtrace_symbols(array, size);
+
+	slog(0, SLOG_DEBUG, "--- Dumping aura stack (%d entries) ---", size);
+	for (i = 0; i < size; i++)
+		slog(0, SLOG_DEBUG, "%s", strings[i]);
+
+	free(strings);
+}
 /**  \addtogroup misc
  *  @{
  */
@@ -33,27 +49,8 @@ int __attribute__((noreturn)) BUG(struct aura_node *node, const char *msg, ...)
  */
 void __attribute__((noreturn)) aura_panic(struct aura_node *node)
 {
-	void *array[TRACE_LEN];
-	size_t size;
-	char **strings;
-	size_t i;
-
 	aura_transport_dump_usage();
-
-#ifndef AURA_DISABLE_BACKTRACE
-	size = backtrace(array, TRACE_LEN);
-	strings = backtrace_symbols(array, size);
-
-	slog(0, SLOG_DEBUG, "--- Dumping aura stack (%d entries) ---", size);
-	for (i = 0; i < size; i++)
-		slog(0, SLOG_DEBUG, "%s", strings[i]);
-#else
-	slog(0, SLOG_DEBUG, "Stackdump disabled. Perhaps your C library sucks");
-#endif
-
-	/* TODO: Dump interesting stuff from node var */
-
-	free(strings);
+	aura_print_stacktrace();
 	exit(128);
 }
 
