@@ -473,7 +473,7 @@ bailout:
  * @param calldonecb
  * @param arg
  * @return -EBADSLT if the requested id is not in etable
- *                 -EIO if serialization failed or another synchronous call for this id is pending
+ *                 -ENODATA if serialization failed or another synchronous call for this id is pending
  *                 -ENOEXEC if the node is currently offline
  */
 int aura_start_call_raw(
@@ -497,7 +497,7 @@ int aura_start_call_raw(
 	va_end(ap);
 
 	if (!buf)
-		return -EIO;
+		return -ENODATA;
 
 	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
 
@@ -578,7 +578,7 @@ int aura_set_event_callback(
  * @param calldonecb
  * @param arg
  * @return -EBADSLT if the requested id is not in etable
- *                 -EIO if serialization failed or another synchronous call for this id is pending
+ *                 -ENODATA if serialization failed or another synchronous call for this id is pending
  *                 -ENOEXEC if the node is currently offline
  */
 int aura_start_call(
@@ -601,7 +601,7 @@ int aura_start_call(
 	buf = aura_serialize(node, o->arg_fmt, o->arglen, ap);
 	va_end(ap);
 	if (!buf)
-		return -EIO;
+		return -ENODATA;
 
 	ret = aura_core_start_call(node, o, calldonecb, arg, buf);
 
@@ -665,7 +665,7 @@ int aura_call_raw(
 
 	if (!buf) {
 		slog(2, SLOG_WARN, "Serialization failed");
-		return -EIO;
+		return -ENODATA;
 	}
 
 	return aura_core_call(node, o, retbuf, buf);
@@ -701,7 +701,7 @@ int aura_call(
 
 	if (!buf) {
 		slog(2, SLOG_WARN, "Serialization failed");
-		return -EIO;
+		return -ENODATA;
 	}
 
 	return aura_core_call(node, o, retbuf, buf);
@@ -911,4 +911,29 @@ void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *
 	/* Now grab all we got from the inbound queue and fire the callbacks */
 	/* TODO: Move inbound handling away from here */
 	aura_handle_inbound(node);
+}
+
+/**
+ * Turn error codes obtained from aura_call() and similar functions
+ * to a meaningful description of what actually happened.
+ * @param  errcode The integer error code
+ * @return         String with description. The string should not be freed or modufied by the caller
+ */
+const char *aura_node_call_strerror(int errcode)
+{
+	switch (errcode)
+	{
+		case 0:
+			return "Call completed";
+		case -EBADSLT:
+			return "No such exported object";
+		case -ENODATA:
+			return "Buffer allocation/marshalling failed";
+		case -ENOEXEC:
+			return "The node is currently offline";
+		case -EIO:
+			return "A call for this object is already running";
+		default:
+			return "Unknown error";
+	}
 }

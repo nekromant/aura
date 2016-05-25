@@ -785,6 +785,7 @@ void aura_print_stacktrace();
 
 #include <aura/inlines.h>
 
+const char *aura_node_call_strerror(int errcode);
 
 #define min_t(type, x, y) ({                                    \
                         type __min1 = (x);                      \
