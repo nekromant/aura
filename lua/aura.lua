@@ -1,5 +1,8 @@
--- Consider aura a singleton
+--- The main aura module
+-- @module aura
+
 local aura = require("auracore");
+
 
 aura.nodes = { }
 
@@ -12,6 +15,29 @@ local function copy (t)
     return target
 end
 
+--- Open a node.
+--
+-- This function opens a node using the specified transport and options
+-- and returns the object to the caller. 
+--
+-- Before you can issue calls on this object you have to ensure it actually
+-- goes online. 
+--
+-- To handle events on the object asynchronously you have to add it to an 
+-- eventloop and call the event dispatching function
+--
+-- When you are done with this node, you can close it using aura.close()
+--
+-- @see aura.status
+-- @see aura.status_cb
+-- @see aura.eventloop
+-- @see eventloop.dispatch
+-- @see aura.close
+-- @usage node = aura.open("dummy", "opts")
+-- @tparam string name Transport name
+-- @tparam string params Transport options, if any
+--
+-- @return The node object
 aura.open = function(name, params)
    local mt = {}
 
@@ -33,6 +59,15 @@ aura.open = function(name, params)
    return node_tbl;
 end
 
+
+
+---
+-- Create an eventloop with one or more nodes assiciated with it.
+-- This function accepts one or more nodes as parameters. 
+--
+-- @tparam node ... One or more nodes
+-- @treturn eventloop eventloop instance created
+
 aura.eventloop = function(...)
    local loop = copy(require("aura/loop"))
    loop:init(...);
@@ -40,6 +75,11 @@ aura.eventloop = function(...)
    return loop
 end
 
+--- 
+-- Dump some information about currently open nodes to stdout
+--
+-- @return 
+--
 aura.dumpnodes = function()
    for n in pairs(aura.nodes) do
       print(n)

@@ -42,8 +42,9 @@ PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
 PKG_CHECK_MODULES(LIBEVENT libevent)
 FIND_PACKAGE(Doxygen)
-find_program(LUADOC_FOUND luadoc)
-message("${LUADOC_FOUND}")
+find_program(LDOC_FOUND ldoc)
+
+
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
@@ -126,7 +127,7 @@ if(LIBUSB_FOUND AND LUA_FOUND)
 endif()
 
 IF(LUA_FOUND)
-  SET(SRCS ${SRCS} bindings-lua.c utils-lua.c)
+  SET(SRCS ${SRCS} lua/bindings-lua.c utils-lua.c)
   SET(BINDINGS ${BINDINGS} lua)
 ENDIF()
 
@@ -233,10 +234,10 @@ else()
   message("Doxygen docs:              disabled")
 endif()
 
-if(LUADOC_FOUND)
-  message("Luadoc docs:               enabled")
+if(LDOC_FOUND)
+  message("ldoc docs:                 enabled")
 else()
-  message("Luadoc docs:               disabled")
+  message("ldoc docs:                 disabled")
 endif()
 
 INSTALL(TARGETS aurashared LIBRARY
@@ -316,29 +317,13 @@ if (DOXYGEN_FOUND)
 endif()
 
 
-if (LUADOC_FOUND)
-  file(COPY ${CMAKE_SOURCE_DIR}/lua DESTINATION ${CMAKE_BINARY_DIR})
-  add_custom_command(
-    TARGET aurashared
-    PRE_BUILD
-    COMMAND ./scripts/extract-luadoc.sh bindings-lua.c > ${CMAKE_BINARY_DIR}/lua/auracore.lua
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Preparing luadoc dummy"
-  )
-
-  SET(LUA_DOC_SRCS,"aura*.lua aura/loop.lua aura/node.lua")
+if (LDOC_FOUND)
   add_custom_command(TARGET aurashared
                     POST_BUILD
-                    COMMAND luadoc -d ${CMAKE_BINARY_DIR}/luadoc/ ${LUA_DOC_SRCS}
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lua
-                    COMMENT "Generating luadoc documentation")
+                    COMMAND ldoc -M -d ${CMAKE_BINARY_DIR}/ldoc/ lua/
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                  COMMENT "Generating documentation for lua bindings")
 endif()
-#add_custom_command(TARGET aurashared
-#                   PRE_BUILD
-#                   COMMAND luadoc -d ${CMAKE_BINARY_DIR}/doc/ *
-#                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua
-#                   COMMENT "Generating luadoc documentation")
-#
 
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
        DESTINATION lib/${CMAKE_LIBRARY_PATH}/pkgconfig/)

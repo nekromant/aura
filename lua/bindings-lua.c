@@ -7,6 +7,9 @@
 #include <lauxlib.h>
 #include <math.h>
 
+/***
+@module aura
+*/
 #define REF_NODE_CONTAINER (1 << 0)
 #define REF_STATUS_CB      (1 << 1)
 #define REF_ETABLE_CB      (1 << 2)
@@ -369,6 +372,19 @@ err:
 	return NULL;
 }
 
+
+/***
+Open a node (private).
+
+This is an internal function, implemented in C. User should NOT call it directly.
+Call aura.open() wrapper instead
+
+@see aura.open
+@function aura.core_open
+@tparam string name transport name
+@tparam string opts transport options, if any
+@return The node object
+*/
 static int l_open_node(lua_State *L)
 {
 	struct aura_node *node;
@@ -382,6 +398,12 @@ static int l_open_node(lua_State *L)
 	return check_node_and_push(L, node);
 }
 
+/***
+Close node. This function will block until the node's been closed and freed
+
+@function aura.close
+@tparam node node An open node to close
+*/
 static int l_close_node(lua_State *L)
 {
 	struct laura_node *lnode = lua_fetch_node(L, -1);
@@ -519,7 +541,6 @@ static int laura_do_async_call(lua_State *L)
 
 
 	/* Now we're sane! */
-
 	buf = lua_to_buffer(L, lnode->node, 5, o);
 	if (!buf)
 		return luaL_error(L, "Serializer failed!");
@@ -562,12 +583,12 @@ static int l_node_index(lua_State *L)
 
 	if (AURA_STATUS_ONLINE != aura_get_status(lnode->node))
 		return luaL_error(L, "Attempt to call remote method %s when node offline",
-			lnode->current_call);
+				  lnode->current_call);
 
 	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
 	if (!o)
 		return luaL_error(L, "Internal aura bug: failed to lookup object: %s",
-			lnode->current_call);
+				  lnode->current_call);
 
 	if (strcmp("__", name) == 0)
 		lua_pushcfunction(L, laura_do_async_call);
@@ -819,10 +840,15 @@ static int l_set_node_container(lua_State *L)
 	return 0;
 }
 
+/***
+Get current node status.
+The status is either aura.STATUS_ONLINE or aura.STATUS_OFFLINE
+@function aura.status
+@tparam node node An open node object to operate on
+*/
 static int l_status(lua_State *L)
 {
 	struct laura_node *lnode;
-
 	TRACE();
 	aura_check_args(L, 1);
 	lnode = lua_fetch_node(L, 1);
@@ -845,6 +871,15 @@ static void status_cb(struct aura_node *node, int newstatus, void *arg)
 	lua_call(L, 3, 0);
 }
 
+/***
+ Setup the callback for node status change notifications.
+
+@function aura.status_cb
+@tparam node node The node that we want to get status notifications about
+@tparam function callback the function to call when status change occurs
+@param arg user argument to pass to the callback
+
+ */
 static int l_set_status_change_cb(lua_State *L)
 {
 	struct laura_node *lnode;
@@ -875,6 +910,23 @@ static int l_set_status_change_cb(lua_State *L)
 	return 0;
 }
 
+/***
+Terminate the event processing loop (Internal).
+
+Do not call this functuion directly.
+@see eventloop.loopexit
+The timeout is given in seconds, fractions of seconds are welcome. Zero timeout
+or omitting the second argument will cause immediate eventloop termination.
+
+ProTIP: You can call this function BEFORE aura.eventloop_dispatch()
+
+@function aura.eventloop_loopexit
+@param loop [loop] eventloop instance
+@param timeout [number, optional] if specified, the eventloop will be terminated
+      after timeout number of seconds. If no timeout given - the eventloop will be
+      stop immediately.
+
+*/
 static int l_eventloop_loopexit(lua_State *L)
 {
 	TRACE();
@@ -900,6 +952,15 @@ static int l_eventloop_loopexit(lua_State *L)
 	return 0;
 }
 
+/***
+ Run the event processing loop and dispatch callbacks.
+
+@function aura.eventloop_dispatch
+@param loop [loop] eventloop instance
+@param flags [number, optional] bitmask of the following flags
+       aura.EVTLOOP_ONCE and aura.EVTLOOP_NONBLOCK
+
+*/
 static int l_eventloop_dispatch(lua_State *L)
 {
 	struct laura_eventloop *lloop;
@@ -929,18 +990,15 @@ static const luaL_Reg libfuncs[] = {
 	{ "core_open",		       l_open_node	      },
 	{ "core_close",		       l_close_node	      },
 	{ "wait_status",	       l_wait_status	      },
-
-	{ "status",		       	   l_status		      },
+	{ "status",		       l_status		      },
 	{ "status_cb",		       l_set_status_change_cb },
-
 	{ "set_node_containing_table", l_set_node_container   },
 	{ "eventloop_create",	       l_eventloop_create     },
 	{ "eventloop_add",	       l_eventloop_add	      },
 	{ "eventloop_del",	       l_eventloop_del	      },
 	{ "eventloop_destroy",	       l_eventloop_destroy    },
-
-	{ "eventloop_dispatch",		       l_eventloop_dispatch	      },
-	{ "eventloop_loopexit",		       l_eventloop_loopexit	      },
+	{ "eventloop_dispatch",	       l_eventloop_dispatch   },
+	{ "eventloop_loopexit",	       l_eventloop_loopexit   },
 
 /*
  *      { "status_cb",                 l_set_status_change_cb        },
