@@ -41,7 +41,9 @@ PKG_CHECK_MODULES(LUA52 lua5.2)
 PKG_CHECK_MODULES(LUA51 lua5.1)
 PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
 PKG_CHECK_MODULES(LIBEVENT libevent)
-
+FIND_PACKAGE(Doxygen)
+find_program(LUADOC_FOUND luadoc)
+message("${LUADOC_FOUND}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
@@ -215,14 +217,26 @@ message("Test suites to run:        ${AURA_TEST_SUITES_TO_RUN}")
 message("Test coverage upload:      ${AURA_COVERALLS}")
 
 if (AURA_USE_BUFFER_POOL)
-message("Buffer pooling:            enabled")
+  message("Buffer pooling:            enabled")
 else()
-message("Buffer pooling:            disabled")
+  message("Buffer pooling:            disabled")
 endif()
 
 if(LUA_FOUND)
   message("lua .so dir:               ${CMAKE_INSTALL_PREFIX}/${LUA_CPATH}")
   message("lua lib dir:               ${CMAKE_INSTALL_PREFIX}/${LUA_LPATH}")
+endif()
+
+if(DOXYGEN_FOUND)
+  message("Doxygen docs:              enabled")
+else()
+  message("Doxygen docs:              disabled")
+endif()
+
+if(LUADOC_FOUND)
+  message("Luadoc docs:               enabled")
+else()
+  message("Luadoc docs:               disabled")
 endif()
 
 INSTALL(TARGETS aurashared LIBRARY
@@ -284,6 +298,47 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
 )
+
+
+if (DOXYGEN_FOUND)
+  CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
+  )
+
+  add_custom_command(
+    TARGET aurashared
+    POST_BUILD
+    COMMAND doxygen > doxygen.log
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running doxygen"
+  )
+endif()
+
+
+if (LUADOC_FOUND)
+  file(COPY ${CMAKE_SOURCE_DIR}/lua DESTINATION ${CMAKE_BINARY_DIR})
+  add_custom_command(
+    TARGET aurashared
+    PRE_BUILD
+    COMMAND ./scripts/extract-luadoc.sh bindings-lua.c > ${CMAKE_BINARY_DIR}/lua/auracore.lua
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Preparing luadoc dummy"
+  )
+
+  SET(LUA_DOC_SRCS,"aura*.lua aura/loop.lua aura/node.lua")
+  add_custom_command(TARGET aurashared
+                    POST_BUILD
+                    COMMAND luadoc -d ${CMAKE_BINARY_DIR}/luadoc/ ${LUA_DOC_SRCS}
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/lua
+                    COMMENT "Generating luadoc documentation")
+endif()
+#add_custom_command(TARGET aurashared
+#                   PRE_BUILD
+#                   COMMAND luadoc -d ${CMAKE_BINARY_DIR}/doc/ *
+#                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/lua
+#                   COMMENT "Generating luadoc documentation")
+#
 
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
        DESTINATION lib/${CMAKE_LIBRARY_PATH}/pkgconfig/)
