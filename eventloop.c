@@ -3,30 +3,14 @@
 #include <sys/eventfd.h>
 #include <aura/eventloop.h>
 
-/* FixMe: The current timeout handling is pretty naive. But let it be so for now */
-
 /** \addtogroup loop
  *  @{
  */
 
-
-/*
- * static __attribute__((deprecated)) void eventloop_recalculate_timeouts(struct aura_eventloop *loop)
- * {
- *      loop->poll_timeout = 5000;
- *      struct aura_node *pos;
- *      list_for_each_entry(pos, &loop->nodelist, eventloop_node_list) {
- *              if (pos->poll_timeout < loop->poll_timeout)
- *                      loop->poll_timeout = pos->poll_timeout;
- *      }
- *      slog(4, SLOG_DEBUG, "Adjusted event poll timeout to %d ms", pos->poll_timeout);
- * }
- */
 static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg)
 {
 	struct aura_eventloop *loop = arg;
-
-	loop->module->fd_action(loop->eventsysdata, fd, act);
+	loop->module->fd_action(loop, fd, act);
 }
 
 /**
@@ -232,18 +216,17 @@ void aura_eventloop_loopexit(struct aura_eventloop *loop, struct timeval *tv)
  * @param loop
  * @param ap
  */
-void aura_eventloop_report_event(struct aura_eventloop *loop, enum node_event event, struct aura_pollfds *ap)
+void __attribute__((deprecated)) aura_eventloop_report_event(struct aura_eventloop *loop, enum node_event event, struct aura_pollfds *ap)
 {
 	struct aura_node *node;
-
 	if (ap) {
 		if (ap->magic != 0xdeadbeaf)
 			BUG(NULL, "bad APFD: %x", ap);
-		node = ap->node;
-		aura_process_node_event(node, ap);
+		node=ap->node;
+		aura_node_dispatch_event(node, event, ap);
 	} else {
 		list_for_each_entry(node, &loop->nodelist, eventloop_node_list) {
-			aura_process_node_event(node, NULL);
+			aura_node_dispatch_event(node, event, ap);
 		}
 	}
 }

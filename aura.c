@@ -156,80 +156,69 @@ void aura_close(struct aura_node *node)
  */
 
 
-/* This one is small, but tricky */
-static void aura_handle_inbound(struct aura_node *node)
+void aura_node_write(struct aura_node *node, struct aura_buffer *buf)
 {
-	while (1) {
-		struct aura_buffer *buf;
-		struct aura_object *o;
+	struct aura_object *o = buf->object;
 
-		buf = aura_dequeue_buffer(&node->inbound_buffers);
-		if (!buf)
-			break;
+	node->current_object = o;
+	aura_buffer_rewind(buf);
 
-		o = buf->object;
-		node->current_object = o;
-		aura_buffer_rewind(buf);
+	slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d",
+	     object_is_method(o) ? "response" : "event",
+	     o->id, o->name, node->sync_call_running);
 
-		slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d",
-		     object_is_method(o) ? "response" : "event",
-		     o->id, o->name, node->sync_call_running);
-
-		if (object_is_method(o)) {
-			if (!o->pending) {
-				slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)",
-				     o->id, o->name);
-				aura_buffer_release(buf);
-			} else if (o->calldonecb) {
-				slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
-				     o->id, o->name);
-				o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
-				aura_buffer_release(buf);
-			} else if (node->sync_call_running) {
-				slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
-				     o->id, o->name);
-				node->sync_call_result = AURA_CALL_COMPLETED;
-				node->sync_ret_buf = buf;
+	if (object_is_method(o)) {
+		if (!o->pending) {
+			slog(0, SLOG_WARN, "Dropping orphan call result %d (%s)",
+			     o->id, o->name);
+			aura_buffer_release(buf);
+		} else if (o->calldonecb) {
+			slog(4, SLOG_DEBUG, "Callback for method/event %d (%s)",
+			     o->id, o->name);
+			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
+			aura_buffer_release(buf);
+		} else if (node->sync_call_running) {
+			slog(4, SLOG_DEBUG, "Completing call for method %d (%s)",
+			     o->id, o->name);
+			node->sync_call_result = AURA_CALL_COMPLETED;
+			node->sync_ret_buf = buf;
+		}
+		o->pending--;
+		if (o->pending < 0)
+			BUG(node, "Internal BUG: pending evt count lesser than zero");
+	} else {
+		/* This one is tricky. We have an event with no callback */
+		if (o->calldonecb) {
+			slog(4, SLOG_DEBUG, "Callback for event %d (%s)",
+			     o->id, o->name);
+			o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
+			aura_buffer_release(buf);
+		} else if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
+			/* If we have an overrun - drop the oldest event to free up space first*/
+			if (node->sync_event_max <= node->sync_event_count) {
+				struct aura_buffer *todrop;
+				const struct aura_object *dummy;
+				int ret = aura_get_next_event(node, &dummy, &todrop);
+				if (ret != 0)
+					BUG(node, "Internal bug, no next event");
+				aura_buffer_release(todrop);
 			}
-			o->pending--;
-			if (o->pending < 0)
-				BUG(node, "Internal BUG: pending evt count lesser than zero");
+
+			/* Now just queue the next one */
+			aura_queue_buffer(&node->event_buffers, buf);
+			node->sync_event_count++;
+			slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout",
+			     o->id, o->name);
 		} else {
-			/* This one is tricky. We have an event with no callback */
-			if (o->calldonecb) {
-				slog(4, SLOG_DEBUG, "Callback for event %d (%s)",
+			/* Last resort - try the catch-all event callback */
+			if (node->unhandled_evt_cb)
+				node->unhandled_evt_cb(node, buf, node->unhandled_evt_arg);
+			else    /* Or just drop it with a warning */
+				slog(0, SLOG_WARN, "Dropping event %d (%s)",
 				     o->id, o->name);
-				o->calldonecb(node, AURA_CALL_COMPLETED, buf, o->arg);
-				aura_buffer_release(buf);
-			} else if (node->sync_event_max > 0) { /* Queue it up into event_queue if it's enabled */
-				/* If we have an overrun - drop the oldest event to free up space first*/
-				if (node->sync_event_max <= node->sync_event_count) {
-					struct aura_buffer *todrop;
-					const struct aura_object *dummy;
-					int ret = aura_get_next_event(node, &dummy, &todrop);
-					if (ret != 0)
-						BUG(node, "Internal bug, no next event");
-					aura_buffer_release(todrop);
-				}
-
-				/* Now just queue the next one */
-				aura_queue_buffer(&node->event_buffers, buf);
-				node->sync_event_count++;
-				slog(4, SLOG_DEBUG, "Queued event %d (%s) for sync readout",
-				     o->id, o->name);
-			} else {
-				/* Last resort - try the catch-all event callback */
-				if (node->unhandled_evt_cb)
-					node->unhandled_evt_cb(node, buf, node->unhandled_evt_arg);
-				else    /* Or just drop it with a warning */
-					slog(0, SLOG_WARN, "Dropping event %d (%s)",
-					     o->id, o->name);
-				aura_buffer_release(buf);
-			}
+			aura_buffer_release(buf);
 		}
 	}
-
-	node->current_object = NULL;
 }
 
 /**
@@ -383,7 +372,6 @@ int aura_core_start_call(struct aura_node *node,
 			 struct aura_buffer *buf)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
-	int isfirst;
 
 	if (!o)
 		return -EBADSLT;
@@ -397,20 +385,16 @@ int aura_core_start_call(struct aura_node *node,
 	if (!loop)
 		BUG(node, "Node has no assosiated event system. Fix your code!");
 
-	isfirst = list_empty(&node->outbound_buffers);
-
 	o->calldonecb = calldonecb;
 	o->arg = arg;
 	buf->object = o;
 	o->pending++;
 
+	bool is_first = list_empty(&node->outbound_buffers);
 	aura_queue_buffer(&node->outbound_buffers, buf);
-	slog(4, SLOG_DEBUG, "Queued call for id %d (%s), notifying node", o->id, o->name);
-
-	if (isfirst) {
-		slog(4, SLOG_DEBUG, "Notifying transport of queue status change");
-		aura_eventloop_report_event(loop, NODE_EVENT_HAVE_OUTBOUND, NULL);
-	}
+	/* If this is the first buffer, notify transport immediately */
+	if (is_first)
+		node->tr->loop(node, NULL);
 
 	return 0;
 }
@@ -861,8 +845,6 @@ void aura_set_status(struct aura_node *node, int status)
 		slog(2, SLOG_INFO, "Node %s going offline, clearing outbound queue",
 		     node->tr->name);
 		cleanup_buffer_queue(&node->outbound_buffers, false);
-		/* Handle any remaining inbound messages */
-		aura_handle_inbound(node);
 		/* Cancel any pending calls */
 		for (i = 0; i < node->tbl->next; i++) {
 			struct aura_object *o;
@@ -899,18 +881,17 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
  */
 
 /**
- * Process an event for the node.
- * If it is just periodic polling fd can be NULL. This
+ * Process an event for the node. This is the actual workhorse that gets the
+ * job done. It's called by the underlying eventsystem. User should not call
+ * this one directly
  *
- * @param node
- * @param fd
+ * @param node - the node
+ * @param fd - the event to process
+ * @param fd - the descriptor that caused this event (if any)
  */
-void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd)
+void aura_node_dispatch_event(struct aura_node *node, enum node_event event, const struct aura_pollfds *fd)
 {
-	node->tr->loop(node, fd);
-	/* Now grab all we got from the inbound queue and fire the callbacks */
-	/* TODO: Move inbound handling away from here */
-	aura_handle_inbound(node);
+		node->tr->loop(node, fd);
 }
 
 /**

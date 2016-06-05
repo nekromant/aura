@@ -13,6 +13,7 @@ struct aura_eventloop {
         struct list_head nodelist;
         void *eventsysdata;
         const struct aura_eventloop_module *module;
+        int deferred_inbound;
 };
 
 struct aura_eventloop_module {
@@ -34,6 +35,8 @@ struct aura_eventloop_module {
         void (*timer_start)(struct aura_eventloop *loop, struct aura_timer *tm);
         void (*timer_stop)(struct aura_eventloop *loop, struct aura_timer *tm);
         void (*timer_destroy)(struct aura_eventloop *loop, struct aura_timer *tm);
+
+        void (*periodic_ctl)(struct aura_eventloop *loop, bool enable);
 };
 
 #define AURA_EVENTLOOP_MODULE(s)                                            \

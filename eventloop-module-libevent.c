@@ -11,8 +11,7 @@ struct aura_libevent_data {
 };
 
 struct aura_libevent_node_data {
-	struct event inbound_event;
-	struct event outbound_event;
+	bool periodic_active;
 };
 
 struct aura_libevent_timer {
@@ -93,6 +92,7 @@ static void libevent_dispatch(struct aura_eventloop *loop, int flags)
 		libevent_flags |= EVLOOP_NONBLOCK;
 	if (flags & AURA_EVTLOOP_ONCE)
 		libevent_flags |= EVLOOP_ONCE;
+
 	if (-1 == event_base_loop(epd->ebase, libevent_flags))
 		BUG(NULL, "event_base_loop() returned -1");
 }
@@ -106,6 +106,10 @@ static void libevent_loopbreak(struct aura_eventloop *loop, struct timeval *tv)
 
 static void libevent_node_added(struct aura_eventloop *loop, struct aura_node *node)
 {
+	struct aura_libevent_data *epd = aura_eventloop_moduledata_get(loop);
+	if (!epd)
+		BUG(node, "Internal BUG: No moduledata in loop");
+
 	struct aura_libevent_node_data *ldata = aura_node_eventloopdata_get(node);
 	if (ldata)
 		slog(0, SLOG_WARN, "Added node with eventsystem data present. We're likely leaking here");
@@ -113,6 +117,7 @@ static void libevent_node_added(struct aura_eventloop *loop, struct aura_node *n
 	ldata = calloc(1, sizeof(*ldata));
 	if (!ldata)
 		BUG(node, "FATAL: Memory allocation failed!");
+
 	aura_node_eventloopdata_set(node, ldata);
 }
 
@@ -123,8 +128,6 @@ static void libevent_node_removed(struct aura_eventloop *loop, struct aura_node 
 		slog(0, SLOG_ERROR, "Attempt to remove node with no eventloopdata. WTF?");
 		return;
 	}
-	event_del(&ldata->inbound_event);
-	event_del(&ldata->outbound_event);
 	aura_node_eventloopdata_set(node, NULL);
 	free(ldata);
 }
@@ -168,6 +171,11 @@ static void libevent_timer_destroy(struct aura_eventloop *loop, struct aura_time
 	/* Nothing to do */
 }
 
+static void libevent_periodic_ctl(struct aura_eventloop *loop, bool enable)
+{
+	slog(4, SLOG_DEBUG, "libevent: periodic ctl %d", enable);
+
+}
 
 static struct aura_eventloop_module levt =
 {
@@ -184,47 +192,7 @@ static struct aura_eventloop_module levt =
 	.loopbreak = libevent_loopbreak,
 	.node_added = libevent_node_added,
 	.node_removed = libevent_node_removed,
+	.periodic_ctl = libevent_periodic_ctl,
 };
 
 AURA_EVENTLOOP_MODULE(levt);
-
-#if 0
-
-static void interrupt_cb_fn(evutil_socket_t fd, short evt, void *arg)
-{
-	struct aura_libevent_data *epd = arg;
-	aura_eventloop_report_event(epd->loopdata, NULL);
-	event_base_loopbreak(epd->ebase);
-}
-
-
-
-
-#define NUM_EVTS 1
-int aura_eventsys_backend_wait(void *backend, int timeout_ms)
-{
-	struct aura_libevent_data *epd = backend;
-
-	struct timeval delay;
-	delay.tv_usec = timeout_ms*1000;
-	delay.tv_sec = 0;
-
-	if (0 != event_add(epd->ievt, &delay))
-		return BUG(NULL, "evtsys-libevent: Failed to add event");
-
-
-	int ret = event_base_dispatch(epd->ebase);
-	if (-1 == ret)
-		return BUG(NULL, "event_base_dispatch returned -1");
-
-	return ret;
-}
-
-
-struct event_base *aura_eventsys_backend_get_ebase(void *backend)
-{
-	struct aura_libevent_data *epd = backend;
-	return epd->ebase;
-}
-
-#endif

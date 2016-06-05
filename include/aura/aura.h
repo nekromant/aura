@@ -111,6 +111,7 @@ struct aura_node {
 	struct list_head eventloop_node_list;
 	struct list_head timer_list; /* List of timers associated with the node */
 	const struct aura_object *current_object;
+
 };
 
 

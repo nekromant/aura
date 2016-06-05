@@ -17,7 +17,7 @@ static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg
 	memset(buf->data, 12, buf->size);
 	buf->object = o;
 	if (buf->object)
-		aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
+		aura_node_write(node, buf);
 }
 
 static void dummy_populate_etable(struct aura_node *node)
@@ -79,10 +79,10 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	struct aura_buffer *buf;
 
 	while (1) {
-		buf = aura_node_queue_read(node, NODE_QUEUE_OUTBOUND);
+		buf = aura_node_read(node);
 		if (!buf)
 			break;
-		aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
+		aura_node_write(node, buf);
 	}
 }
 

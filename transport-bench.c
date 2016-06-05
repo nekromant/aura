@@ -67,10 +67,10 @@ static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
 	}
 
 	while (1) {
-		buf = aura_node_queue_read(node, NODE_QUEUE_OUTBOUND);
+		buf = aura_node_read(node);
 		if (!buf)
 			break;
-		aura_node_queue_write(node, NODE_QUEUE_INBOUND, buf);
+		aura_node_write(node, buf);
 	}
 }
 
