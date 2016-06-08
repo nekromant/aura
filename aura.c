@@ -610,8 +610,10 @@ int aura_start_call(
 void aura_wait_status(struct aura_node *node, int status)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
+	node->waiting_for_status = true;
 	while (node->status != status)
 		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
+	node->waiting_for_status = false;
 }
 
 

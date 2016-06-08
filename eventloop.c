@@ -196,6 +196,20 @@ void aura_eventloop_destroy(struct aura_eventloop *loop)
  */
 void aura_eventloop_dispatch(struct aura_eventloop *loop, int flags)
 {
+	struct aura_node *node;
+	list_for_each_entry(node, &loop->nodelist, eventloop_node_list)
+	{
+		if (!node->start_event_sent) {
+			node->start_event_sent = true;
+			slog(0, SLOG_DEBUG, "started!");
+			aura_node_dispatch_event(node, NODE_EVENT_STARTED, NULL);
+			/* If we're waiting for a specific status - return now!
+				The node may go online handling the 'started' event
+			*/
+			if (node->waiting_for_status)
+				return;
+		}
+	}
 	loop->module->dispatch(loop, flags);
 }
 

@@ -77,6 +77,7 @@ struct usb_dev_info {
 
 	/* Usb device string */
 	struct ncusb_devwatch_data	dev_descr;
+	struct aura_timer *timer;
 };
 
 enum usb_requests {
@@ -224,7 +225,9 @@ static void cb_parse_object(struct libusb_transfer *transfer)
 	char is_method;
 	char *name, *afmt, *rfmt;
 
-	check_control(transfer);
+	if (0 != check_control(transfer))
+		return;
+
 	name = (char *)libusb_control_transfer_get_data(transfer);
 
 	is_method = *name++;
@@ -352,7 +355,6 @@ static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 
 	inf->state = AUSB_DEVICE_INIT; /* Change our state */
 	inf->cbusy = true;
-
 	slog(4, SLOG_DEBUG, "usb: Device opened, info packet requested");
 };
 
@@ -392,13 +394,13 @@ static int usb_open(struct aura_node *node, const char *opts)
 {
 	int ret;
 	struct usb_dev_info *inf = calloc(1, sizeof(*inf));
-
 	if (!inf)
 		return -ENOMEM;
 
 	ret = libusb_init(&inf->ctx);
 	if (ret != 0)
 		goto err_free_inf;
+
 
 	inf->io_buf_size = 256;
 	inf->optbuf = strdup(opts);
@@ -411,13 +413,17 @@ static int usb_open(struct aura_node *node, const char *opts)
 	ncusb_start_descriptor_watching(node, inf->ctx);
 	aura_set_transportdata(node, inf);
 
+	inf->timer = ncusb_timer_create(node, inf->ctx);
+	if (!inf->timer)
+		goto err_libusb_exit;
+
 	slog(4, SLOG_INFO, "usb: vid 0x%x pid 0x%x vendor %s product %s serial %s",
 	     inf->dev_descr.vid, inf->dev_descr.pid, inf->dev_descr.vendor,
 	     inf->dev_descr.product, inf->dev_descr.serial);
 
 	inf->ctrlbuf = malloc(inf->io_buf_size);
 	if (!inf->ctrlbuf)
-		goto err_libusb_exit;
+		goto err_free_timer;
 	inf->itransfer = libusb_alloc_transfer(0);
 	if (!inf->itransfer)
 		goto err_free_cbuf;
@@ -434,6 +440,8 @@ err_free_int:
 	libusb_free_transfer(inf->itransfer);
 err_free_cbuf:
 	free(inf->ctrlbuf);
+err_free_timer:
+	aura_timer_destroy(inf->timer);
 err_libusb_exit:
 	libusb_exit(inf->ctx);
 err_free_inf:
@@ -503,7 +511,8 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 	buf->object = o;
 	/* Position the buffer at the start of the responses */
 	buf->pos = LIBUSB_CONTROL_SETUP_SIZE + sizeof(struct usb_event_packet);
-	aura_queue_buffer(&node->inbound_buffers, buf);
+	aura_node_write(node, buf);
+
 	return;
 
 panic:
@@ -581,12 +590,8 @@ static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	struct timeval tv = {
-		.tv_sec		= 0,
-		.tv_usec	= 0
-	};
 
-	libusb_handle_events_timeout(inf->ctx, &tv);
+	ncusb_handle_events_nonblock_once(node, inf->ctx, inf->timer);
 
 	if (inf->cbusy)
 		return;

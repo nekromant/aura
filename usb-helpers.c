@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <libusb.h>
 #include <aura/usb_helpers.h>
+#include <aura/timer.h>
 
 
 void ncusb_print_libusb_transfer(struct libusb_transfer *p_t)
@@ -119,7 +120,6 @@ struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx,
 	return found;
 }
 
-
 static int hotplug_callback_fn(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event, void *user_data)
 {
 	struct ncusb_devwatch_data *d = user_data;
@@ -163,11 +163,14 @@ void ncusb_start_descriptor_watching(struct aura_node *node, libusb_context *ctx
 	const struct libusb_pollfd **fds_data = libusb_get_pollfds(ctx);
 	const struct libusb_pollfd **fds = fds_data;
 
+	slog(4, SLOG_DEBUG, "Adding current descriptors to eventloop");
 	while (*fds != NULL) {
 		pollfd_added_cb((*fds)->fd, (*fds)->events, node);
+		slog(4, SLOG_DEBUG, "   ===> %d", (*fds)->fd);
 		fds++;
 	}
 	free(fds_data);
+	slog(4, SLOG_DEBUG, "Enablind fd change callback");
 	/* Register a callback */
 	libusb_set_pollfd_notifiers(ctx, pollfd_added_cb, pollfd_removed_cb, node);
 }
@@ -181,4 +184,50 @@ int ncusb_watch_for_device(libusb_context *		ctx,
 						LIBUSB_HOTPLUG_MATCH_ANY,
 						hotplug_callback_fn,
 						dwatch, NULL);
+}
+
+void ncusb_handle_events_nonblock_once(struct aura_node *	node,
+				       struct libusb_context *	ctx,
+				       struct aura_timer *	tm)
+{
+	struct timeval tv = {
+		.tv_sec		= 0,
+		.tv_usec	= 0
+	};
+
+	libusb_handle_events_timeout(ctx, &tv);
+
+	int ret = libusb_get_next_timeout(ctx, &tv);
+	if (ret == LIBUSB_ERROR_OTHER)
+		BUG(node, "libusb_get_next_timeout_failed");
+
+	if (aura_get_status(node) != AURA_STATUS_ONLINE ){
+		/* libusb workaround
+		It looks like libusb actually dispatches hotplug callbacks
+		whenever we call libusb_handle_events(), and out own eventloop
+		will never get notified from a descriptor when that happends to call it.
+		Therefore, we always schedule libusb_handle_events() to be
+		called at least every 250ms, when out node's offline
+		(e.g. when we're waiting for device to arrive)
+		Life's a bitch, baby!
+		*/
+		tv.tv_usec = 250000;
+		ret = 1;
+	}
+
+	if (ret == 1) {
+		aura_timer_stop(tm);
+		aura_timer_start(tm, 0, &tv);
+	}
+
+}
+
+static void hotplug_timer_fn(struct aura_node *node, struct aura_timer *tm, void *arg)
+{
+	ncusb_handle_events_nonblock_once(node, arg, tm);
+}
+
+struct aura_timer *ncusb_timer_create(struct aura_node *node, struct libusb_context *ctx)
+{
+	return aura_timer_create(node, hotplug_timer_fn, ctx);
 }

@@ -33,6 +33,7 @@ struct usb_dev_info {
 
 	/* Usb device string */
 	struct ncusb_devwatch_data	dev_descr;
+	struct aura_timer *timer;
 };
 
 static void usb_panic_and_reset_state(struct aura_node *node)
@@ -201,15 +202,19 @@ static int susb_open(struct aura_node *node, const char *conf)
 	inf->dev_descr.arg = inf;
 	inf->node = node;
 
+	inf->timer = ncusb_timer_create(node, inf->ctx);
+	if (!inf->timer)
+		goto err_free_ct;
+
 	/* We no not need this state anymore */
 	lua_close(L);
 	aura_set_transportdata(node, inf);
 
+	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 	ncusb_start_descriptor_watching(node, inf->ctx);
 	slog(1, SLOG_INFO, "usb: Now looking for a device %x:%x %s/%s/%s",
 	     inf->dev_descr.vid, inf->dev_descr.pid,
 	     inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
-	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 
 	return 0;
 err_free_ct:
@@ -264,8 +269,8 @@ static void cb_call_done(struct libusb_transfer *transfer)
 	/* It only makes sense when we succeed */
 	if (0 == check_control(transfer)) {
 		slog(4, SLOG_DEBUG, "Requeuing!");
-		buf = aura_dequeue_buffer(&inf->node->outbound_buffers);
-		aura_queue_buffer(&node->inbound_buffers, buf);
+		buf = aura_node_read(node);
+		aura_node_write(node, buf);
 		inf->current_buffer = NULL;
 	}
 }
@@ -331,12 +336,10 @@ static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-	struct timeval tv = {
-		.tv_sec		= 0,
-		.tv_usec	= 0
-	};
 
-	libusb_handle_events_timeout(inf->ctx, &tv);
+
+	ncusb_handle_events_nonblock_once(node, inf->ctx, inf->timer);
+
 	if (inf->cbusy)
 		return;
 

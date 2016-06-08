@@ -2,9 +2,8 @@
 #define AURA_PRIVATE_H
 
 enum node_event {
+		NODE_EVENT_STARTED,
 		NODE_EVENT_HAVE_OUTBOUND,
-		NODE_EVENT_HAVE_INBOUND,
-		NODE_EVENT_DEFER,
 		NODE_EVENT_DESCRIPTOR
 };
 
@@ -52,4 +51,7 @@ void aura_node_queue_write(struct aura_node *node,
 			 struct aura_buffer *buf);
 struct aura_buffer *aura_node_queue_read(struct aura_node *node,
 			 	enum node_buffer_queue queue_type);
+void aura_node_dispatch_event(struct aura_node *node, enum node_event event, const struct aura_pollfds *fd);
+void aura_node_write(struct aura_node *node, struct aura_buffer *buf);
+struct aura_buffer *aura_node_read(struct aura_node *node);
 #endif

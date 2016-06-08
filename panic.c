@@ -73,3 +73,25 @@ void __attribute__((constructor(101))) reg_seg_handler()
 	sa.sa_sigaction = handler;
 	sigaction(SIGSEGV, &sa, NULL);
 }
+
+#if 0
+static int stackusage;
+void __attribute__((no_instrument_function)) __cyg_profile_func_enter(void *this_fn, void *call_site)
+{
+	stackusage++;
+	int i;
+	char **strings;
+	strings = backtrace_symbols(&this_fn, 1);
+	printf("|");
+	for (i=0; i<stackusage; i++)
+		printf("=");
+	printf("> %s\n", strings[0]);
+	free(strings);
+}
+
+void __attribute__((no_instrument_function)) __cyg_profile_func_exit(void *this_fn, void *call_site)
+{
+	stackusage--;
+}
+
+#endif

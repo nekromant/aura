@@ -5,6 +5,7 @@
 #include <aura/list.h>
 #include <aura/timer.h>
 #include <event.h>
+#include <sys/epoll.h>
 
 struct aura_libevent_data {
 	struct event_base   *ebase;
@@ -58,6 +59,22 @@ static void dispatch_cb_fn(evutil_socket_t fd, short evt, void *arg)
 }
 
 
+static int events_to_libevent(int evts)
+{
+	int ret = 0;
+	if (evts & EPOLLIN)
+		ret |= EV_READ;
+	if (evts & EPOLLHUP)
+		ret |= EV_SIGNAL;
+	if (evts & EPOLLERR)
+		ret |= EV_SIGNAL;
+	if (evts & EPOLLOUT)
+		ret |= EV_WRITE;
+	if (evts & EPOLLOUT)
+		ret |= EV_WRITE;
+	return ret;
+}
+
 static void libevent_fd_action(
 	struct aura_eventloop *loop,
 	const struct aura_pollfds *app,
@@ -67,7 +84,6 @@ static void libevent_fd_action(
 	struct aura_node *node = ap->node;
 	struct aura_libevent_data *epd = aura_eventloop_moduledata_get(loop);
 	ap->magic = 0xdeadbeaf;
-
 	if (ap->eventsysdata) {
 		/* TODO: Error checking */
 		event_del(ap->eventsysdata);
@@ -76,11 +92,16 @@ static void libevent_fd_action(
 	}
 
 	if (action == AURA_FD_ADDED) {
-		ap->eventsysdata = event_new(epd->ebase, ap->fd, ap->events | EV_PERSIST,
+		int ret;
+		slog(0, SLOG_DEBUG, "fdaction: %d %d events %x", ap->fd, action, ap->events);
+		ap->eventsysdata = event_new(epd->ebase, ap->fd,
+								ap->events | EV_PERSIST,
 									dispatch_cb_fn, ap);
 		if (!ap->eventsysdata)
 			BUG(node, "evtsys-libevent: Failed to create event");
-		event_add(ap->eventsysdata, NULL);
+		ret = event_add(ap->eventsysdata, NULL);
+		if (0 != ret)
+			BUG(NULL, "evtsys-libevent: Failed to add event to base");
 	}
 }
 
@@ -140,10 +161,12 @@ static void libevent_timer_create(struct aura_eventloop *loop, struct aura_timer
 static void timer_dispatch_fn(int fd, short events, void *arg)
 {
 	struct aura_timer *tm = arg;
-	tm->callback(tm->node, tm, tm->callback_arg);
 	if (!(tm->flags & AURA_TIMER_PERIODIC))
 		tm->is_active = false;
-	else if (tm->flags & AURA_TIMER_FREE)
+
+	tm->callback(tm->node, tm, tm->callback_arg);
+
+	if (tm->flags & AURA_TIMER_FREE)
 		aura_timer_destroy(tm);
 }
 
@@ -174,7 +197,6 @@ static void libevent_timer_destroy(struct aura_eventloop *loop, struct aura_time
 static void libevent_periodic_ctl(struct aura_eventloop *loop, bool enable)
 {
 	slog(4, SLOG_DEBUG, "libevent: periodic ctl %d", enable);
-
 }
 
 static struct aura_eventloop_module levt =

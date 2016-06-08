@@ -51,6 +51,9 @@ void aura_timer_start(struct aura_timer *tm, int flags, struct timeval *tv)
 
 void aura_timer_stop(struct aura_timer *timer)
 {
+	if (!timer->is_active)
+		return;
+
 	struct aura_eventloop *loop = aura_node_eventloop_get(timer->node);
 	if (!loop)
 		BUG(timer->node, "Internal bug: Node has no associated eventsystem");
@@ -60,7 +63,6 @@ void aura_timer_stop(struct aura_timer *timer)
 
 void aura_timer_destroy(struct aura_timer *timer)
 {
-	slog(0, SLOG_DEBUG, "Nuke %x", timer);
 	struct aura_eventloop *loop = aura_node_eventloop_get(timer->node);
 	if (!loop)
 		BUG(timer->node, "Internal bug: Node has no associated eventsystem");
@@ -69,4 +71,9 @@ void aura_timer_destroy(struct aura_timer *timer)
 	timer->module->timer_destroy(loop, timer);
 	list_del(&timer->entry);
 	free(timer);
+}
+
+bool aura_timer_is_active(struct aura_timer *timer)
+{
+	return timer->is_active;
 }
