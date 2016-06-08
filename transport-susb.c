@@ -332,7 +332,7 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);
 }
 
-static void susb_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void susb_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
@@ -377,7 +377,7 @@ static struct aura_transport tusb = {
 	.name			= "simpleusb",
 	.open			= susb_open,
 	.close			= susb_close,
-	.loop			= susb_loop,
+	.handle_event	= susb_handle_event,
 	/* We write wIndex and wValue in the setup part of the packet */
 	.buffer_overhead	= LIBUSB_CONTROL_SETUP_SIZE,
 	.buffer_offset		= LIBUSB_CONTROL_SETUP_SIZE

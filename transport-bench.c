@@ -57,7 +57,7 @@ static void dummy_close(struct aura_node *node)
 	slog(1, SLOG_INFO, "Closing lookup-bench transport");
 }
 
-static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 
@@ -93,7 +93,7 @@ static struct aura_transport bench = {
 	.name			= "bench",
 	.open			= dummy_open,
 	.close			= dummy_close,
-	.loop			= dummy_loop,
+	.handle_event	= dummy_handle_event,
 	.buffer_overhead	= 16,
 	.buffer_offset		= 8,
 	.buffer_get		= dummy_buffer_get,

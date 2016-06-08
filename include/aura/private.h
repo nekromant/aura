@@ -1,12 +1,6 @@
 #ifndef AURA_PRIVATE_H
 #define AURA_PRIVATE_H
 
-enum node_event {
-		NODE_EVENT_STARTED,
-		NODE_EVENT_HAVE_OUTBOUND,
-		NODE_EVENT_DESCRIPTOR
-};
-
 enum node_buffer_queue
 {
 	NODE_QUEUE_OUTBOUND,

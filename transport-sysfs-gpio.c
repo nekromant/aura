@@ -189,7 +189,7 @@ static void handle_outbound(struct aura_node *node, struct aura_object *o, struc
 	aura_queue_buffer(&node->inbound_buffers, buf);
 }
 
-static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void gpio_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct aura_object *o;
@@ -205,10 +205,10 @@ static void gpio_loop(struct aura_node *node, const struct aura_pollfds *fd)
 }
 
 static struct aura_transport gpio = {
-	.name	= "gpio",
-	.open	= gpio_open,
-	.close	= gpio_close,
-	.loop	= gpio_loop,
+	.name	       = "gpio",
+	.open	       = gpio_open,
+	.close	       = gpio_close,
+	.handle_event  = gpio_handle_event,
 };
 
 AURA_TRANSPORT(gpio);

@@ -74,7 +74,7 @@ static void dummy_close(struct aura_node *node)
 	slog(1, SLOG_INFO, "Closing dummy transport");
 }
 
-static void dummy_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 
@@ -105,7 +105,7 @@ static struct aura_transport dummy = {
 	.name			  = "dummy",
 	.open			  = dummy_open,
 	.close			  = dummy_close,
-	.loop			  = dummy_loop,
+	.handle_event	  = dummy_handle_event,
 	.buffer_overhead  = sizeof(struct aura_packet8),
 	.buffer_offset	  = sizeof(struct aura_packet8),
 	.buffer_get		  = dummy_buffer_get,

@@ -69,7 +69,7 @@ struct aura_node {
 	bool need_endian_swap;
 	bool is_opening;
 	bool start_event_sent;
-	bool waiting_for_status; 
+	bool waiting_for_status;
 	struct aura_buffer *sync_ret_buf;
 	int sync_call_result;
 
@@ -141,6 +141,11 @@ struct aura_object {
 
 struct aura_eventloop;
 
+enum node_event {
+		NODE_EVENT_STARTED,
+		NODE_EVENT_HAVE_OUTBOUND,
+		NODE_EVENT_DESCRIPTOR
+};
 
 #define object_is_event(o)  (o->arg_fmt==NULL)
 #define object_is_method(o) (o->arg_fmt!=NULL)
@@ -240,7 +245,7 @@ struct aura_transport
 	 * @param node current node
 	 * @param fd pointer to struct aura_pollfds that generated an event.
 	 */
-	void   (*loop)(struct aura_node *node, const struct aura_pollfds *fd);
+	void   (*handle_event)(struct aura_node *node, enum node_event, const struct aura_pollfds *fd);
 
 	/**
 	 * \brief Optional.

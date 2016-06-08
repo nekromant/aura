@@ -395,7 +395,7 @@ static inline void do_issue_next_call(struct aura_node *node)
 	pv->sbuf->state = SYNCBUF_ARGOUT;
 }
 
-static void nmc_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void nmc_handle_events(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct nmc_private *pv = aura_get_userdata(node);
 	struct easynmc_handle *h = pv->h;
@@ -521,7 +521,7 @@ static struct aura_transport nmc = {
 	.name			= "nmc",
 	.open			= nmc_open,
 	.close			= nmc_close,
-	.loop			= nmc_loop,
+	.handle_event	= nmc_handle_events,
 	.buffer_offset		= 0,
 	.buffer_overhead	= 0,
 	.buffer_request		= ion_buffer_request,

@@ -392,9 +392,9 @@ int aura_core_start_call(struct aura_node *node,
 
 	bool is_first = list_empty(&node->outbound_buffers);
 	aura_queue_buffer(&node->outbound_buffers, buf);
-	/* If this is the first buffer, notify transport immediately */
+	/* If this is the first buffer queued, notify transport immediately */
 	if (is_first)
-		node->tr->loop(node, NULL);
+		node->tr->handle_event(node, NODE_EVENT_HAVE_OUTBOUND, NULL);
 
 	return 0;
 }
@@ -893,7 +893,7 @@ void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)
  */
 void aura_node_dispatch_event(struct aura_node *node, enum node_event event, const struct aura_pollfds *fd)
 {
-		node->tr->loop(node, fd);
+		node->tr->handle_event(node, event, fd);
 }
 
 /**

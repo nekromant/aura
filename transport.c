@@ -18,7 +18,7 @@ void aura_transport_register(struct aura_transport *tr)
 	required(name);
 	required(open);
 	required(close);
-	required(loop);
+	required(handle_event);
 
 	if ((tr->buffer_get) || (tr->buffer_put)) {
 		required(buffer_get);

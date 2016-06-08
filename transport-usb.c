@@ -586,7 +586,7 @@ static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
 	submit_control(node);
 }
 
-static void usb_loop(struct aura_node *node, const struct aura_pollfds *fd)
+static void usb_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
@@ -617,7 +617,7 @@ static struct aura_transport usb = {
 	.name			= "usb",
 	.open			= usb_open,
 	.close			= usb_close,
-	.loop			= usb_loop,
+	.handle_event	= usb_handle_event,
 	.buffer_overhead	= LIBUSB_CONTROL_SETUP_SIZE, /* Offset for usb SETUP structure */
 	.buffer_offset		= LIBUSB_CONTROL_SETUP_SIZE
 };
