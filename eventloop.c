@@ -243,18 +243,3 @@ void __attribute__((deprecated)) aura_eventloop_report_event(struct aura_eventlo
 		}
 	}
 }
-
-/**
- * Get a pointer to struct event_base * when using libevent
- *
- *
- * @param  loop current eventloop
- * @return Underlying (struct event_base*)
- */
-struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop)
-{
-	if (0 != strcmp(loop->module->name, "libevent"))
-		return NULL;
-	struct event_base *ebase = aura_eventloop_moduledata_get(loop);
-	return ebase;
-}
