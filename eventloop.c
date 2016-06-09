@@ -1,6 +1,5 @@
 #include <aura/aura.h>
 #include <aura/private.h>
-#include <sys/eventfd.h>
 #include <aura/eventloop.h>
 
 /** \addtogroup loop
@@ -247,8 +246,6 @@ void __attribute__((deprecated)) aura_eventloop_report_event(struct aura_eventlo
 
 /**
  * Get a pointer to struct event_base * when using libevent
- * Calling this function when compiled with no libevent will
- * trigger a BUG()
  *
  *
  * @param  loop current eventloop
@@ -256,9 +253,8 @@ void __attribute__((deprecated)) aura_eventloop_report_event(struct aura_eventlo
  */
 struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop)
 {
-	return NULL;
-	// struct event_base *ret = aura_eventsys_backend_get_ebase(loop->eventsysdata);
-	// if (!ret)
-	//      BUG(NULL, "Failed to retrieve ebase: no libevent support?");
-	// return ret;
+	if (0 != strcmp(loop->module->name, "libevent"))
+		return NULL;
+	struct event_base *ebase = aura_eventloop_moduledata_get(loop);
+	return ebase;
 }

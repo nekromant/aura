@@ -36,7 +36,6 @@ struct aura_eventloop_module {
         void (*timer_stop)(struct aura_eventloop *loop, struct aura_timer *tm);
         void (*timer_destroy)(struct aura_eventloop *loop, struct aura_timer *tm);
 
-        void (*periodic_ctl)(struct aura_eventloop *loop, bool enable);
 };
 
 #define AURA_EVENTLOOP_MODULE(s)                                            \
