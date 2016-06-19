@@ -220,26 +220,3 @@ void aura_eventloop_loopexit(struct aura_eventloop *loop, struct timeval *tv)
 /**
  * @}
  */
-
-/**
- * Internal function called by the eventsystem to report an event on a descriptor ap.
- * Reporting ap as NULL means that the event processing has been interrupted via
- * aura_eventloop_interrupt()
- *
- * @param loop
- * @param ap
- */
-void __attribute__((deprecated)) aura_eventloop_report_event(struct aura_eventloop *loop, enum node_event event, struct aura_pollfds *ap)
-{
-	struct aura_node *node;
-	if (ap) {
-		if (ap->magic != 0xdeadbeaf)
-			BUG(NULL, "bad APFD: %x", ap);
-		node=ap->node;
-		aura_node_dispatch_event(node, event, ap);
-	} else {
-		list_for_each_entry(node, &loop->nodelist, eventloop_node_list) {
-			aura_node_dispatch_event(node, event, ap);
-		}
-	}
-}

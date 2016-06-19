@@ -18,8 +18,6 @@ static int libevent_create(struct aura_eventloop *loop)
 	if (!ebase)
 		return -ENOMEM;
 
-	loop->eventsysdata = ebase;
-
 	aura_eventloop_moduledata_set(loop, ebase);
 	return 0;
 }
@@ -34,10 +32,7 @@ void libevent_destroy(struct aura_eventloop *loop)
 static void dispatch_cb_fn(evutil_socket_t fd, short evt, void *arg)
 {
 	struct aura_pollfds *ap = arg;
-	struct aura_node *node = ap->node;
-	struct aura_eventloop *l = aura_node_eventloop_get(node);
-
-	aura_eventloop_report_event(l, NODE_EVENT_DESCRIPTOR, ap);
+	aura_node_dispatch_event(ap->node, NODE_EVENT_DESCRIPTOR, ap);
 }
 
 static void libevent_fd_action(
