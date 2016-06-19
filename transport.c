@@ -93,7 +93,7 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
  * @param fd
  * @param events
  */
-void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
+struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 {
 	struct aura_pollfds *ap;
 
@@ -124,6 +124,7 @@ void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 
 	if (node->fd_changed_cb)
 		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
+	return ap;
 }
 
 /**
@@ -142,7 +143,7 @@ void aura_del_pollfds(struct aura_node *node, int fd)
 			break;
 	}
 	if (i == node->nextfd) {
-		slog(0, SLOG_FATAL, "Attempt to delete invalid descriptor from node");
+		slog(0, SLOG_FATAL, "Attempt to delete invalid descriptor (%d) from node", fd);
 		aura_panic(node);
 	}
 

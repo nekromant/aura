@@ -746,7 +746,7 @@ void aura_object_migration_failed_cb(struct aura_node *node,
 
 const struct aura_object *aura_get_current_object(struct aura_node *node);
 
-void aura_add_pollfds(struct aura_node *node, int fd, uint32_t events);
+struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t events);
 void aura_del_pollfds(struct aura_node *node, int fd);
 int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
 

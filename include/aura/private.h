@@ -23,7 +23,6 @@ int aura_core_call (struct aura_node *node,
 
 
 uint64_t aura_platform_timestamp();
-void aura_process_node_event(struct aura_node *node, const struct aura_pollfds *fd);
 
 int aura_node_buffer_pool_gc_once(struct aura_node *pos);
 int aura_node_buffer_pool_gc_full(struct aura_node *pos);

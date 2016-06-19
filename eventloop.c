@@ -87,7 +87,7 @@ void aura_eventloop_del(struct aura_node *node)
 	/* Remove all descriptors from epoll, but keep 'em in the node */
 	count = aura_get_pollfds(node, &fds);
 	for (i = 0; i < count; i++)
-		loop->module->fd_action(loop->eventsysdata, &fds[i], AURA_FD_REMOVED);
+		loop->module->fd_action(loop, &fds[i], AURA_FD_REMOVED);
 
 	/* Remove our fd_changed callback */
 	aura_fd_changed_cb(node, NULL, NULL);

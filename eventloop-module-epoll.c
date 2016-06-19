@@ -1,121 +1,244 @@
+#include <stdlib.h>
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/eventloop.h>
+#include <aura/list.h>
+#include <aura/timer.h>
 #include <sys/epoll.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <sys/eventfd.h>
+#include <sys/timerfd.h>
+#include <unistd.h>
 
-struct aura_epoll_data {
-	int			epollfd;
-	struct aura_pollfds	evtfd;
-	void *			loopdata;
+
+struct aura_timerfd_timer {
+	struct aura_timer	timer;
+	int			fd;
 };
 
-void *aura_eventsys_backend_create(void *loopdata)
+struct aura_epoll_loop {
+	int			epollfd;
+	struct aura_pollfds	evtfd;
+	int			exit_after_ms;
+};
+
+static int lepoll_create(struct aura_eventloop *loop)
 {
-	struct aura_epoll_data *epd = calloc(1, sizeof(*epd));
+	int ret = 0;
+	struct aura_epoll_loop *lp = calloc(1, sizeof(*lp));
 
-	if (!epd)
-		return NULL;
-	epd->loopdata = loopdata;
-	epd->epollfd = epoll_create(7);
-	if (!epd->epollfd)
-		goto errfreeepd;
+	if (!lp)
+		return -ENOMEM;
 
-	/* We use eventfd here to interrupt things */
+	lp->epollfd = epoll_create(1);
+	if (lp->epollfd == -1) {
+		ret = -errno;
+		goto err_free_lp;
+	}
 
-	epd->evtfd.fd = eventfd(0, EFD_NONBLOCK);
-	epd->evtfd.events = EPOLLIN;
-	if (-1 == epd->evtfd.fd)
-		goto errepolldestroy;
+	lp->evtfd.fd = eventfd(0, EFD_NONBLOCK);
+	lp->evtfd.events = EPOLLIN;
 
-	aura_eventsys_backend_fd_action(epd, &epd->evtfd, AURA_FD_ADDED);
+	if (-1 == lp->evtfd.fd) {
+		ret = -EFAULT;
+		goto err_epoll_destroy;
+	}
 
-	return epd;
-errepolldestroy:
-	close(epd->epollfd);
-errfreeepd:
-	free(epd);
-	return NULL;
+	aura_eventloop_moduledata_set(loop, lp);
+	loop->module->fd_action(loop, &lp->evtfd, AURA_FD_ADDED);
+	return 0;
+
+err_epoll_destroy:
+	close(lp->epollfd);
+err_free_lp:
+	free(lp);
+	return ret;
 }
 
-void aura_eventsys_backend_destroy(void *backend)
+void lepoll_destroy(struct aura_eventloop *loop)
 {
-	struct aura_epoll_data *epd = backend;
+	struct aura_epoll_loop *lp = aura_eventloop_moduledata_get(loop);
 
-	close(epd->epollfd);
-	close(epd->evtfd.fd);
-	free(epd);
+	close(lp->epollfd);
+	close(lp->evtfd.fd);
+	free(lp);
+	aura_eventloop_moduledata_set(loop, NULL);
 }
 
-void aura_eventsys_backend_fd_action(
-	void *backend,
-	const struct aura_pollfds *ap,
-	int action)
+static void lepoll_fd_action(
+	struct aura_eventloop *		loop,
+	const struct aura_pollfds *	app,
+	int				action)
 {
+	struct aura_epoll_loop *lp = aura_eventloop_moduledata_get(loop);
+	struct aura_pollfds *ap = (struct aura_pollfds *)app;
 	struct aura_node *node = ap->node;
 	struct epoll_event ev;
-	struct aura_epoll_data *epd = backend;
+
 
 	((struct aura_pollfds *)ap)->magic = 0xdeadbeaf;
 	int ret;
 	int op = (action == AURA_FD_ADDED) ? EPOLL_CTL_ADD : EPOLL_CTL_DEL;
-	slog(4, SLOG_DEBUG, "epoll: Descriptor %d %s to/from epoll",
-	     ap->fd, (action == AURA_FD_ADDED) ? "added" : "removed");
+
+	slog(4, SLOG_DEBUG, "epoll: Descriptor %d %s epoll",
+	     ap->fd, (action == AURA_FD_ADDED) ? "added to" : "removed from");
+
 	ev.events = ap->events;
 	ev.data.ptr = (void *)ap;
-	ret = epoll_ctl(epd->epollfd, op, ap->fd, &ev);
+	ret = epoll_ctl(lp->epollfd, op, ap->fd, &ev);
 	if (ret != 0)
 		BUG(node, "Event System failed to add/remove a descriptor");
 }
 
-#define NUM_EVTS 1
-int aura_eventsys_backend_wait(void *backend, int timeout_ms)
+static void lepoll_dispatch(struct aura_eventloop *loop, int flags)
 {
-	struct aura_epoll_data *epd = backend;
-	struct epoll_event ev[NUM_EVTS];
-	int i;
-	int ret = epoll_wait(epd->epollfd, ev, NUM_EVTS, timeout_ms);
+	struct aura_epoll_loop *lp = aura_eventloop_moduledata_get(loop);
+	int timeout_ms = 5000;          /* Assume 5 sec iterations for a start */
+	bool should_loop = true;        /* And loop forever by default */
 
-	slog(4, SLOG_LIVE, "epoll: reported %d events", ret);
-	if (ret < 0) {
-		slog(0, SLOG_ERROR, "epoll: returned -1: %s", strerror(errno));
-		aura_panic(NULL);
-		return -1; /* Never reached */
+	if (flags & AURA_EVTLOOP_ONCE) {
+		should_loop = false;
 	}
 
-	for (i = 0; i < ret; i++) {
+	if (flags & AURA_EVTLOOP_NONBLOCK) {
+		should_loop = false;
+		timeout_ms = 0;
+	}
+	;
+
+	if (lp->exit_after_ms) {
+		timeout_ms = lp->exit_after_ms;
+		should_loop = false;
+		/* TODO: Better timer handling */
+	}
+
+	do {
+		struct epoll_event ev;
 		struct aura_pollfds *ap;
-		ap = ev[i].data.ptr;
-		if (ap == &epd->evtfd) {
-			/* Read out our event */
-			uint64_t tmp;
-			ap = NULL;
-			read(epd->evtfd.fd, &tmp, sizeof(uint64_t));
-		} else {
-			ap->events = ev[i].events;
+		int ret = epoll_wait(lp->epollfd, &ev, 1, timeout_ms);
+		if (ret == 1) {
+			ap = ev.data.ptr;
+			if (ap == &lp->evtfd) {
+				uint64_t tmp;
+				int ret = read(lp->evtfd.fd, &tmp, sizeof(uint64_t));
+				if (ret != sizeof(uint64_t))
+					BUG(NULL, "Error reading from eventfd descriptor ");
+				/* We've been interrupted via loopbreak. Schedule the next timeout */
+				should_loop = false;
+				if (lp->exit_after_ms) {
+					timeout_ms = lp->exit_after_ms;
+					continue;
+				}
+			} else if (ap->eventsysdata != NULL) {
+				/* This must be a timer! Only timers have eventsysdata set here */
+				struct aura_timerfd_timer *ftm = ap->eventsysdata;
+				uint64_t expiry_count;
+				int ret;
+				ret = read(ftm->fd, &expiry_count, sizeof(expiry_count));
+
+				if (ret != sizeof(expiry_count))
+					BUG(NULL, "timerfd read failed(): %s\n", strerror(errno));
+				if (expiry_count > 1)
+					slog(0, SLOG_WARN, "timerfd expired more than once. Your system may be too slow");
+
+				aura_timer_dispatch(ap->eventsysdata);
+			} else {
+				/* This is an actual descriptor from node */
+				aura_node_dispatch_event(ap->node, NODE_EVENT_DESCRIPTOR, ap);
+			}
+		} else if (ret == -1) {
+			BUG(NULL, "epoll_wait() returned -1: %s", strerror(errno));
 		}
-
-		slog(4, SLOG_LIVE, "events: %s %s %s",
-		     (ev[i].events & EPOLLIN) ? "IN" : "",
-		     (ev[i].events & EPOLLOUT) ? "OUT" : "",
-		     (ev[i].events & EPOLLPRI) ? "PRI" : ""
-		     );
-
-		aura_eventloop_report_event(epd->loopdata, ap);
-	}
-	return ret;
+	} while (should_loop);
 }
 
-void aura_eventsys_backend_interrupt(void *backend)
+static void lepoll_loopbreak(struct aura_eventloop *loop, struct timeval *tv)
 {
-	struct aura_epoll_data *epd = backend;
+	struct aura_epoll_loop *lp = aura_eventloop_moduledata_get(loop);
+	int timeout_ms = 0;
+
+	if (tv)
+		timeout_ms = (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
+	lp->exit_after_ms = timeout_ms;
 	uint64_t tmp = 1;
-
-	write(epd->evtfd.fd, &tmp, sizeof(uint64_t));
+	write(lp->evtfd.fd, &tmp, sizeof(uint64_t));
 }
 
-struct event_base *aura_eventsys_backend_get_ebase(void *backend)
+static void lepoll_node_added(struct aura_eventloop *loop, struct aura_node *node)
 {
-	return NULL;
+	/* Nothing to do here */
 }
+
+static void lepoll_node_removed(struct aura_eventloop *loop, struct aura_node *node)
+{
+	/* Nothing to do here */
+}
+
+static void tfd_timer_create(struct aura_eventloop *loop, struct aura_timer *tm)
+{
+	struct aura_timerfd_timer *etm = container_of(tm, struct aura_timerfd_timer, timer);
+	int fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+
+	if (fd == -1)
+		BUG(NULL, "timerfd_create() failed: %s", strerror(errno));
+
+	etm->fd = fd;
+	struct aura_pollfds *fds = aura_add_pollfds(tm->node, fd, EPOLLIN);
+	fds->eventsysdata = tm;
+}
+
+static void tfd_timer_start(struct aura_eventloop *loop, struct aura_timer *tm)
+{
+	struct aura_timerfd_timer *etm = container_of(tm, struct aura_timerfd_timer, timer);
+	struct itimerspec its;
+	int ret;
+
+	bzero(&its, sizeof(its));
+
+	its.it_value.tv_sec = tm->tv.tv_sec;
+	its.it_value.tv_nsec = tm->tv.tv_usec * 1000;
+
+	if (tm->flags & AURA_TIMER_PERIODIC) {
+		its.it_interval.tv_sec = tm->tv.tv_sec;
+		its.it_interval.tv_nsec = tm->tv.tv_usec * 1000;
+	}
+
+	ret = timerfd_settime(etm->fd, 0, &its, NULL);
+	if (ret != 0)
+		BUG(NULL, "timerfd_settime() faliled: %s", strerror(errno));
+}
+
+static void tfd_timer_stop(struct aura_eventloop *loop, struct aura_timer *tm)
+{
+	struct aura_timerfd_timer *etm = container_of(tm, struct aura_timerfd_timer, timer);
+	struct itimerspec its;
+
+	bzero(&its, sizeof(its));
+	timerfd_settime(etm->fd, 0, &its, NULL);
+}
+
+static void tfd_timer_destroy(struct aura_eventloop *loop, struct aura_timer *tm)
+{
+	struct aura_timerfd_timer *etm = container_of(tm, struct aura_timerfd_timer, timer);
+
+	aura_del_pollfds(tm->node, etm->fd);
+	close(etm->fd);
+}
+
+static struct aura_eventloop_module lepoll =
+{
+	.name		= "epoll",
+	.timer_size	= sizeof(struct aura_timerfd_timer),
+	.timer_create	= tfd_timer_create,
+	.timer_start	= tfd_timer_start,
+	.timer_stop	= tfd_timer_stop,
+	.timer_destroy	= tfd_timer_destroy,
+	.create		= lepoll_create,
+	.destroy	= lepoll_destroy,
+	.fd_action	= lepoll_fd_action,
+	.dispatch	= lepoll_dispatch,
+	.loopbreak	= lepoll_loopbreak,
+	.node_added	= lepoll_node_added,
+	.node_removed	= lepoll_node_removed,
+};
+
+AURA_EVENTLOOP_MODULE(lepoll);

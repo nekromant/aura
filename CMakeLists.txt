@@ -28,6 +28,7 @@ SET(SRCS
   eventloop-factory.c timer.c
   retparse.c queue.c utils-linux.c
   transport-dummy.c
+  transport-null.c
   transport-bench.c
   transport-sysfs-gpio.c
   packetizer.c
@@ -44,6 +45,10 @@ PKG_CHECK_MODULES(LIBEVENT libevent)
 FIND_PACKAGE(Doxygen)
 find_program(LDOC_FOUND ldoc)
 
+
+if ( ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -finstrument-functions")
+endif()
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
@@ -82,13 +87,14 @@ if(AURA_USE_BUFFER_POOL)
 endif()
 
 #Let's use libevent if we have and should
+SET(SRCS ${SRCS} eventloop-module-epoll.c)
+SET(EVENTSYSTEM "epoll ${EVENTSYSTEM}")
+
 if(LIBEVENT_FOUND)
   SET(SRCS ${SRCS} eventloop-module-libevent.c)
   SET(EVENTSYSTEM "${EVENTSYSTEM} libevent")
 endif()
 
-#SET(SRCS ${SRCS} eventloop-module-libevent.c)
-#SET(EVENTSYSTEM "${EVENTSYSTEM} epoll")
 
 # Let's auto detect a suitable lua version
 if(LUA52_FOUND)

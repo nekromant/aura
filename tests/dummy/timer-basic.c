@@ -14,13 +14,18 @@ static void timer_cb_fn(struct aura_node *node, struct aura_timer *timer, void *
 	exitcode = 0;
 }
 
-int main() {
-	slog_init(NULL, 18);
-	struct timeval tv;
 
-	struct aura_node *n = aura_open("dummy", NULL);
+int test(int type) {
+	struct timeval tv;
+	struct aura_eventloop *loop;
+	struct aura_node *n = aura_open("null", NULL);
 	if (!n)
 		return -1;
+
+	if (type)
+		loop = aura_eventloop_create(n);
+	/* And should be moved to the new eventsystem here */
+
 
 	slog(0, SLOG_DEBUG, "node ptr %x", n);
 	/* Make sure we have an auto-created eventsystem assigned */
@@ -33,8 +38,8 @@ int main() {
 	slog(0, SLOG_DEBUG, "%x/%x", tm->callback, tm->callback_arg);
 	aura_timer_start(tm, 0, &tv);
 
-	/* And should be moved to the new eventsystem here */
-	struct aura_eventloop *loop = aura_eventloop_create(n);
+	if (!type)
+		loop = aura_eventloop_create(n);
 
 	tv.tv_sec = 5;
 	tv.tv_usec = 0;
@@ -44,4 +49,15 @@ int main() {
 	aura_close(n);
 	aura_eventloop_destroy(loop);
 	return exitcode;
+}
+
+
+int main()
+{
+	slog_init(NULL, 18);
+	int ret = test(0);
+	if (ret != 0)
+		return ret;
+	ret = test(1);
+	return ret;
 }
