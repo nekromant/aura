@@ -3,7 +3,7 @@ sudo: required
 before_install:
   - sudo apt-add-repository -y ppa:kalakris/cmake
   - sudo apt-get update 
-  - sudo apt-get install -y cmake
+  - sudo apt-get install -y --force-yes cmake
 script:
   - cmake --version
   - mkdir build
