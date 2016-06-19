@@ -27,5 +27,6 @@ void aura_timer_start(struct aura_timer *tm, int flags, struct timeval *tv);
 void aura_timer_stop(struct aura_timer *timer);
 void aura_timer_destroy(struct aura_timer *timer);
 bool aura_timer_is_active(struct aura_timer *timer);
+void aura_timer_dispatch(struct aura_timer *tm);
 
 #endif

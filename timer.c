@@ -77,3 +77,15 @@ bool aura_timer_is_active(struct aura_timer *timer)
 {
 	return timer->is_active;
 }
+
+void aura_timer_dispatch(struct aura_timer *tm)
+{
+	if (!(tm->flags & AURA_TIMER_PERIODIC))
+		tm->is_active = false;
+
+	if (tm->callback)
+		tm->callback(tm->node, tm, tm->callback_arg);
+
+	if (tm->flags & AURA_TIMER_FREE)
+		aura_timer_destroy(tm);
+}
