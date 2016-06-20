@@ -200,7 +200,6 @@ void aura_eventloop_dispatch(struct aura_eventloop *loop, int flags)
 	{
 		if (!node->start_event_sent) {
 			node->start_event_sent = true;
-			slog(0, SLOG_DEBUG, "started!");
 			aura_node_dispatch_event(node, NODE_EVENT_STARTED, NULL);
 			/* If we're waiting for a specific status - return now!
 				The node may go online handling the 'started' event
