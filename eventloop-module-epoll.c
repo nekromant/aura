@@ -19,6 +19,7 @@ struct aura_epoll_loop {
 	int			epollfd;
 	struct aura_pollfds	evtfd;
 	int			exit_after_ms;
+	struct timespec		ts_deadline;
 };
 
 static int lepoll_create(struct aura_eventloop *loop)
@@ -89,45 +90,82 @@ static void lepoll_fd_action(
 		BUG(node, "Event System failed to add/remove a descriptor");
 }
 
+static struct timespec clk_get()
+{
+	struct timespec ts;
+
+	if (0 != clock_gettime(CLOCK_MONOTONIC, &ts))
+		BUG(NULL, "clock_gettime() failed: %s", strerror(errno));
+	return ts;
+}
+
+static struct timespec clk_add_ms(struct timespec src, int ms)
+{
+	struct timespec bc = src;
+
+	src.tv_nsec += ms * 1000000;
+	if (src.tv_nsec < bc.tv_nsec) {
+		/* Handle overflows */
+		src.tv_sec += 1;
+		src.tv_nsec -= 1000000000UL;
+	}
+	return src;
+}
+
+#define timespecsub(a, b, result)                                                     \
+	do {                                                                        \
+		(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;                             \
+		(result)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec;                          \
+		if ((result)->tv_nsec < 0) {                                              \
+			--(result)->tv_sec;                                                     \
+			(result)->tv_nsec += 1000000000;                                        \
+		}                                                                         \
+	} while (0)
+
+#define timespeccmp(a, b, CMP)                                                  \
+	(((a)->tv_sec == (b)->tv_sec) ?                                             \
+	 ((a)->tv_nsec CMP(b)->tv_nsec) :                                          \
+	 ((a)->tv_sec CMP(b)->tv_sec))
+
+
 static void lepoll_dispatch(struct aura_eventloop *loop, int flags)
 {
 	struct aura_epoll_loop *lp = aura_eventloop_moduledata_get(loop);
 	int timeout_ms = 5000;          /* Assume 5 sec iterations for a start */
 	bool should_loop = true;        /* And loop forever by default */
 
-	if (flags & AURA_EVTLOOP_ONCE) {
+	if (flags & AURA_EVTLOOP_ONCE)
 		should_loop = false;
-	}
 
 	if (flags & AURA_EVTLOOP_NONBLOCK) {
 		should_loop = false;
 		timeout_ms = 0;
-	}
-	;
-
-	if (lp->exit_after_ms) {
-		timeout_ms = lp->exit_after_ms;
-		should_loop = false;
-		/* TODO: Better timer handling */
 	}
 
 	do {
 		struct epoll_event ev;
 		struct aura_pollfds *ap;
 		int ret = epoll_wait(lp->epollfd, &ev, 1, timeout_ms);
-		if (ret == 1) {
+		if ((ret == 0) && (lp->exit_after_ms)) {
+			/* If we have no event, just adjust the timeout in a simple way */
+			lp->exit_after_ms -= timeout_ms;
+			if (!lp->exit_after_ms)
+				break;
+			timeout_ms = lp->exit_after_ms;
+		} else if (ret == 1) {
 			ap = ev.data.ptr;
 			if (ap == &lp->evtfd) {
+				/* Reset eventfd machinery */
 				uint64_t tmp;
 				int ret = read(lp->evtfd.fd, &tmp, sizeof(uint64_t));
 				if (ret != sizeof(uint64_t))
 					BUG(NULL, "Error reading from eventfd descriptor ");
-				/* We've been interrupted via loopbreak. Schedule the next timeout */
-				should_loop = false;
-				if (lp->exit_after_ms) {
-					timeout_ms = lp->exit_after_ms;
-					continue;
-				}
+
+				/* We've been interrupted via loopbreak. Should we break? */
+				if (!lp->exit_after_ms)
+					break;
+				/* Or just adjust our timeout ? */
+				timeout_ms = lp->exit_after_ms;
 			} else if (ap->eventsysdata != NULL) {
 				/* This must be a timer! Only timers have eventsysdata set here */
 				struct aura_timerfd_timer *ftm = ap->eventsysdata;
@@ -145,6 +183,17 @@ static void lepoll_dispatch(struct aura_eventloop *loop, int flags)
 				/* This is an actual descriptor from node */
 				aura_node_dispatch_event(ap->node, NODE_EVENT_DESCRIPTOR, ap);
 			}
+
+			if (lp->exit_after_ms) {
+				struct timespec ts = clk_get();
+				if (timespeccmp(&ts, &lp->ts_deadline, >=))
+					break;
+
+				struct timespec towait;
+				timespecsub(&lp->ts_deadline, &ts, &towait);
+				lp->exit_after_ms = towait.tv_sec * 1000 + (towait.tv_nsec / 1000000) + 1;
+				timeout_ms = lp->exit_after_ms;
+			}
 		} else if (ret == -1) {
 			BUG(NULL, "epoll_wait() returned -1: %s", strerror(errno));
 		}
@@ -159,6 +208,9 @@ static void lepoll_loopbreak(struct aura_eventloop *loop, struct timeval *tv)
 	if (tv)
 		timeout_ms = (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
 	lp->exit_after_ms = timeout_ms;
+	lp->ts_deadline = clk_get();
+	lp->ts_deadline = clk_add_ms(lp->ts_deadline, timeout_ms);
+
 	uint64_t tmp = 1;
 	write(lp->evtfd.fd, &tmp, sizeof(uint64_t));
 }
