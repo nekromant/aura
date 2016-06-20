@@ -1,12 +1,18 @@
 Source: libaura
 Priority: optional
 Maintainer: Andrew 'Necromant' Andrianov <andrew@ncrmnt.org>
-Build-Depends: debhelper (>= 9), liblua5.2-dev, libusb-1.0-0-dev, cmake, lua5.2
+Build-Depends: debhelper (>= 9), liblua5.2-dev, libusb-1.0-0-dev, cmake, lua5.2, libevent-dev
 Standards-Version: 3.9.5
 Section: libs
 Homepage: http://github.com/nekromant/aura
 #Vcs-Git: git://anonscm.debian.org/collab-maint/aura.git
 #Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/aura.git;a=summary
+
+Package: libaura-tests
+Section: libdevel
+Architecture: any
+Depends: libaura (= ${binary:Version}), ${misc:Depends} libaura
+Description: Universal RPC library to interface with different hardware (unit-tests)
 
 Package: libaura-dev
 Section: libdevel

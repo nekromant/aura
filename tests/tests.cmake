@@ -29,6 +29,8 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
             ./${f})
         endif()
       endif()
+      INSTALL(TARGETS ${f}
+        RUNTIME DESTINATION lib/${CMAKE_LIBRARY_PATH}/aura/tests/)
     endforeach(file)
 endfunction(ADD_C_TEST_DIRECTORY)
 
