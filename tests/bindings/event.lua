@@ -3,6 +3,7 @@ package.cpath="./?.so;"..package.cpath
 package.path="./../lua/?.lua;"..package.path
 
 aura = require("aura");
+aura.slog_init(nil, 99);
 n = aura.open("dummy", "blah");
 
 exitcode = 1;
