@@ -420,19 +420,17 @@ static void nmc_handle_events(struct aura_node *node, enum node_event evt, const
 	if (pv->sbuf) {
 		switch (pv->sbuf->state) {
 		case SYNCBUF_IDLE:
-			slog(4, SLOG_DEBUG, "transport-nmc: We can issue our call");
 			do_issue_next_call(node);
-			break;
-		case SYNCBUF_ARGOUT:
-			slog(4, SLOG_DEBUG, "transport-nmc: NMC is still working");
 			break;
 		case SYNCBUF_RETIN:
 			aura_buffer_release(pv->current_out);
-			aura_queue_buffer(&node->inbound_buffers, pv->current_in);
+			aura_node_write(node, pv->current_in);
 			pv->current_out = NULL;
 			pv->current_in = NULL;
 			pv->sbuf->state = SYNCBUF_IDLE;
 			slog(4, SLOG_DEBUG, "transport-nmc: We got something from nmc");
+			break;
+		case SYNCBUF_ARGOUT:
 			break;
 		default:
 			BUG(node, "Unexpected syncbuf state");
