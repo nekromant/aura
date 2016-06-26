@@ -21,6 +21,10 @@ SET(AURA_TEST_DUMMY yes CACHE BOOL "Run basic test suite on a dummy transport (n
 SET(AURA_TEST_BINDINGS yes CACHE BOOL "Run basic lua bindings test suite (no hw required)")
 SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
 
+SET(CTEST_ENVIRONMENT
+  "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua"
+)
+
 SET(SRCS
   buffer.c
   slog.c panic.c utils.c

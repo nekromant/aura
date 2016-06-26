@@ -20,6 +20,7 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
       TARGET_LINK_LIBRARIES(${f} aurashared)
       if (${RUN})
             ADD_TEST(${f} ${f})
+            set_property(TEST ${f} PROPERTY ENVIRONMENT "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua")
         if (${MEMCHECK})
           ADD_TEST(memcheck-${f} valgrind
             --error-exitcode=1 --read-var-info=yes
@@ -27,6 +28,7 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
             --suppressions=${CMAKE_SOURCE_DIR}/valgrind.suppress
             --undef-value-errors=no --xml=yes --xml-file=${f}.xml
             ./${f})
+            set_property(TEST memcheck-${f} PROPERTY ENVIRONMENT "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua")
         endif()
       endif()
       INSTALL(TARGETS ${f}

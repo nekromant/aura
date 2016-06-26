@@ -34,6 +34,8 @@ struct usb_dev_info {
 	/* Usb device string */
 	struct ncusb_devwatch_data	dev_descr;
 	struct aura_timer *		timer;
+	int				control_retry_count;
+	int				control_retry_max;
 };
 
 static void usb_panic_and_reset_state(struct aura_node *node)
@@ -69,6 +71,12 @@ static int check_control(struct libusb_transfer *transfer)
 	inf->cbusy = false;
 
 	if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+		if (inf->control_retry_count++ < inf->control_retry_max) {
+			slog(0, SLOG_WARN, "Control transfer failed, retrying (%d/%d)",
+			     inf->control_retry_count, inf->control_retry_max);
+			submit_control(inf->node);
+			return -EAGAIN;
+		}
 		slog(0, SLOG_ERROR, "usb: error completing control transfer");
 		ncusb_print_libusb_transfer(transfer);
 		usb_panic_and_reset_state(node);
@@ -89,6 +97,7 @@ static void susb_offline_transport(struct usb_dev_info *inf)
 static void usb_stop_ops(void *arg)
 {
 	struct usb_dev_info *inf = arg;
+
 	usb_panic_and_reset_state(inf->node);
 	slog(2, SLOG_INFO, "susb: Device disconnect detected!");
 	susb_offline_transport(inf);
@@ -103,6 +112,7 @@ static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	 * from a device in an async fasion in the background.
 	 */
 	struct usb_dev_info *inf = arg;
+
 	inf->handle = hndl;
 	inf->state = SUSB_DEVICE_OPERATIONAL;
 	aura_set_status(inf->node, AURA_STATUS_ONLINE);
@@ -132,6 +142,7 @@ static char *lua_strfromstack(lua_State *L, int n)
 }
 
 extern int luaopen_auracore(lua_State *L);
+
 static int susb_open(struct aura_node *node, const char *conf)
 {
 	struct libusb_context *ctx;
@@ -142,6 +153,8 @@ static int susb_open(struct aura_node *node, const char *conf)
 	if (!inf)
 		return -ENOMEM;
 
+	/* Assume 3 retries by default */
+	inf->control_retry_max = 3;
 	ret = libusb_init(&ctx);
 	if (ret != 0)
 		goto err_free_inf;
@@ -161,14 +174,29 @@ static int susb_open(struct aura_node *node, const char *conf)
 
 	slog(2, SLOG_INFO, "usbsimple: config file %s", conf);
 
-	const char scr[] = "return require(\"aura/conf-loader\")\n";
+	const char loader_scr[] =
+		"return require(\"aura/conf-loader\")\n";
+	char *scr;
+	const char *libpath = getenv("AURA_LUA_SCRIPT_PATH");
+	if (libpath) {
+		int ret = asprintf(&scr, "package.path=\"%s/?.lua;\"..package.path\n%s\n",
+		libpath, loader_scr);
+		if (ret == -1)
+			goto err_free_ct;
+	} else {
+		scr = (char *) loader_scr;
+	}
 	ret = luaL_loadbuffer(L, scr, strlen(scr), "ldr");
-	lua_call(L, 0, 1);
+	if (libpath)
+		free(scr);
+
 	if (ret) {
 		slog(0, SLOG_ERROR, lua_tostring(L, -1));
 		slog(0, SLOG_ERROR, "usbsimple: config file load error");
 		goto err_free_ct;
 	}
+
+	lua_call(L, 0, 1);
 
 	lua_pushstring(L, conf);
 	lua_setglobal(L, "simpleconf");
@@ -192,20 +220,25 @@ static int susb_open(struct aura_node *node, const char *conf)
 
 	lua_settoken(L, "FMT_BIN", URPC_BIN);
 
-	ret = lua_pcall(L, 0, 6, 0);
+	ret = lua_pcall(L, 0, 7, 0);
 	if (ret) {
 		const char *err = lua_tostring(L, -1);
 		slog(0, SLOG_FATAL, "usbsimple: %s", err);
 		goto err_free_ct;
 	}
 
-	inf->dev_descr.vid = lua_tonumber(L, -6);
-	inf->dev_descr.pid = lua_tonumber(L, -5);
-	inf->dev_descr.vendor = lua_strfromstack(L, -4);
-	inf->dev_descr.product = lua_strfromstack(L, -3);
-	inf->dev_descr.serial = lua_strfromstack(L, -2);
-	inf->etbl = lua_touserdata(L, -1);
-
+	inf->dev_descr.vid = lua_tonumber(L, -7);
+	inf->dev_descr.pid = lua_tonumber(L, -6);
+	inf->dev_descr.vendor = lua_strfromstack(L, -5);
+	inf->dev_descr.product = lua_strfromstack(L, -4);
+	inf->dev_descr.serial = lua_strfromstack(L, -3);
+	inf->etbl = lua_touserdata(L, -2);
+	if (lua_isnumber(L, -1)) {
+		inf->control_retry_max = lua_tonumber(L, -1);
+		slog(4, SLOG_DEBUG, "Adjusting control transfer retry count to %d",
+		     inf->control_retry_max);
+	}
+	lua_stackdump(L);
 	inf->dev_descr.device_found_func = usb_start_ops;
 	inf->dev_descr.device_left_func = usb_stop_ops;
 	inf->dev_descr.arg = inf;
@@ -332,6 +365,7 @@ static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)
 				  datalen);
 	libusb_fill_control_transfer(inf->ctransfer, inf->handle,
 				     (unsigned char *)buf->data, cb_call_done, node, 4000);
+	inf->control_retry_count = 0;
 	submit_control(node);
 }
 
@@ -362,8 +396,8 @@ static void susb_handle_event(struct aura_node *node, enum node_event evt, const
 		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
 		ncusb_start_descriptor_watching(node, inf->ctx);
 		slog(1, SLOG_INFO, "usb: Now looking for a device %x:%x %s/%s/%s",
-			 inf->dev_descr.vid, inf->dev_descr.pid,
-			 inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
+		     inf->dev_descr.vid, inf->dev_descr.pid,
+		     inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
 	} else if (inf->state == SUSB_DEVICE_RESTART) {
 		susb_offline_transport(inf);
 	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {

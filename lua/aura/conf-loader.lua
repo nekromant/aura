@@ -1,4 +1,4 @@
-function BIN(v) 
+function BIN(v)
    return FMT_BIN..tostring(v).."."
 end
 
@@ -32,8 +32,7 @@ function do_load()
       aura.etable_add(tbl, unpack(device.methods[n]));
       n = n + 1
    end
-
-   return device.vid, device.pid, device.vendor,device.product,device.serial, tbl
+   return device.vid, device.pid, device.vendor,device.product,device.serial, tbl, device.control_retries
 end
 
 return do_load
