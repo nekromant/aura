@@ -33,7 +33,7 @@ struct usb_dev_info {
 
 	/* Usb device string */
 	struct ncusb_devwatch_data	dev_descr;
-	struct aura_timer *timer;
+	struct aura_timer *		timer;
 };
 
 static void usb_panic_and_reset_state(struct aura_node *node)
@@ -77,11 +77,21 @@ static int check_control(struct libusb_transfer *transfer)
 	return ret;
 }
 
+static void susb_offline_transport(struct usb_dev_info *inf)
+{
+	aura_set_status(inf->node, AURA_STATUS_OFFLINE);
+	libusb_close(inf->handle);
+	inf->handle = NULL;
+	inf->state = SUSB_DEVICE_SEARCHING;
+	slog(4, SLOG_DEBUG, "susb: transport offlined");
+}
+
 static void usb_stop_ops(void *arg)
 {
 	struct usb_dev_info *inf = arg;
 	usb_panic_and_reset_state(inf->node);
 	slog(2, SLOG_INFO, "susb: Device disconnect detected!");
+	susb_offline_transport(inf);
 }
 
 static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
@@ -94,9 +104,8 @@ static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)
 	 */
 	struct usb_dev_info *inf = arg;
 	inf->handle = hndl;
-
 	inf->state = SUSB_DEVICE_OPERATIONAL;
-
+	aura_set_status(inf->node, AURA_STATUS_ONLINE);
 	slog(2, SLOG_INFO, "susb: Device opened and ready to accept calls");
 	return;
 };
@@ -209,12 +218,6 @@ static int susb_open(struct aura_node *node, const char *conf)
 	/* We no not need this state anymore */
 	lua_close(L);
 	aura_set_transportdata(node, inf);
-
-	ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
-	ncusb_start_descriptor_watching(node, inf->ctx);
-	slog(1, SLOG_INFO, "usb: Now looking for a device %x:%x %s/%s/%s",
-	     inf->dev_descr.vid, inf->dev_descr.pid,
-	     inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
 
 	return 0;
 err_free_ct:
@@ -337,39 +340,36 @@ static void susb_handle_event(struct aura_node *node, enum node_event evt, const
 	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 
-
 	ncusb_handle_events_nonblock_once(node, inf->ctx, inf->timer);
 
 	if (inf->cbusy)
 		return;
 
-	if (inf->state == SUSB_DEVICE_RESTART) {
-		slog(4, SLOG_DEBUG, "usb: transport offlined, starting to look for a device");
-		aura_set_status(node, AURA_STATUS_OFFLINE);
-		libusb_close(inf->handle);
-		inf->handle = NULL;
-		inf->state = SUSB_DEVICE_SEARCHING;
-		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
-	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {
-		if (inf->etbl) {
-			/* Hack: Since libusb tends to send and receive data in one buffer,
-			 * we need to adjust argument buffer to fit in return values as well.
-			 * It helps us to avoid needless copying.
-			 */
-			int i;
-			for (i = 0; i < inf->etbl->next; i++) {
-				struct aura_object *tmp;
-				tmp = &inf->etbl->objects[i];
-				tmp->arglen += tmp->retlen;
-			}
-			aura_etable_activate(inf->etbl);
-			inf->etbl = NULL;
+	if (evt == NODE_EVENT_STARTED) {
+		aura_etable_activate(inf->etbl);
+		/* Activate our export table
+		 * Hack: Since libusb tends to send and receive data in one buffer,
+		 * we need to adjust argument buffer to fit in return values as well.
+		 * It helps us to avoid needless copying.
+		 */
+		int i;
+		for (i = 0; i < inf->etbl->next; i++) {
+			struct aura_object *tmp;
+			tmp = &inf->etbl->objects[i];
+			tmp->arglen += tmp->retlen;
 		}
-		aura_set_status(node, AURA_STATUS_ONLINE);
+		inf->etbl = NULL;
+		ncusb_watch_for_device(inf->ctx, &inf->dev_descr);
+		ncusb_start_descriptor_watching(node, inf->ctx);
+		slog(1, SLOG_INFO, "usb: Now looking for a device %x:%x %s/%s/%s",
+			 inf->dev_descr.vid, inf->dev_descr.pid,
+			 inf->dev_descr.vendor, inf->dev_descr.product, inf->dev_descr.serial);
+	} else if (inf->state == SUSB_DEVICE_RESTART) {
+		susb_offline_transport(inf);
+	} else if (inf->state == SUSB_DEVICE_OPERATIONAL) {
 		buf = aura_peek_buffer(&node->outbound_buffers);
-		if (!buf)
-			return;
-		susb_issue_call(node, buf);
+		if (buf)
+			susb_issue_call(node, buf);
 	}
 }
 
@@ -377,7 +377,7 @@ static struct aura_transport tusb = {
 	.name			= "simpleusb",
 	.open			= susb_open,
 	.close			= susb_close,
-	.handle_event	= susb_handle_event,
+	.handle_event		= susb_handle_event,
 	/* We write wIndex and wValue in the setup part of the packet */
 	.buffer_overhead	= LIBUSB_CONTROL_SETUP_SIZE,
 	.buffer_offset		= LIBUSB_CONTROL_SETUP_SIZE
