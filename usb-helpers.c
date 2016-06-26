@@ -201,25 +201,16 @@ void ncusb_handle_events_nonblock_once(struct aura_node *	node,
 	if (ret == LIBUSB_ERROR_OTHER)
 		BUG(node, "libusb_get_next_timeout_failed");
 
-	if (aura_get_status(node) != AURA_STATUS_ONLINE ){
-		/* libusb workaround
-		It looks like libusb actually dispatches hotplug callbacks
-		whenever we call libusb_handle_events(), and out own eventloop
-		will never get notified from a descriptor when that happends to call it.
-		Therefore, we always schedule libusb_handle_events() to be
-		called at least every 250ms, when out node's offline
-		(e.g. when we're waiting for device to arrive)
-		Life's a bitch, baby!
-		*/
-		tv.tv_usec = 250000;
-		ret = 1;
-	}
-
-	if (ret == 1) {
-		aura_timer_stop(tm);
-		aura_timer_start(tm, 0, &tv);
-	}
-
+	/* libusb workaround
+	 * It looks like libusb actually dispatches hotplug callbacks
+	 * whenever we call libusb_handle_events(), and our own eventloop
+	 * will never get notified from a descriptor when that happens to call it.
+	 * Therefore, we always schedule libusb_handle_events() to be
+	 * called at least every 250ms.
+	 */
+	tv.tv_usec = 250000;
+	aura_timer_stop(tm);
+	aura_timer_start(tm, 0, &tv);
 }
 
 static void hotplug_timer_fn(struct aura_node *node, struct aura_timer *tm, void *arg)
