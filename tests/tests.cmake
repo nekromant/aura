@@ -2,6 +2,13 @@
 # prefix is appended to each compiled C file
 function(add_aura_test testname testcommand)
     set(list_var "${ARGN}")
+
+    # If we run tests on remote hardware, rewrite the testcommand to invoke
+    # ssh. The remote should have passwordless auth
+    if (AURA_TEST_REMOTE)
+        SET(testcommand ssh ${AURA_TEST_REMOTE_HOST} ${testcommand})
+    endif()
+
     ADD_TEST(epoll-${testname} ${testcommand} ${ARGN})
     set_property(TEST epoll-${testname} PROPERTY ENVIRONMENT "AURA_USE_EVENTLOOP=epoll" "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua")
     set_property(TEST epoll-${testname} PROPERTY TIMEOUT 30)
