@@ -1,6 +1,6 @@
 #!/usr/bin/lua
-package.cpath="./?.so;"..package.cpath
-package.path="./../lua/?.lua;"..package.path
+package.cpath=os.getenv("AURA_BUILDDIR").."/?.so;"..package.cpath
+package.path=os.getenv("AURA_SOURCEDIR").."/lua/?.lua;"..package.path
 
 exitcode = 0
 
