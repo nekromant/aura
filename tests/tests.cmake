@@ -6,7 +6,7 @@ function(add_aura_test testname testcommand)
     # If we run tests on remote hardware, rewrite the testcommand to invoke
     # ssh. The remote should have passwordless auth
     if (AURA_TEST_REMOTE)
-        SET(testcommand ssh ${AURA_TEST_REMOTE_HOST} ./${testcommand})
+        SET(testcommand ssh ${AURA_TEST_REMOTE_HOST} ${testcommand})
     endif()
 
     ADD_TEST(epoll-${testname} ${testcommand} ${ARGN})
@@ -38,7 +38,7 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
       ADD_EXECUTABLE(${f} ${file})
       TARGET_LINK_LIBRARIES(${f} aurashared)
       if (${RUN})
-          add_aura_test(${f} ${f})
+          add_aura_test(${f} ./${f})
         if (${MEMCHECK})
           add_aura_test(memcheck-${f} valgrind
             --error-exitcode=1 --read-var-info=yes
@@ -84,5 +84,5 @@ function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
 endfunction(ADD_SCRIPT_TEST_DIRECTORY)
 
 
-file(WRITE ${CMAKE_BINARY_DIR}/.bashrc "export AURA_BUILDDIR=${CMAKE_BINARY_DIR}" \n)
-file(APPEND ${CMAKE_BINARY_DIR}/.bashrc "export AURA_SOURCEDIR=${CMAKE_SOURCE_DIR}" \n)
+file(WRITE ${CMAKE_BINARY_DIR}/.bashrc "export AURA_BUILDDIR=${CMAKE_BINARY_DIR}\n")
+file(APPEND ${CMAKE_BINARY_DIR}/.bashrc "export AURA_SOURCEDIR=${CMAKE_SOURCE_DIR}\n")
