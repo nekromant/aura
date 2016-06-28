@@ -1,29 +1,26 @@
 # This file assumes that you have a linaro abe-based toolchain
 # with a raspbian sysroot somewhere inside. This file also
-# takes care to trick pkg-config into searching only sysroot for
-# libraries
+# takes care to trick pkg-config into searching only toolchain's sysroot for
+# the libraries
 
 SET(CROSS_COMPILING yes)
 
-SET(CROSS_TOOLCHAIN_PATH /home/necromant/x-tools/rcm-arm-linux-gnueabihf)
+SET(CROSS_TRIPLET arm-rcm-linux-gnueabihf)
 SET(CMAKE_LIBRARY_PATH arm-linux-gnueabihf)
 
-# this one is important
 SET(CMAKE_SYSTEM_NAME Linux)
-#this one not so much
 SET(CMAKE_SYSTEM_VERSION 1)
+SET(CMAKE_C_COMPILER     ${CROSS_TRIPLET}-gcc${CMAKE_EXECUTABLE_SUFFIX})
+SET(CMAKE_CXX_COMPILER   ${CROSS_TRIPLET}-g++${CMAKE_EXECUTABLE_SUFFIX})
+
+#get_filename_component(CROSS_TOOLCHAIN_PATH "${CMAKE_C_COMPILER}" ABSOLUTE)
+find_program(CROSS_TOOLCHAIN_PATH NAMES ${CMAKE_C_COMPILER})
+get_filename_component(CROSS_TOOLCHAIN_PATH "${CROSS_TOOLCHAIN_PATH}" PATH)
+message(${CROSS_TOOLCHAIN_PATH})
 
 # where is the target environment
-SET(CMAKE_FIND_ROOT_PATH  ${CROSS_TOOLCHAIN_PATH}/${CMAKE_LIBRARY_PATH}/libc)
+SET(CMAKE_FIND_ROOT_PATH  ${CROSS_TOOLCHAIN_PATH}/../${CROSS_TRIPLET}/libc)
 
-# specify the cross compiler
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_FIND_ROOT_PATH}/lib/${CMAKE_LIBRARY_PATH}/")
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_FIND_ROOT_PATH}/usr/lib/${CMAKE_LIBRARY_PATH}/")
-
-SET(CMAKE_C_COMPILER     ${CROSS_TOOLCHAIN_PATH}/bin/arm-linux-gnueabihf-gcc)
-SET(CMAKE_CXX_COMPILER   ${CROSS_TOOLCHAIN_PATH}/bin/arm-linux-gnueabihf-g++)
-# C++ test is broken withgout -Wl,-rpath
-set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
