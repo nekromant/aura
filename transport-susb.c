@@ -238,7 +238,7 @@ static int susb_open(struct aura_node *node, const char *conf)
 		slog(4, SLOG_DEBUG, "Adjusting control transfer retry count to %d",
 		     inf->control_retry_max);
 	}
-	lua_stackdump(L);
+
 	inf->dev_descr.device_found_func = usb_start_ops;
 	inf->dev_descr.device_left_func = usb_stop_ops;
 	inf->dev_descr.arg = inf;
