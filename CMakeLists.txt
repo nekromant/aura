@@ -1,8 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
 PROJECT(aura)
-SET(PROJECT_VERSION   0.1.2)
-SET(AURA_API_VERSION  1)
+SET(PROJECT_VERSION   0.3-gitmaster)
+SET(AURA_API_VERSION  2)
 
 enable_testing()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
@@ -13,6 +13,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 #Safe to enable, pool is stable
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 
+
+SET(AURA_BUILD_DOC no CACHE BOOL "Build doxygen & ldoc documentation")
 #DEVELOPER HACKS. Enable only when hacking around aura
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing (Runs each test twice)")
 SET(AURA_TEST_USB_TRANSPORT no CACHE BOOL "Run usb/susb transport module test suite (requires hardware)")
@@ -22,9 +24,13 @@ SET(AURA_TEST_BINDINGS yes CACHE BOOL "Run basic lua bindings test suite (no hw 
 SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
 SET(AURA_TEST_REMOTE no CACHE BOOL "Run testsuite on remote machine")
 SET(AURA_TEST_REMOTE_HOST "root@shade.home" CACHE STRING "Run tests on a remote machine")
+SET(AURA_TEST_PREFIX "host" CACHE STRING "Prefix for test name")
+SET(AURA_EXTRA_VALGRIND_OPTS "--show-leak-kinds=all" CACHE STRING "Extra options for valgrind")
 
 SET(CTEST_ENVIRONMENT
   "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua"
+  "AURA_BUILDDIR=${CMAKE_BINARY_DIR}"
+  "AURA_SOURCEDIR=${CMAKE_SOURCE_DIR}"
 )
 
 SET(SRCS
@@ -250,13 +256,13 @@ if(LUA_FOUND)
   message("lua lib dir:               ${CMAKE_INSTALL_PREFIX}/${LUA_LPATH}")
 endif()
 
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND AURA_BUILD_DOC)
   message("Doxygen docs:              enabled")
 else()
   message("Doxygen docs:              disabled")
 endif()
 
-if(LDOC_FOUND)
+if(LDOC_FOUND AND AURA_BUILD_DOC)
   message("ldoc docs:                 enabled")
 else()
   message("ldoc docs:                 disabled")
@@ -323,28 +329,44 @@ CONFIGURE_FILE(
 )
 
 
-if (DOXYGEN_FOUND)
-  CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
-  )
+if (AURA_BUILD_DOC)
+  if (DOXYGEN_FOUND)
+    CONFIGURE_FILE(
+      "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
+    )
 
-  add_custom_command(
-    TARGET aurashared
-    POST_BUILD
-    COMMAND doxygen > doxygen.log
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running doxygen"
-  )
-endif()
+    add_custom_command(TARGET aurashared
+      PRE_BUILD
+      COMMAND
+      mkdir -p ${CMAKE_BINARY_DIR}/doc/C/
+    )
+
+    add_custom_command(
+      TARGET aurashared
+      POST_BUILD
+      COMMAND doxygen > doxygen.log
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Running doxygen"
+    )
+  endif()
 
 
-if (LDOC_FOUND)
-  add_custom_command(TARGET aurashared
-                    POST_BUILD
-                    COMMAND ldoc -M -d ${CMAKE_BINARY_DIR}/ldoc/ lua/
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                  COMMENT "Generating documentation for lua bindings")
+  if (LDOC_FOUND)
+    add_custom_command(TARGET aurashared
+      PRE_BUILD
+      COMMAND
+      mkdir -p ${CMAKE_BINARY_DIR}/doc/lua/
+    )
+
+    add_custom_command(TARGET aurashared
+                      POST_BUILD
+                      COMMAND ldoc -M
+                      -d ${CMAKE_BINARY_DIR}/doc/lua/${PROJECT_VERSION}/
+                      lua/
+                      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    COMMENT "Generating documentation for lua bindings")
+  endif()
 endif()
 
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"

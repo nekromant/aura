@@ -9,6 +9,7 @@ function(add_aura_test testname testcommand)
         SET(testcommand ssh ${AURA_TEST_REMOTE_HOST} ${testcommand})
     endif()
 
+    SET(testname "${AURA_TEST_PREFIX}-${testname}")
     ADD_TEST(epoll-${testname} ${testcommand} ${ARGN})
     set_property(TEST epoll-${testname} PROPERTY ENVIRONMENT "AURA_USE_EVENTLOOP=epoll" "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua")
     set_property(TEST epoll-${testname} PROPERTY TIMEOUT 30)
@@ -42,7 +43,7 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
         if (${MEMCHECK})
           add_aura_test(memcheck-${f} valgrind
             --error-exitcode=1 --read-var-info=yes
-            --leak-check=full  --show-leak-kinds=all
+            --leak-check=full ${AURA_EXTRA_VALGRIND_OPTS}
             --suppressions=${CMAKE_SOURCE_DIR}/valgrind.suppress
             --undef-value-errors=no --xml=yes --xml-file=${f}.xml
             ./${f})
@@ -74,7 +75,7 @@ function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
           if (${MEMCHECK})
               add_aura_test(memcheck-${f} valgrind
                   --error-exitcode=1 --read-var-info=yes
-                  --leak-check=full  --show-leak-kinds=all
+                  --leak-check=full ${AURA_EXTRA_VALGRIND_OPTS}
                   --suppressions=${CMAKE_SOURCE_DIR}/valgrind.suppress
                   --undef-value-errors=no --xml=yes --xml-file=${f}.xml
               ./lua-test-wrapper ${file})
