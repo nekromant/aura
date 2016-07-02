@@ -16,6 +16,7 @@ SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
 
 SET(AURA_BUILD_DOC no CACHE BOOL "Build doxygen & ldoc documentation")
 #DEVELOPER HACKS. Enable only when hacking around aura
+SET(AURA_TEST_TIMEOUT 30 CACHE STRING "Test timeout in seconds")
 SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing (Runs each test twice)")
 SET(AURA_TEST_USB_TRANSPORT no CACHE BOOL "Run usb/susb transport module test suite (requires hardware)")
 SET(AURA_TEST_NMC_TRANSPORT no CACHE BOOL "Run Neuromatrix(r) DSP transport module test suite (requires hardware)")
