@@ -224,13 +224,3 @@ To match *ANY* serial, product, vendor:
 ## nmc
 
 You can use this transport to call remote methods running on RC Module's NeuroMatrix DSP core. This transport requires that you run it on a SoC with NeuroMatrix DSP and experimental easynmc driver, e.g. K1879ХБ1Я.
-
-#TODO (For 0.3-release)
-#### Better node timeout handling in eventloop code
-#### Provide backend-agnostic event flags, do not rely on poll.h/epoll.h
-#### Fix reconnect event delivery in susb code on libevent backend
-#### Rework eventloop functions to be more libevent like
-#### Implement proper serial port transport
-#### Implement event delivery mechanism in Neuromatrix DSP transport
-#### Make libevent backend default and stable
-#### Refactor function naming (e.g. aura_open -> aura_node_open)
