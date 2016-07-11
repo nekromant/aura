@@ -207,7 +207,8 @@ TARGET_LINK_LIBRARIES(aurashared
     ${LUA_LIBRARIES}
     ${EASYNMC_LIBRARIES}
     ${LIBEVENT_LIBRARIES}
-    -lrt -lm
+    ${STLINK_LIBRARIES}
+    -lrt -lm -lpthread
 )
 
 message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
