@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <time.h>
 #include <aura/slog.h>
+#include <pthread.h>
 
 /* Supported colors */
 #define CLR_NORM     "\x1B[0m"
@@ -40,7 +41,7 @@
 
 /* Flags */
 static slog_flags slg;
-
+static pthread_mutex_t slogmut = PTHREAD_MUTEX_INITIALIZER;
 
 /*
  * get_system_date - Intialize date with system date.
@@ -247,6 +248,7 @@ void slogv(int level, int flag, const char *msg, va_list args)
 		break;
 	}
 
+	pthread_mutex_lock(&slogmut);
 	/* Print output */
 	fprintf(stderr, "%s", slog_sprintf("%s\n", prints));
 
@@ -255,6 +257,7 @@ void slogv(int level, int flag, const char *msg, va_list args)
 		char *output = slog_sprintf("%s\n", string);
 		log_to_file(output, slg.fname, &mdate);
 	}
+	pthread_mutex_unlock(&slogmut);
 }
 
 /*
