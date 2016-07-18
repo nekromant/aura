@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Test Layout</title>
+    <style type="text/css">
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #content {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0px;
+        }
+        /* Dropdown Button */
+
+        .dropbtn {
+            background-color: #999999;
+            color: white;
+            padding: 4px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        /* Dropdown button on hover & focus */
+
+        .dropbtn:hover,
+        .dropbtn:focus {
+            background-color: #3e8e41;
+        }
+        /* The container <div> - needed to position the dropdown content */
+
+        .gobtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+        /* Dropdown button on hover & focus */
+
+        .gobtn:hover,
+        .gobtn:focus {
+            background-color: #3e8e41;
+        }
+        /* The container <div> - needed to position the dropdown content */
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        /* Dropdown Content (Hidden by Default) */
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        }
+        /* Links inside the dropdown */
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        /* Change color of dropdown links on hover */
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1
+        }
+        /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body onload="initDocs()">
+    <script>
+        var config = []
+        /* When the user clicks on the button,
+                        toggle between hiding and showing the dropdown content */
+
+        function setApi(api) {
+            document.getElementById("apibtn").innerHTML = api;
+            config.ApiDropDown = api;
+        }
+
+        function setVersion(ver) {
+            document.getElementById("verbtn").innerHTML = ver;
+            config.VersionDropDown = ver;
+        }
+
+        function showVersionMenu() {
+            document.getElementById("VersionDropDown").classList.toggle("show");
+        }
+
+        function showApiMenu() {
+            document.getElementById("ApiDropDown").classList.toggle("show");
+        }
+
+        function fetch(url) {
+            var xhr = new XMLHttpRequest();
+            var path = window.location.pathname + url
+
+            xhr.open('GET', path, false);
+
+            xhr.send();
+
+            if (xhr.status != 200) {
+                alert(xhr.status + ': ' + xhr.statusText);
+            } else {
+                var ret = xhr.responseText.split("\n");
+                return ret;
+            }
+            return ["error"]
+        }
+
+        function populateDropDown(url, dropdown) {
+            var arr = fetch(url)
+            var items = ""
+            arr.forEach(function(item, i, arr) {
+                if (config[dropdown] === undefined)
+                    config[dropdown] = item /* Set default */
+                items += '<a href="#" onclick="config[\''+ dropdown + '\'] = \'' + item + '\';">' + item + '</a>'
+            });
+            document.getElementById(dropdown).innerHTML = items
+        }
+
+        function displayDocs() {
+            var url = "./" + config.ApiDropDown + '/' + config.VersionDropDown + '/index.html'
+            document.getElementById("docframe").src = url
+        }
+
+        function initDocs() {
+            if (window.location.protocol == "file:") {
+                /* xhr won't work from file:// */
+                config["VersionDropDown"]="gitmaster"
+                config["ApiDropDown"] = "C"
+            } else {
+                populateDropDown("versions", "VersionDropDown");
+                populateDropDown("apis", "ApiDropDown");
+            }
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+    <div id="content">
+<a href="https://github.com/nekromant/aura"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+        <div class="dropdown">
+            <button onclick="displayFile('hello.html');" class="gobtn">Introduction</button>
+            | API:
+            <button id="apibtn" onclick="showApiMenu()" class="dropbtn">C</button>
+            <div id="ApiDropDown" class="dropdown-content">
+                <a href="#" onclick="setApi('C')">C</a>
+                <a href="#" onclick="setApi('lua')">Lua</a>
+            </div>
+            VERSION:
+            <button id="verbtn" onclick="showVersionMenu()" class="dropbtn">gitmaster</button>
+            <div id="VersionDropDown" class="dropdown-content">
+                <a href="#" onclick="setVersion('gitmaster')">gitmaster</a>
+            </div> |
+            <button onclick="displayDocs();" class="gobtn">Go get it!</button>
+        </div>
+        <iframe id="docframe" width="100%" height="100%" src="./hello.html"></iframe>
+    </div>
+</body>
+
+</html>

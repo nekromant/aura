@@ -1,7 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
 PROJECT(aura)
-SET(PROJECT_VERSION   0.3-gitmaster)
+#TODO: Set this from git tag
+SET(PROJECT_VERSION   0.3)
+SET(PROJECT_DOC_VERSION   gitmaster)
 SET(AURA_API_VERSION  2)
 
 enable_testing()
@@ -344,6 +346,10 @@ CONFIGURE_FILE(
 
 
 if (AURA_BUILD_DOC)
+  file(GLOB HTMLFILES ${CMAKE_CURRENT_SOURCE_DIR}/doc-index/*)
+  file(COPY ${HTMLFILES}
+  DESTINATION ${CMAKE_BINARY_DIR}/doc/)
+
   if (DOXYGEN_FOUND)
     CONFIGURE_FILE(
       "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake"
@@ -376,7 +382,7 @@ if (AURA_BUILD_DOC)
     add_custom_command(TARGET aurashared
                       POST_BUILD
                       COMMAND ldoc -M
-                      -d ${CMAKE_BINARY_DIR}/doc/lua/${PROJECT_VERSION}/
+                      -d ${CMAKE_BINARY_DIR}/doc/lua/${PROJECT_DOC_VERSION}/
                       lua/
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     COMMENT "Generating documentation for lua bindings")

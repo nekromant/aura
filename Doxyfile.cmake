@@ -32,7 +32,7 @@ PROJECT_NAME = aura
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER = ${PROJECT_VERSION}
+PROJECT_NUMBER = ${PROJECT_DOC_VERSION}
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -52,7 +52,7 @@ PROJECT_LOGO =
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY = ${CMAKE_BINARY_DIR}/doc/C/${PROJECT_VERSION}
+OUTPUT_DIRECTORY = ${CMAKE_BINARY_DIR}/doc/C/${PROJECT_DOC_VERSION}
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -865,7 +865,7 @@ GENERATE_HTML = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
 # put in front of it. If left blank `html' will be used as the default path.
 
-HTML_OUTPUT = html
+HTML_OUTPUT = .
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for
 # each generated HTML page (for example: .htm,.php,.asp). If it is left blank
