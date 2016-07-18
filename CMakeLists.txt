@@ -1,6 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
+if (CROSS_COMPILE AND NOT CMAKE_TOOLCHAIN_FILE)
+  include(${CMAKE_SOURCE_DIR}/cmake/cross-compile.cmake)
+endif()
+
+
 PROJECT(aura)
+
 #TODO: Set this from git tag
 SET(PROJECT_VERSION   0.3)
 SET(PROJECT_DOC_VERSION   gitmaster)
@@ -9,8 +15,6 @@ SET(AURA_API_VERSION  2)
 enable_testing()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-
-#TODO: Move out linux-specific stuff
 
 #Safe to enable, pool is stable
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
