@@ -1,7 +1,6 @@
 {
   <insert_a_suppression_name_here>
   Memcheck:Leak
-  match-leak-kinds: reachable
   fun:malloc
   fun:_dl_close_worker
   fun:_dl_close
@@ -18,7 +17,6 @@
 {
   <insert_a_suppression_name_here>
   Memcheck:Leak
-  match-leak-kinds: reachable
   fun:malloc
   fun:local_strdup
   fun:_dl_map_object
@@ -35,7 +33,6 @@
 {
   <insert_a_suppression_name_here>
   Memcheck:Leak
-  match-leak-kinds: reachable
   fun:malloc
   fun:_dl_new_object
   fun:_dl_map_object_from_fd
@@ -52,7 +49,6 @@
 {
   <insert_a_suppression_name_here>
   Memcheck:Leak
-  match-leak-kinds: reachable
   fun:calloc
   fun:_dl_check_map_versions
   fun:dl_open_worker
@@ -69,7 +65,6 @@
 {
   <insert_a_suppression_name_here>
   Memcheck:Leak
-  match-leak-kinds: reachable
   fun:calloc
   fun:_dl_new_object
   fun:_dl_map_object_from_fd
