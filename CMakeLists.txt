@@ -1,9 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
-if (CROSS_COMPILE AND NOT CMAKE_TOOLCHAIN_FILE)
-  include(${CMAKE_SOURCE_DIR}/cmake/cross-compile.cmake)
-endif()
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+include(LinuxCrossCompile)
 
+if (CROSS_COMPILE)
+  SET(LUA_CPATH "lib/lua/5.2/" CACHE PATH "lua cpath")
+  SET(LUA_LPATH "share/lua/5.2/" CACHE PATH "lua lpath")
+endif()
 
 PROJECT(aura)
 
@@ -13,7 +16,7 @@ SET(PROJECT_DOC_VERSION   gitmaster)
 SET(AURA_API_VERSION  2)
 
 enable_testing()
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
 
 
 #Safe to enable, pool is stable
