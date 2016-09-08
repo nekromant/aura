@@ -293,8 +293,8 @@ static int nmc_open(struct aura_node *node, const char *filepath)
 
 	nonblock(h->iofd, 1);
 
-	aura_add_pollfds(node, h->iofd, (EPOLLIN | EPOLLET));
-	aura_add_pollfds(node, h->memfd, (EPOLLPRI | EPOLLET));
+	aura_add_pollfds(node, h->iofd, (EPOLLIN));
+	aura_add_pollfds(node, h->memfd, EPOLLIN | EPOLLOUT );
 
 	easynmc_start_app(h, pv->ep);
 	return 0;
@@ -383,7 +383,7 @@ static inline void do_issue_next_call(struct aura_node *node)
 	o = out_buf->object;
 	in_buf = aura_buffer_request(node, o->retlen);
 	if (!in_buf)
-		BUG(node, "Buffer allocation faield");
+		BUG(node, "Buffer allocation failed");
 
 	in_buf->object = o;
 	pv->current_out = out_buf;
@@ -405,14 +405,12 @@ static void nmc_handle_events(struct aura_node *node, enum node_event evt, const
 		aura_etable_activate(pv->etbl);
 		aura_set_status(node, AURA_STATUS_ONLINE);
 		pv->is_online++;
-	}
-	;
+	};
 
 	if (pv->is_online && (easynmc_core_state(h) != EASYNMC_CORE_RUNNING)) {
 		aura_set_status(node, AURA_STATUS_OFFLINE);
 		pv->is_online = 0;
-	}
-	;
+	};
 
 	if (fd && (fd->fd == pv->h->iofd))
 		fetch_stdout(node);
@@ -428,7 +426,6 @@ static void nmc_handle_events(struct aura_node *node, enum node_event evt, const
 			pv->current_out = NULL;
 			pv->current_in = NULL;
 			pv->sbuf->state = SYNCBUF_IDLE;
-			slog(4, SLOG_DEBUG, "transport-nmc: We got something from nmc");
 			break;
 		case SYNCBUF_ARGOUT:
 			break;
