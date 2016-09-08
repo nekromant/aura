@@ -63,7 +63,7 @@ print(node:echo_u8(5))
 
 For async examples see tests and docs.
 
-# Installation
+# Compiling from source
 
 You'll need cmake, lua5.2-dev, libusb-1.0 and easynmc-0.1.1 (For NeuroMatrix Transport).
 
@@ -79,6 +79,43 @@ sudo make install
 Or just build yourself a debian package with
 ```
 dpkg-buildpackage
+```
+
+# Cross-compiling
+
+You'll need a cross-toolchain for the target architecture with a relevant
+sysroot. Besides the toolchain you'll need all the dependencies to be present
+within sysroot. For debian (armel port) and and raspbian (armhf) you can use
+toolchains provided by RC Module. The following can be downloaded from the
+following URL:
+
+http://www.module.ru/mb7707/ci/toolchains/
+
+Make sure that your toolchain binaries are in your PATH. Run:
+
+```
+mkdir build-arm
+cd build-arm
+cmake .. -DCROSS_COMPILE=arm-rcm-linux-gnueabihf -DCMAKE_LIBRARY_PATH=arm-linux-gnueabihf
+make
+```
+
+CROSS_COMPILE is your toolchain prefix
+CMAKE_LIBRARY_PATH should point to the target system's multiarch triplet.
+
+The build scripts try to autodetect all the things, so that you will NOT
+generally need to write your CMAKE_TOOLCHAIN_FILE. If the stuff above doesn't
+work for you, please follow the steps at cmake wiki and write your own toolchain
+file
+
+http://www.vtk.org/Wiki/CMake_Cross_Compiling
+
+When cross-compiling the autodetection of lua C library path and lua library
+path will NOT be performed. The defaults found in CMakeLists.txt will be
+generally ok for debian/raspbian jessie and lua 5.2. If you may want to
+adjust these. e.g.
+```
+cmake .. -DCROSS_COMPILE=arm-rcm-linux-gnueabihf -DCMAKE_LIBRARY_PATH=arm-linux-gnueabihf -DLUA_CPATH=lib/lua/5.2/ -DLUA_LPATH=share/lua/5.2/
 ```
 
 # Terminology
