@@ -11,13 +11,11 @@ endif()
 PROJECT(aura)
 
 #TODO: Set this from git tag
-SET(PROJECT_VERSION   0.3)
+SET(PROJECT_VERSION   0.1.3)
 SET(PROJECT_DOC_VERSION   gitmaster)
-SET(AURA_API_VERSION  2)
+SET(AURA_API_VERSION  3)
 
 enable_testing()
-
-
 
 #Safe to enable, pool is stable
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
