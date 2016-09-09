@@ -84,9 +84,10 @@ int ion_alloc(int fd, size_t len, size_t align, unsigned int heap_mask,
 
 int ion_free(int fd, ion_user_handle_t handle)
 {
-	struct ion_handle_data data = {
-		.handle = handle,
-	};
+	struct ion_handle_data data;
+
+	memset((void *) &data, 0x0, sizeof(data));
+	data.handle = handle;
 
 	return ion_ioctl(fd, ION_IOC_FREE, &data);
 }
