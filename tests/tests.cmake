@@ -6,10 +6,8 @@ function(add_test_with_valgrind testname testtimeout testenv testcommand memchec
     # If we run tests on remote hardware, rewrite the testcommand to invoke
     # ssh. The remote should have passwordless auth
 
-    message("test ${testname} timeout ${testtimeout} cmd ${testcommand}")
-
     if (AURA_TEST_REMOTE)
-        SET(testcommand ssh ${AURA_TEST_REMOTE_HOST} ${testcommand})
+        SET(remotecmd ssh ${AURA_TEST_REMOTE_HOST})
     endif()
 
     set(VALGRIND_OPTS --error-exitcode=1 --read-var-info=yes
@@ -18,12 +16,12 @@ function(add_test_with_valgrind testname testtimeout testenv testcommand memchec
           --undef-value-errors=no --xml=yes --xml-file=${testname}.xml
     )
 
-    ADD_TEST(${testname} ${testcommand} ${testargs})
+    ADD_TEST(${testname} ${remotecmd} ${testcommand} ${testargs})
     set_property(TEST ${testname} PROPERTY ENVIRONMENT ${testenv})
     set_property(TEST ${testname} PROPERTY TIMEOUT "${testtimeout}")
 
-    if (false)
-        ADD_TEST(memcheck-${testname} valgrind ${VALGRIND_OPTS} ${testcommand})
+    if (MEMCHECK)
+        ADD_TEST(memcheck-${testname} ${remotecmd} valgrind ${VALGRIND_OPTS} ${testcommand} ${testargs})
         set_property(TEST memcheck-${testname} PROPERTY ENVIRONMENT ${testenv})
         set_property(TEST memcheck-${testname} PROPERTY TIMEOUT ${testtimeout})
     endif()
@@ -32,7 +30,6 @@ endfunction()
 
 function(add_aura_test testname memcheck testcommand testargs)
     SET(testname "${AURA_TEST_PREFIX}-${testname}")
-    message(${testcommand})
 
     SET(testenv ${CTEST_ENVIRONMENT} "AURA_USE_EVENTLOOP=epoll" "AURA_LUA_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lua")
     add_test_with_valgrind(epoll-${testname} "${AURA_TEST_TIMEOUT}" "${testenv}" "${testcommand}" "${memcheck}" "${testargs}")
