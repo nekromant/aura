@@ -4,6 +4,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 include(LinuxCrossCompile)
 
 if (CROSS_COMPILE)
+  #Assume some sane defaults when cross-compiling
   SET(LUA_CPATH "lib/lua/5.2/" CACHE PATH "lua cpath")
   SET(LUA_LPATH "share/lua/5.2/" CACHE PATH "lua lpath")
 endif()
@@ -48,6 +49,7 @@ SET(SRCS
   transport.c eventloop.c aura.c export.c serdes.c
   eventloop-factory.c timer.c
   retparse.c queue.c utils-linux.c
+  ion.c ion_buffer_allocator.c
   transport-dummy.c
   transport-null.c
   transport-bench.c
@@ -168,7 +170,7 @@ ENDIF()
 
 IF(EASYNMC_FOUND)
   SET(TRANSPORTS ${TRANSPORTS} nmc)
-  SET(SRCS ${SRCS} transport-nmc.c ion.c)
+  SET(SRCS ${SRCS} transport-nmc.c)
   SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} easynmc-0.1.1")
 ENDIF()
 

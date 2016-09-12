@@ -1,5 +1,6 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/buffer_allocator.h>
 #include <aura/eventloop.h>
 #include <inttypes.h>
 
@@ -57,6 +58,13 @@ struct aura_node *aura_open(const char *name, const char *opts)
 
 	node->status = AURA_STATUS_OFFLINE;
 
+	if (node->tr->allocator) {
+		node->allocator_data = node->tr->allocator->create(node);
+		if (!node->allocator_data) {
+			slog(0, SLOG_ERROR, "Failed to initialize transport-specific buffer allocator");
+			goto err_free_node;
+		}
+	}
 	/*  Eventsystem will be either lazy-initialized or created via
 	 *  aura_eventloop_* functions
 	 */
@@ -109,8 +117,19 @@ void aura_close(struct aura_node *node)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get(node);
 
+	/* After transport shutdown we need to clean up
+	 * remaining buffers */
+	cleanup_buffer_queue(&node->inbound_buffers, true);
+	cleanup_buffer_queue(&node->outbound_buffers, true);
+	cleanup_buffer_queue(&node->event_buffers, true);
+	cleanup_buffer_queue(&node->buffer_pool, true);
+
 	if (node->tr->close)
 		node->tr->close(node);
+
+	/* Destroy the memory allocator, if any */
+	if (node->allocator_data)
+		node->tr->allocator->destroy(node, node->allocator_data);
 
 	/* Nuke all running timers */
 	struct aura_timer *pos;
@@ -126,12 +145,6 @@ void aura_close(struct aura_node *node)
 			aura_eventloop_del(node);
 	}
 
-	/* After transport shutdown we need to clean up
-	 * remaining buffers */
-	cleanup_buffer_queue(&node->inbound_buffers, true);
-	cleanup_buffer_queue(&node->outbound_buffers, true);
-	cleanup_buffer_queue(&node->event_buffers, true);
-	cleanup_buffer_queue(&node->buffer_pool, true);
 
 	aura_transport_release(node->tr);
 	/* Check if we have an export table registered and nuke it */

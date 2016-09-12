@@ -1,5 +1,6 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/buffer_allocator.h>
 
 struct aura_buffer *aura_buffer_internal_request(int size);
 void aura_buffer_internal_free(struct aura_buffer *buf);
@@ -88,14 +89,14 @@ struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)
 #endif
 
 	/* Fallback to alloc() */
-	if (!nd->tr->buffer_request) {
+	if (!nd->tr->allocator) {
 		char *data = malloc(act_size + sizeof(struct aura_buffer));
 		ret = (struct aura_buffer *)data;
 		if (!ret)
 			BUG(nd, "FATAL: malloc() failed");
 		ret->data = &data[sizeof(*ret)];
 	} else {
-		ret = nd->tr->buffer_request(nd, act_size);
+		ret = nd->tr->allocator->request(nd, nd->allocator_data, act_size);
 		if (!ret)
 			BUG(nd, "FATAL: buffer allocation by transport failed");
 	}
@@ -148,8 +149,11 @@ void aura_buffer_destroy(struct aura_buffer *buf)
 		    "FATAL: Attempting to destroy a buffer with invalid magic OR double free an aura_buffer");
 	buf->magic = 0;
 
-	if (nd && nd->tr->buffer_release)
-		nd->tr->buffer_release(buf);
+	if (!nd)
+		BUG(NULL, "Buffer with no owner");
+
+	if (nd->tr->allocator)
+		nd->tr->allocator->release(nd, nd->allocator_data, buf);
 	else
 		free(buf);
 }

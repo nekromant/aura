@@ -56,6 +56,9 @@ struct aura_node {
 	struct aura_export_table *tbl;
 	void                     *transport_data;
 	void                     *user_data;
+
+	void *allocator_data;
+
 	enum aura_node_status     status;
 	struct list_head          outbound_buffers;
 	struct list_head          inbound_buffers;
@@ -274,41 +277,9 @@ struct aura_transport
 	/**
 	 * \brief Optional
 	 *
-	 * Override Buffer allocation. This may be called if you need
-	 * any special consideration when allocating buffers (e.g. ION).
-	 * The size includes any transport-required overhead, but doesn't include
-	 * the actual struct aura_buffer or any of your own data. Your code should set
-	 * (struct aura_buffer *)->data field to point to the actual data
-	 *
-	 * The simplest implementation would be:
-	 * \code{.c}
-	 *  struct aura_buffer *aura_buffer_internal_request(struct aura_node *node, int size) {
-	 *		int act_size = sizeof(struct aura_buffer) + size;
-	 *  	struct aura_buffer *ret = malloc(act_size);
-	 *  	ret->size = size;
-	 *  	ret->pos = 0;
-	 *  	return ret;
-	 *  }
-	 *  \endcode
-	 *
-	 *
-	 * @param node current node
-	 * @param size requested buffer size (NOT including struct aura_buffer)
-	 * @return
+	 * If your transport needs a custom memory allocator, specify it here.
 	 */
-	struct aura_buffer *(*buffer_request)(struct aura_node *node, int size);
-	/**
-	 * \brief Optional.
-	 *
-	 * Override Buffer deallocation. This may be called if you need
-	 * any special consideration when allocating and deallocating buffers (e.g. ION)
-	 *
-	 *
-	 * @param node
-	 * @param size
-	 * @return
-	 */
-	void                (*buffer_release)(struct aura_buffer *buf);
+	struct aura_buffer_allocator *allocator;
 
 	/** \brief Private.
 	 *

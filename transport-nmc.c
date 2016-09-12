@@ -1,5 +1,6 @@
 #include <aura/aura.h>
 #include <aura/private.h>
+#include <aura/ion_buffer_allocator.h>
 #include <linux/easynmc.h>
 #include <easynmc.h>
 #include <stdint.h>
@@ -61,14 +62,6 @@ enum {
 	NMC_EVENT_TRANSPORT=1 << 1
 };
 
-struct ion_buffer_descriptor {
-	int			map_fd;
-	int			share_fd;
-	int			size;
-	ion_user_handle_t	hndl;
-	struct aura_buffer	buf;
-};
-
 
 struct nmc_private {
 	struct easynmc_handle *		h;
@@ -82,7 +75,6 @@ struct nmc_private {
 	struct aura_buffer *		reading;
 	int				inbufsize;
 	struct nmc_aura_syncbuffer *	sbuf;
-	int				ion_fd;
 	struct aura_buffer *		current_in;
 	struct aura_buffer *		current_out;
 	struct aura_export_table *	etbl;
@@ -261,13 +253,6 @@ static int nmc_open(struct aura_node *node, const char *filepath)
 		goto errclose;
 	}
 
-	pv->ion_fd = ion_open();
-
-	if (pv->ion_fd < 0) {
-		slog(0, SLOG_ERROR, "Failed to init ion");
-		goto errfreemem;
-	}
-
 	if ((sizeof(struct aura_buffer) % 4))
 		BUG(node, "Internal BUG: aura_buffer header must be 4-byte aligned");
 
@@ -346,7 +331,7 @@ static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)
 {
 	struct aura_node *node = buf->owner;
 	struct nmc_private *pv = aura_get_userdata(node);
-	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
+	struct aura_ion_buffer_descriptor *dsc = container_of(buf, struct aura_ion_buffer_descriptor, buf);
 	uint32_t nmaddress;
 
 	/* If the object requires no buffer we should bail out
@@ -357,8 +342,9 @@ static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)
 	if (!buf->data)
 		return -1;
 
+	struct aura_ion_allocator_data *idata = aura_node_allocatordata_get(node);
 	if (dsc->share_fd == -1) { /* Share it! */
-		int ret = ion_share(pv->ion_fd, dsc->hndl, &dsc->share_fd);
+		int ret = ion_share(idata->ion_fd, dsc->hndl, &dsc->share_fd);
 		if (ret)
 			BUG(node, "ion_share() failed");
 	}
@@ -436,56 +422,6 @@ static void nmc_handle_events(struct aura_node *node, enum node_event evt, const
 	}
 }
 
-struct aura_buffer *ion_buffer_request(struct aura_node *node, int size)
-{
-	int ret;
-	int map_fd=0;
-	ion_user_handle_t hndl = 0;
-	struct nmc_private *pv = aura_get_userdata(node);
-
-	struct ion_buffer_descriptor *dsc = malloc(sizeof(*dsc));
-
-	if (!dsc)
-		BUG(node, "malloc failed!");
-
-	if (size) {
-		ret = ion_alloc(pv->ion_fd, size, 0x8, 0xf, 0, &hndl);
-		if (ret)
-			BUG(node, "ION allocation of %d bytes failed: %d", size, ret);
-
-		ret = ion_map(pv->ion_fd, hndl, size, (PROT_READ | PROT_WRITE),
-			      MAP_SHARED, 0, (void *)&dsc->buf.data, &map_fd);
-		if (ret)
-			BUG(node, "ION mmap failed");
-	} else {
-		dsc->buf.data = NULL;
-	}
-
-	dsc->map_fd = map_fd;
-	dsc->hndl = hndl;
-	dsc->size = size;
-	dsc->share_fd = -1;
-	return &dsc->buf;
-}
-
-static void ion_buffer_release(struct aura_buffer *buf)
-{
-	struct aura_node *node = buf->owner;
-	struct nmc_private *pv = aura_get_userdata(node);
-	struct ion_buffer_descriptor *dsc = container_of(buf, struct ion_buffer_descriptor, buf);
-	int ret;
-
-	if (dsc->buf.data) {
-		munmap(dsc->buf.data, dsc->size);
-
-		ret = ion_free(pv->ion_fd, dsc->hndl);
-		if (ret)
-			BUG(node, "Shit happened when doing ion_free(): %d", ret);
-
-		close(dsc->map_fd);
-	}
-	free(dsc);
-}
 
 /*
  * TODO:
@@ -519,8 +455,7 @@ static struct aura_transport nmc = {
 	.handle_event	= nmc_handle_events,
 	.buffer_offset		= 0,
 	.buffer_overhead	= 0,
-	.buffer_request		= ion_buffer_request,
-	.buffer_release		= ion_buffer_release,
+	.allocator      = AURA_NODE_ION_BUFFER_ALLOCATOR,
 	.buffer_get		= nmc_buffer_get,
 	.buffer_put		= nmc_buffer_put,
 };
