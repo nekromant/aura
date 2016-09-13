@@ -152,6 +152,16 @@ if (AURA_COVERALLS)
        "${SRCS}" # The source files.
        ON                 # If we should upload.
        )
+    find_program(LCOV_FOUND lcov)
+    if (LCOV_FOUND)
+      add_custom_target(coverage.info COMMAND geninfo ${CMAKE_BINARY_DIR} -o coverage.info)
+      add_custom_target(coverage.filtered.info
+                        DEPENDS coverage.info
+                        COMMAND lcov --remove coverage.info
+                                  '/usr/include/*'
+                                  '${CMAKE_SOURCE_DIR}/tests/*'
+                                -o coverage.filtered.info)
+    endif()
 endif()
 
 ADD_LIBRARY(aurastatic STATIC $<TARGET_OBJECTS:aura>)
