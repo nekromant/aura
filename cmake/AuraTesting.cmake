@@ -1,5 +1,6 @@
 # This function adds tests from a subdirectory unders tests/
 # prefix is appended to each compiled C file
+enable_testing()
 
 
 function(add_test_with_valgrind testname testtimeout testenv testcommand memcheck testargs)
@@ -65,9 +66,6 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
         RUNTIME DESTINATION lib/${CMAKE_LIBRARY_PATH}/aura/tests/)
     endforeach(file)
 endfunction(ADD_C_TEST_DIRECTORY)
-
-add_executable(lua-test-wrapper lua-test-wrapper.c utils-lua.c)
-target_link_libraries(lua-test-wrapper ${LUA_LIBRARIES})
 
 function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
     file(GLOB UNITS

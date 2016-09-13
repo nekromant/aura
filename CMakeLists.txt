@@ -1,22 +1,18 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
 include(LinuxCrossCompile)
-
-if (CROSS_COMPILE)
-  #Assume some sane defaults when cross-compiling
-  SET(LUA_CPATH "lib/lua/5.2/" CACHE PATH "lua cpath")
-  SET(LUA_LPATH "share/lua/5.2/" CACHE PATH "lua lpath")
-endif()
-
-PROJECT(aura)
+find_package(PkgConfig)
+include(AuraMacros)
+include(AuraTesting)
+project(aura)
 
 #TODO: Set this from git tag
-SET(PROJECT_VERSION   0.1.3)
-SET(PROJECT_DOC_VERSION   gitmaster)
-SET(AURA_API_VERSION  3)
+set(PROJECT_VERSION   0.1.3)
+set(PROJECT_DOC_VERSION   gitmaster)
+set(AURA_API_VERSION  3)
 
-enable_testing()
 
 #Safe to enable, pool is stable
 SET(AURA_USE_BUFFER_POOL yes CACHE BOOL "Enable buffer pool")
@@ -57,18 +53,64 @@ SET(SRCS
   packetizer.c
   crc.c
 )
-SET(TRANSPORTS dummy sysfs-gpio serial)
 
-FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(LIBUSB libusb-1.0)
-PKG_CHECK_MODULES(LUA52 lua5.2)
-PKG_CHECK_MODULES(LUA51 lua5.1)
-PKG_CHECK_MODULES(EASYNMC easynmc-0.1.1)
-PKG_CHECK_MODULES(LIBEVENT libevent)
-PKG_CHECK_MODULES(STLINK stlink)
-FIND_PACKAGE(Doxygen)
+# Our dependencies
+# Lua needs some x-tra love
+find_package(SuitableLua)
+
+if(LUA_FOUND)
+  aura_add_include_dirs(${LUA_INCLUDE_DIRS})
+  aura_add_link_libraries(${LUA_LIBRARIES})
+  aura_add_source(lua/bindings-lua.c utils-lua.c)
+  add_executable(lua-test-wrapper lua-test-wrapper.c utils-lua.c)
+  target_link_libraries(lua-test-wrapper ${LUA_LIBRARIES})
+  ADD_SCRIPT_TEST_DIRECTORY(lua bindings lua ${AURA_TEST_BINDINGS} ${AURA_TEST_LEAKS})
+endif()
+
+# The rest are pretty straightforward
+aura_pkg_require(LIBUSB libusb-1.0)
+aura_pkg_require(EASYNMC easynmc-0.1.1)
+aura_pkg_require(LIBEVENT libevent)
+aura_pkg_require(STLINK stlink)
+
+#Add our eventloop modules
+aura_add_eventloop(epoll eventloop-module-epoll.c)
+
+
+if(LIBEVENT_FOUND)
+  aura_add_eventloop(libevent eventloop-module-libevent.c)
+endif()
+
+#Add all our transport modules
+aura_add_transport(dummy      transport-dummy.c)
+aura_add_transport(sysfs-gpio transport-sysfs-gpio.c)
+ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
+
+#aura_add_transport(serial transport-serial.c)
+
+if (STLINK_FOUND)
+  aura_add_transport(stlink transport-stlink.c)
+  ADD_C_TEST_DIRECTORY(stlink stlink ${AURA_TEST_STLINK_TRANSPORT} ${AURA_TEST_LEAKS})
+endif()
+
+if(LIBUSB_FOUND)
+  aura_add_transport(usb transport-usb.c usb-helpers.c)
+endif()
+
+if(LIBUSB_FOUND AND LUA_FOUND)
+  aura_add_transport(susb transport-susb.c)
+  ADD_C_TEST_DIRECTORY(xUSB xusb ${AURA_TEST_USB_TRANSPORT} ${AURA_TEST_LEAKS})
+endif()
+
+if(EASYNMC_FOUND)
+  aura_add_transport(nmc transport-nmc.c)
+  ADD_C_TEST_DIRECTORY(nmc nmc ${AURA_TEST_NMC_TRANSPORT} ${AURA_TEST_LEAKS})
+  file(COPY ${CMAKE_SOURCE_DIR}/nmc-dsp-test-app.abs DESTINATION ${CMAKE_BINARY_DIR})
+  file(RENAME ${CMAKE_BINARY_DIR}/nmc-dsp-test-app.abs ${CMAKE_BINARY_DIR}/aura-test.abs)
+endif()
+
+find_package(Doxygen)
 find_program(LDOC_FOUND ldoc)
-
 
 if ( ${CMAKE_BUILD_TYPE} MATCHES "Debug")
   exec_program("mkdir -p ${CMAKE_BINARY_DIR}/cov")
@@ -77,21 +119,6 @@ endif()
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC -D_GNU_SOURCE")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-
-
-MACRO (TODAY RESULT)
-    IF (WIN32)
-        EXECUTE_PROCESS(COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE ${RESULT})
-        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1/\\2/\\3" ${RESULT} ${${RESULT}})
-    ELSEIF(UNIX)
-        EXECUTE_PROCESS(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE ${RESULT})
-        string(REGEX REPLACE "(..)/(..)/..(..).*" "\\1/\\2/\\3" ${RESULT} ${${RESULT}})
-    ELSE (WIN32)
-        MESSAGE(SEND_ERROR "date not implemented")
-        SET(${RESULT} 000000)
-    ENDIF (WIN32)
-ENDMACRO (TODAY)
-
 
 #Set up some version-specific defines
 EXECUTE_PROCESS(COMMAND git rev-parse HEAD
@@ -111,83 +138,10 @@ if(AURA_USE_BUFFER_POOL)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
 endif()
 
-#Let's use libevent if we have and should
-SET(SRCS ${SRCS} eventloop-module-epoll.c)
-SET(EVENTSYSTEM "epoll ${EVENTSYSTEM}")
-
-if(LIBEVENT_FOUND)
-  SET(SRCS ${SRCS} eventloop-module-libevent.c)
-  SET(EVENTSYSTEM "${EVENTSYSTEM} libevent")
-endif()
-
-
-# Let's auto detect a suitable lua version
-if(LUA52_FOUND)
-  SET(LUA_INCLUDE_DIRS ${LUA52_INCLUDE_DIRS})
-  SET(LUA_LIBRARIES ${LUA52_LIBRARIES})
-  SET(LUA_FOUND y)
-
-  if (NOT CROSS_COMPILING)
-    EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
-      OUTPUT_VARIABLE LUA_CPATH
-      )
-    EXECUTE_PROCESS(COMMAND lua5.2 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
-        OUTPUT_VARIABLE LUA_LPATH
-      )
-    message("Detecting LUA_CPATH and LUA_LPATH...")
-  endif()
-  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.2")
-elseif(${LUA51_FOUND})
-  SET(LUA_INCLUDE_DIRS ${LUA51_INCLUDE_DIRS})
-  SET(LUA_LIBRARIES ${LUA51_LIBRARIES})
-  SET(LUA_FOUND y)
-  if (NOT CROSS_COMPILING)
-    EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua cpath ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
-      OUTPUT_VARIABLE LUA_CPATH
-      )
-    EXECUTE_PROCESS(COMMAND lua5.1 ${CMAKE_SOURCE_DIR}/lua-guess-lib-install-path.lua path ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_PATH}
-        OUTPUT_VARIABLE LUA_LPATH
-      )
-  endif()
-  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} lua5.1")
-endif()
-
-if(LIBUSB_FOUND)
-  SET(TRANSPORTS ${TRANSPORTS} usb)
-  SET(SRCS ${SRCS} transport-usb.c usb-helpers.c)
-  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libusb-1.0")
-endif()
-
-if(LIBUSB_FOUND AND LUA_FOUND)
-    SET(TRANSPORTS ${TRANSPORTS} susb)
-    SET(SRCS ${SRCS} transport-susb.c)
-endif()
-
-IF(LUA_FOUND)
-  SET(SRCS ${SRCS} lua/bindings-lua.c utils-lua.c)
-  SET(BINDINGS ${BINDINGS} lua)
-ENDIF()
-
-IF(EASYNMC_FOUND)
-  SET(TRANSPORTS ${TRANSPORTS} nmc)
-  SET(SRCS ${SRCS} transport-nmc.c)
-  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} easynmc-0.1.1")
-ENDIF()
-
-IF(STLINK_FOUND)
-  SET(TRANSPORTS ${TRANSPORTS} stlink)
-  SET(SRCS ${SRCS} transport-stlink.c)
-  SET(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} stlink")
-ENDIF()
-
 
 INCLUDE_DIRECTORIES(
     ./include/
-    ${LIBUSB_INCLUDE_DIRS}
-    ${LUA_INCLUDE_DIRS}
-    ${EASYNMC_INCLUDE_DIRS}
-    ${LIBEVENT_INCLUDE_DIRS}
-    ${STLINK_INCLUDE_DIRS}
+    ${AURA_INCLUDE_DIRS}
 )
 
 ADD_LIBRARY(aura OBJECT ${SRCS})
@@ -203,61 +157,27 @@ endif()
 ADD_LIBRARY(aurastatic STATIC $<TARGET_OBJECTS:aura>)
 SET_TARGET_PROPERTIES(aurastatic PROPERTIES OUTPUT_NAME aura)
 TARGET_LINK_LIBRARIES(aurastatic
-    ${LIBUSB_LIBRARIES}
-    ${LUA_LIBRARIES}
-    ${EASYNMC_LIBRARIES}
-    ${LIBEVENT_LIBRARIES}
-    ${STLINK_LIBRARIES}
+    ${AURA_LINK_LIBS}
 )
 
 ADD_LIBRARY(aurashared SHARED $<TARGET_OBJECTS:aura>)
 SET_TARGET_PROPERTIES(aurashared PROPERTIES OUTPUT_NAME aura)
 TARGET_LINK_LIBRARIES(aurashared
-    ${LIBUSB_LIBRARIES}
-    ${LUA_LIBRARIES}
-    ${EASYNMC_LIBRARIES}
-    ${LIBEVENT_LIBRARIES}
-    ${STLINK_LIBRARIES}
+    ${AURA_LINK_LIBS}
     -lrt -lm -lpthread
 )
 
-message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-file(WRITE ${CMAKE_SOURCE_DIR}/.clang_complete "")
-foreach(dir ${dirs})
-  file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "-I${dir}\n")
-endforeach()
-string(REPLACE "'" "" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS})
-string(REPLACE " " ";" CMAKE_C_FLAGS_SPLIT ${CMAKE_C_FLAGS_SPLIT})
-foreach(flag ${CMAKE_C_FLAGS_SPLIT})
-# FixMe: Ugly hack
-  if (NOT "${flag}" MATCHES "-Wall")
-    if (NOT "${flag}" MATCHES "-g")
-      if (NOT "${flag}" MATCHES "-fPIC")
-        file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
-      endif()
-    endif()
-  endif()
-endforeach()
+SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
+  VERSION ${AURA_API_VERSION})
+
+
+generate_clang_complete()
 
 file(WRITE ${CMAKE_SOURCE_DIR}/.core_sources "")
 foreach(f ${SRCS})
   file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "${f} ")
 endforeach()
 
-include(${CMAKE_SOURCE_DIR}/tests/tests.cmake)
-
-ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
-ADD_SCRIPT_TEST_DIRECTORY(lua bindings lua ${AURA_TEST_BINDINGS} ${AURA_TEST_LEAKS})
-ADD_C_TEST_DIRECTORY(xUSB xusb ${AURA_TEST_USB_TRANSPORT} ${AURA_TEST_LEAKS})
-ADD_C_TEST_DIRECTORY(nmc nmc ${AURA_TEST_NMC_TRANSPORT} ${AURA_TEST_LEAKS})
-ADD_C_TEST_DIRECTORY(stlink stlink ${AURA_TEST_STLINK_TRANSPORT} ${AURA_TEST_LEAKS})
-#FixMe: Hack
-file(COPY ${CMAKE_SOURCE_DIR}/nmc-dsp-test-app.abs DESTINATION ${CMAKE_BINARY_DIR})
-file(RENAME ${CMAKE_BINARY_DIR}/nmc-dsp-test-app.abs ${CMAKE_BINARY_DIR}/aura-test.abs)
-
-SET_TARGET_PROPERTIES(aurashared PROPERTIES SOVERSION ${PROJECT_VERSION}
-  VERSION ${AURA_API_VERSION})
 
 message("libaura version:           ${PROJECT_VERSION}")
 message("libaura git commit:        ${PROJECT_VERSION_GIT}")
@@ -267,7 +187,7 @@ message("Install prefix:            ${CMAKE_INSTALL_PREFIX}")
 message("Event system:              ${EVENTSYSTEM}")
 message("Test suites to run:        ${AURA_TEST_SUITES_TO_RUN}")
 message("Test coverage upload:      ${AURA_COVERALLS}")
-
+message("linker flags:              ${AURA_LINK_LIBS}")
 if (AURA_USE_BUFFER_POOL)
   message("Buffer pooling:            enabled")
 else()
@@ -350,7 +270,6 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
 )
-
 
 if (AURA_BUILD_DOC)
   file(GLOB HTMLFILES ${CMAKE_CURRENT_SOURCE_DIR}/doc-index/*)
