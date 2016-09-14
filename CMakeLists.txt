@@ -80,6 +80,7 @@ if(LIBEVENT_FOUND)
 endif()
 
 #Add all our transport modules
+aura_add_transport(null       src/transports/transport-null.c)
 aura_add_transport(dummy      src/transports/transport-dummy.c)
 aura_add_transport(sysfs-gpio src/transports/transport-sysfs-gpio.c)
 ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
