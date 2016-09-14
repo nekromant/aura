@@ -2,6 +2,19 @@ macro(aura_add_source)
     LIST(APPEND SRCS ${ARGN})
 endmacro()
 
+function(addprefix var prefix)
+   set(listVar "")
+   foreach(f ${ARGN})
+      list(APPEND listVar "${prefix}/${f}")
+   endforeach(f)
+   set(${var} "${listVar}" PARENT_SCOPE)
+endfunction()
+
+macro(aura_add_source_in_dir dir)
+  addprefix(tmpvar ${dir}/ ${ARGN})
+  aura_add_source(${tmpvar})
+endmacro()
+
 macro(aura_add_include_dirs)
   LIST(APPEND AURA_INCLUDE_DIRS ${ARGN})
 endmacro()
@@ -19,6 +32,7 @@ macro(aura_add_transport name)
   list(APPEND TRANSPORTS ${name})
   aura_add_source(${ARGN})
 endmacro()
+
 
 macro(aura_pkg_require var name)
   pkg_check_modules(${var} ${name})

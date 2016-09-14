@@ -39,19 +39,17 @@ SET(CTEST_ENVIRONMENT
   "AURA_SOURCEDIR=${CMAKE_SOURCE_DIR}"
 )
 
-SET(SRCS
-  buffer.c
-  slog.c panic.c utils.c
-  transport.c eventloop.c aura.c export.c serdes.c
-  eventloop-factory.c timer.c
-  retparse.c queue.c utils-linux.c
-  ion.c ion_buffer_allocator.c
-  transport-dummy.c
-  transport-null.c
-  transport-bench.c
-  transport-sysfs-gpio.c
-  packetizer.c
-  crc.c
+
+aura_add_source_in_dir(src/core
+    buffer.c
+    slog.c panic.c utils.c
+    transport.c eventloop.c aura.c export.c serdes.c
+    eventloop-factory.c timer.c
+    retparse.c queue.c
+)
+
+aura_add_source_in_dir(src/allocators/
+    ion.c ion_buffer_allocator.c
 )
 
 # Our dependencies
@@ -61,8 +59,9 @@ find_package(SuitableLua)
 if(LUA_FOUND)
   aura_add_include_dirs(${LUA_INCLUDE_DIRS})
   aura_add_link_libraries(${LUA_LIBRARIES})
-  aura_add_source(lua/bindings-lua.c utils-lua.c)
-  add_executable(lua-test-wrapper lua-test-wrapper.c utils-lua.c)
+  aura_add_source_in_dir(src/lua bindings.c utils-lua.c)
+  # We need our dedicated lua test wrapper for testing...
+  add_executable(lua-test-wrapper src/lua/lua-test-wrapper.c src/lua/utils-lua.c)
   target_link_libraries(lua-test-wrapper ${LUA_LIBRARIES})
   ADD_SCRIPT_TEST_DIRECTORY(lua bindings lua ${AURA_TEST_BINDINGS} ${AURA_TEST_LEAKS})
 endif()
@@ -74,36 +73,35 @@ aura_pkg_require(LIBEVENT libevent)
 aura_pkg_require(STLINK stlink)
 
 #Add our eventloop modules
-aura_add_eventloop(epoll eventloop-module-epoll.c)
-
+aura_add_eventloop(epoll src/eventloop/epoll.c)
 
 if(LIBEVENT_FOUND)
-  aura_add_eventloop(libevent eventloop-module-libevent.c)
+  aura_add_eventloop(libevent src/eventloop/libevent.c)
 endif()
 
 #Add all our transport modules
-aura_add_transport(dummy      transport-dummy.c)
-aura_add_transport(sysfs-gpio transport-sysfs-gpio.c)
+aura_add_transport(dummy      src/transports/transport-dummy.c)
+aura_add_transport(sysfs-gpio src/transports/transport-sysfs-gpio.c)
 ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
 
 #aura_add_transport(serial transport-serial.c)
 
 if (STLINK_FOUND)
-  aura_add_transport(stlink transport-stlink.c)
+  aura_add_transport(stlink src/transports/transport-stlink.c)
   ADD_C_TEST_DIRECTORY(stlink stlink ${AURA_TEST_STLINK_TRANSPORT} ${AURA_TEST_LEAKS})
 endif()
 
 if(LIBUSB_FOUND)
-  aura_add_transport(usb transport-usb.c usb-helpers.c)
+  aura_add_transport(usb src/transports/transport-usb.c src/transports/usb-helpers.c)
 endif()
 
 if(LIBUSB_FOUND AND LUA_FOUND)
-  aura_add_transport(susb transport-susb.c)
+  aura_add_transport(susb src/transports/transport-susb.c)
   ADD_C_TEST_DIRECTORY(xUSB xusb ${AURA_TEST_USB_TRANSPORT} ${AURA_TEST_LEAKS})
 endif()
 
 if(EASYNMC_FOUND)
-  aura_add_transport(nmc transport-nmc.c)
+  aura_add_transport(nmc src/transports/transport-nmc.c)
   ADD_C_TEST_DIRECTORY(nmc nmc ${AURA_TEST_NMC_TRANSPORT} ${AURA_TEST_LEAKS})
   file(COPY ${CMAKE_SOURCE_DIR}/nmc-dsp-test-app.abs DESTINATION ${CMAKE_BINARY_DIR})
   file(RENAME ${CMAKE_BINARY_DIR}/nmc-dsp-test-app.abs ${CMAKE_BINARY_DIR}/aura-test.abs)

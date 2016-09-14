@@ -43,7 +43,7 @@ endfunction(add_aura_test)
 
 function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
     file(GLOB UNITS
-        "${CMAKE_SOURCE_DIR}/tests/${directory}/*.c"
+        "${CMAKE_SOURCE_DIR}/src/tests/${directory}/*.c"
     )
 
     if (${RUN})
@@ -55,7 +55,7 @@ function(ADD_C_TEST_DIRECTORY prefix directory RUN MEMCHECK)
 
     foreach(file ${UNITS})
       GET_FILENAME_COMPONENT(f ${file} NAME_WE)
-      file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "tests/${directory}/${f}.c ")
+      file(APPEND ${CMAKE_SOURCE_DIR}/.core_sources "src/tests/${directory}/${f}.c ")
       SET(f "test-${prefix}-${f}")
       ADD_EXECUTABLE(${f} ${file})
       TARGET_LINK_LIBRARIES(${f} aurashared)
@@ -69,7 +69,7 @@ endfunction(ADD_C_TEST_DIRECTORY)
 
 function(ADD_SCRIPT_TEST_DIRECTORY prefix directory ext RUN MEMCHECK)
     file(GLOB UNITS
-        "${CMAKE_SOURCE_DIR}/tests/${directory}/*.${ext}"
+        "${CMAKE_SOURCE_DIR}/src/tests/${directory}/*.${ext}"
     )
     if (${RUN})
         SET(AURA_TEST_SUITES_TO_RUN "${AURA_TEST_SUITES_TO_RUN}${prefix} " PARENT_SCOPE)
