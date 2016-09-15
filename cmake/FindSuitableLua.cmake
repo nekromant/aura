@@ -1,6 +1,6 @@
 # We cant't use cmake's FindLuaXXX, since it doesn'tplay nicely
 # when cross-compiling
-set(luaversions "5.4;5.3;5.2;5.1")
+set(luaversions "5.2;5.4;5.3;5.1")
 
 macro(lua_detect_paths luaver)
   if (NOT CROSS_COMPILING)
