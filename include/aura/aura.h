@@ -21,8 +21,8 @@
 
 /**  Node status */
 enum aura_node_status {
-	AURA_STATUS_OFFLINE,//!< AURA_STATUS_OFFLINE
-	AURA_STATUS_ONLINE, //!< AURA_STATUS_ONLINE
+	AURA_STATUS_OFFLINE,    //!< AURA_STATUS_OFFLINE
+	AURA_STATUS_ONLINE,     //!< AURA_STATUS_ONLINE
 };
 
 #define AURA_EVTLOOP_ONCE     (1 << 1)
@@ -31,138 +31,129 @@ enum aura_node_status {
 
 /** Remote method call status */
 enum aura_call_status {
-	AURA_CALL_COMPLETED,     //!< AURA_CALL_COMPLETED
-	AURA_CALL_TIMEOUT,       //!< AURA_CALL_TIMEOUT
-	AURA_CALL_TRANSPORT_FAIL,//!< AURA_CALL_TRANSPORT_FAIL
+	AURA_CALL_COMPLETED,            //!< AURA_CALL_COMPLETED
+	AURA_CALL_TIMEOUT,              //!< AURA_CALL_TIMEOUT
+	AURA_CALL_TRANSPORT_FAIL,       //!< AURA_CALL_TRANSPORT_FAIL
 };
 
 /** File descriptor action */
 enum aura_fd_action {
-	AURA_FD_ADDED, //!< Descriptor added
-	AURA_FD_REMOVED//!< Descriptor removed
+	AURA_FD_ADDED,  //!< Descriptor added
+	AURA_FD_REMOVED //!< Descriptor removed
 };
 
 struct aura_pollfds {
-	int magic;
-	struct aura_node *node;
-	int fd;
-	uint32_t events;
-	void *eventsysdata; /* Private eventsystem data */
+	int			magic;
+	struct aura_node *	node;
+	int			fd;
+	uint32_t		events;
+	void *			eventsysdata; /* Private eventsystem data */
 };
 
 struct aura_object;
 struct aura_node {
-	const struct aura_transport    *tr;
-	struct aura_export_table *tbl;
-	void                     *transport_data;
-	void                     *user_data;
+	const struct aura_transport *	tr;
+	struct aura_export_table *	tbl;
+	void *				transport_data;
+	void *				user_data;
 
-	void *allocator_data;
+	void *				allocator_data;
 
-	enum aura_node_status     status;
-	struct list_head          outbound_buffers;
-	struct list_head          inbound_buffers;
+	enum aura_node_status		status;
+	struct list_head		outbound_buffers;
+	struct list_head		inbound_buffers;
 
 	/* A simple, memory efficient buffer pool */
-	struct list_head          buffer_pool;
-	int                       num_buffers_in_pool;
-	int                       gc_threshold;
+	struct list_head		buffer_pool;
+	int				num_buffers_in_pool;
+	int				gc_threshold;
 	/* Synchronos calls put their stuff here */
-	bool sync_call_running;
-	bool need_endian_swap;
-	bool is_opening;
-	bool start_event_sent;
-	bool waiting_for_status;
-	struct aura_buffer *sync_ret_buf;
-	int sync_call_result;
+	bool				sync_call_running;
+	bool				need_endian_swap;
+	bool				is_opening;
+	bool				start_event_sent;
+	bool				waiting_for_status;
+	struct aura_buffer *		sync_ret_buf;
+	int				sync_call_result;
 
 	/* Synchronous event storage */
-	struct list_head          event_buffers;
-	int sync_event_max;
-	int sync_event_count;
+	struct list_head		event_buffers;
+	int				sync_event_max;
+	int				sync_event_count;
 
 	/* General callbacks */
-	void *status_changed_arg;
-	void (*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
+	void *				status_changed_arg;
+	void				(*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);
 
-	void *etable_changed_arg;
-	void (*etable_changed_cb)(struct aura_node *node,
-				  struct aura_export_table *old,
-				  struct aura_export_table *newtbl,
-				  void *arg);
+	void *				etable_changed_arg;
+	void				(*etable_changed_cb)(struct aura_node *node, struct aura_export_table *old, struct aura_export_table *newtbl, void *arg);
 
-	void *object_migration_failed_arg;
-	void (*object_migration_failed_cb)(struct aura_node *node,
-					struct aura_object *failed,
-					void *arg);
+	void *				object_migration_failed_arg;
+	void				(*object_migration_failed_cb)(struct aura_node *node, struct aura_object *failed, void *arg);
 
-	void (*unhandled_evt_cb)(struct aura_node *node,
-				 struct aura_buffer *ret,
-				 void *arg);
-	void *unhandled_evt_arg;
-	void *fd_changed_arg;
-	void (*fd_changed_cb)(const struct aura_pollfds *fd,
-			      enum aura_fd_action act, void *arg);
+	void				(*unhandled_evt_cb)(struct aura_node *node, struct aura_buffer *ret, void *arg);
+	void *				unhandled_evt_arg;
+	void *				fd_changed_arg;
+	void				(*fd_changed_cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg);
 
 
 	/* Event system and polling */
-	int numfds; /* Currently available space for descriptors */
-	int nextfd; /* Next descriptor to add */
-	struct aura_pollfds *fds; /* descriptor and event array */
+	int				numfds;         /* Currently available space for descriptors */
+	int				nextfd;         /* Next descriptor to add */
+	struct aura_pollfds *		fds;            /* descriptor and event array */
 
-	struct aura_eventloop *loop; /* eventloop structure */
-	int evtloop_is_autocreated;
-	void *eventloop_data; /* eventloop module private data */
-	struct list_head eventloop_node_list;
-	struct list_head timer_list; /* List of timers associated with the node */
-	const struct aura_object *current_object;
-
+	struct aura_eventloop *		loop;           /* eventloop structure */
+	int				evtloop_is_autocreated;
+	void *				eventloop_data; /* eventloop module private data */
+	struct list_head		eventloop_node_list;
+	struct list_head		timer_list;     /* List of timers associated with the node */
+	const struct aura_object *	current_object;
 };
 
 
 struct aura_object {
-	int id;
-	char *name;
-	char *arg_fmt;
-	char *ret_fmt;
+	int	id;
+	char *	name;
+	char *	arg_fmt;
+	char *	ret_fmt;
 
-	int valid;
-	char* arg_pprinted;
-	char* ret_pprinted;
-	int num_args;
-	int num_rets;
+	int	valid;
+	char *	arg_pprinted;
+	char *	ret_pprinted;
+	int	num_args;
+	int	num_rets;
 
-	int arglen;
-	int retlen;
+	int	arglen;
+	int	retlen;
 
 	/* Store callbacks here.
-	   TODO: Can there be several calls of the same method pending? */
-	int pending;
-	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg);
-	void *arg;
+	 * TODO: Can there be several calls of the same method pending? */
+	int	pending;
+	void	(*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg);
+	void *	arg;
 };
 
 struct aura_eventloop;
 
 enum node_event {
-		NODE_EVENT_STARTED,
-		NODE_EVENT_HAVE_OUTBOUND,
-		NODE_EVENT_DESCRIPTOR
+	NODE_EVENT_STARTED,
+	NODE_EVENT_HAVE_OUTBOUND,
+	NODE_EVENT_DESCRIPTOR
 };
 
-#define object_is_event(o)  (o->arg_fmt==NULL)
-#define object_is_method(o) (o->arg_fmt!=NULL)
+#define object_is_event(o)  (o->arg_fmt == NULL)
+#define object_is_method(o) (o->arg_fmt != NULL)
 
 struct aura_export_table {
-	int size;
-	int next;
-	struct aura_node *owner;
-	struct hsearch_data index;
-	struct aura_object objects[];
+	int			size;
+	int			next;
+	struct aura_node *	owner;
+	struct hsearch_data	index;
+	struct aura_object	objects[];
 };
 
 
-#define __BIT(n) (1<< n)
+#define __BIT(n) (1 << n)
 
 /**
  * \addtogroup trapi
@@ -170,18 +161,17 @@ struct aura_export_table {
  */
 
 /** Represents an aura transport module */
-struct aura_transport
-{
+struct aura_transport {
 	/** \brief Required
 	 *
 	 * String name identifying the transport e.g. "usb"
 	 */
-	const char *name;
+	const char *	name;
 	/** \brief Optional
 	 *
 	 * Flags. TODO: Is it still needed?
 	 */
-	uint32_t flags;
+	uint32_t	flags;
 
 	/**
 	 * \brief Optional.
@@ -193,7 +183,7 @@ struct aura_transport
 	 *  unneeded copying while formatting the message for transmission in the transport
 	 *  layer.
 	 */
-	int      buffer_overhead;
+	int buffer_overhead;
 
 	/** \brief Optional.
 	 *
@@ -203,7 +193,7 @@ struct aura_transport
 	 * core will complain and refuse to register your transport.
 	 *
 	 */
-	int      buffer_offset;
+	int buffer_offset;
 
 	/** \brief Required.
 	 *
@@ -218,7 +208,7 @@ struct aura_transport
 	 *  @param opts string containing transport-specific options
 	 *  @return 0 if everything went fine, anything other will be considered an error.
 	 */
-	int    (*open)(struct aura_node *node, const char *opts);
+	int (*open)(struct aura_node *node, const char *opts);
 	/**
 	 * \brief Required.
 	 *
@@ -229,7 +219,7 @@ struct aura_transport
 	 *
 	 * @param node current node
 	 */
-	void   (*close)(struct aura_node *node);
+	void (*close)(struct aura_node *node);
 	/**
 	 * \brief Required
 	 *
@@ -248,7 +238,7 @@ struct aura_transport
 	 * @param node current node
 	 * @param fd pointer to struct aura_pollfds that generated an event.
 	 */
-	void   (*handle_event)(struct aura_node *node, enum node_event, const struct aura_pollfds *fd);
+	void (*handle_event)(struct aura_node *node, enum node_event, const struct aura_pollfds *fd);
 
 	/**
 	 * \brief Optional.
@@ -261,7 +251,7 @@ struct aura_transport
 	 *
 	 * @param buf
 	 */
-	void               (*buffer_put)(struct aura_buffer *dst, struct aura_buffer *buf);
+	void (*buffer_put)(struct aura_buffer *dst, struct aura_buffer *buf);
 	/**
 	 * \brief Optional
 	 *
@@ -273,24 +263,23 @@ struct aura_transport
 	 * @param buf
 	 * @param ptr
 	 */
-	struct aura_buffer *(*buffer_get)(struct aura_buffer *buf);
+	struct aura_buffer *		(*buffer_get)(struct aura_buffer *buf);
 	/**
 	 * \brief Optional
 	 *
 	 * If your transport needs a custom memory allocator, specify it here.
 	 */
-	struct aura_buffer_allocator *allocator;
+	struct aura_buffer_allocator *	allocator;
 
 	/** \brief Private.
 	 *
 	 * Transport usage count */
-	int usage;
+	int				usage;
 
 	/** \brief Private.
 	 *
 	 * List entry for global transport list */
-	struct list_head registry;
-
+	struct list_head		registry;
 };
 
 /**
@@ -312,19 +301,19 @@ struct aura_transport
  */
 struct aura_buffer {
 	/** Magic value, used for additional sanity-checking */
-	uint32_t magic;
+	uint32_t		magic;
 	/** Size of the data in this buffer */
-	int                 size;
+	int			size;
 	/** Pointer to the next element */
-	int                 pos;
+	int			pos;
 	/** object assosiated with this buffer */
-	struct aura_object *object;
+	struct aura_object *	object;
 	/** The node that owns the buffer */
-	struct aura_node   *owner;
+	struct aura_node *	owner;
 	/** list_entry. Used to link buffers in queue keep in buffer pool */
-	struct list_head    qentry;
+	struct list_head	qentry;
 	/** The actual data in this buffer */
-	char                *data;
+	char *			data;
 };
 
 /**
@@ -334,103 +323,68 @@ struct aura_buffer {
 
 struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap);
 int  aura_fmt_len(struct aura_node *node, const char *fmt);
-char* aura_fmt_pretty_print(const char* fmt, int *valid, int *num_args);
+char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args);
 
 
 const struct aura_transport *aura_transport_lookup(const char *name);
 void aura_set_status(struct aura_node *node, int status);
 
 
-#define AURA_TRANSPORT(s)					   \
-	void __attribute__((constructor (101))) do_reg_##s(void) { \
-		aura_transport_register(&s);			   \
+#define AURA_TRANSPORT(s)                                          \
+	void __attribute__((constructor(101))) do_reg_ ## s(void) { \
+		aura_transport_register(&s);                       \
 	}
 
 enum aura_endianness aura_get_host_endianness();
-void aura_hexdump (char *desc, void *addr, int len);
+void aura_hexdump(char *desc, void *addr, int len);
 const char *aura_get_version();
 unsigned int aura_get_version_code();
 
 void aura_set_node_endian(struct aura_node *node, enum aura_endianness en);
 
 struct aura_export_table *aura_etable_create(struct aura_node *owner, int n);
-void aura_etable_add(struct aura_export_table *tbl,
-		    const char *name,
-		    const char *argfmt,
-		     const char *retfmt);
+void aura_etable_add(struct aura_export_table *tbl, const char *name, const char *argfmt, const char *retfmt);
 void aura_etable_activate(struct aura_export_table *tbl);
 
-struct aura_object *aura_etable_find(struct aura_export_table *tbl,
-				     const char *name);
-struct aura_object *aura_etable_find_id(struct aura_export_table *tbl,
-					int id);
+struct aura_object *aura_etable_find(struct aura_export_table *tbl, const char *name);
+struct aura_object *aura_etable_find_id(struct aura_export_table *tbl, int id);
 
-#define AURA_DECLARE_CACHED_ID(idvar, node, name)\
+#define AURA_DECLARE_CACHED_ID(idvar, node, name) \
 	static int idvar = -1; \
-	if (idvar == -1) {\
+	if (idvar == -1) { \
 		struct aura_object *tmp = aura_etable_find(node->tbl, name); \
 		if (!tmp) \
 			BUG(node, "Static lobject lookup failed!"); \
 		idvar = tmp->id; \
-		}
+	}
 
 void aura_etable_destroy(struct aura_export_table *tbl);
 
-struct aura_node *aura_open(const char* name, const char *opts);
+struct aura_node *aura_open(const char *name, const char *opts);
 void aura_close(struct aura_node *dev);
 
 
-int aura_queue_call(struct aura_node *node,
-		    int id,
-		    void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-		    void *arg,
-		    struct aura_buffer *buf);
+int aura_queue_call(struct aura_node *node, int id, void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg), void *arg, struct aura_buffer *buf);
 
-int aura_start_call_raw(
-	struct aura_node *dev,
-	int id,
-	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-	void *arg,
-	...);
+int aura_start_call_raw(struct aura_node *dev, int id, void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg), void *arg, ...);
 
-int aura_start_call(
-	struct aura_node *dev,
-	const char *name,
-	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-	void *arg,
-	...);
+int aura_start_call(struct aura_node *dev, const char *name, void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg), void *arg, ...);
 
-int aura_call_raw(
-	struct aura_node *dev,
-	int id,
-	struct aura_buffer **ret,
-	...);
+int aura_call_raw(struct aura_node *dev, int id, struct aura_buffer **ret, ...);
 
-int aura_call(
-	struct aura_node *dev,
-	const char *name,
-	struct aura_buffer **ret,
-	...);
+int aura_call(struct aura_node *dev, const char *name, struct aura_buffer **ret, ...);
 
-int aura_set_event_callback_raw(
-	struct aura_node *node,
-	int id,
-	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-	void *arg);
+int aura_set_event_callback_raw(struct aura_node *node, int id, void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg), void *arg);
 
-int aura_set_event_callback(
-	struct aura_node *node,
-	const char *event,
-	void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg),
-	void *arg);
+int aura_set_event_callback(struct aura_node *node, const char *event, void (*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg), void *arg);
 
 void aura_enable_sync_events(struct aura_node *node, int count);
 int aura_get_pending_events(struct aura_node *node);
-int aura_get_next_event(struct aura_node *node, const struct aura_object ** obj, struct aura_buffer **retbuf);
+int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf);
 
 
 void __attribute__((noreturn)) aura_panic(struct aura_node *node);
-int  __attribute__((noreturn))  BUG(struct aura_node *node, const char *msg, ...);
+int __attribute__((noreturn))  BUG(struct aura_node *node, const char *msg, ...);
 
 /** \addtogroup retparse
  *  @{
@@ -445,7 +399,7 @@ int  __attribute__((noreturn))  BUG(struct aura_node *node, const char *msg, ...
  * @param buf
  * @return
  */
-uint8_t  aura_buffer_get_u8 (struct aura_buffer *buf);
+uint8_t  aura_buffer_get_u8(struct aura_buffer *buf);
 
 /**
  * \brief Get an unsigned 16 bit integer from aura buffer
@@ -491,7 +445,7 @@ uint64_t aura_buffer_get_u64(struct aura_buffer *buf);
  * @param buf
  * @return
  */
-int8_t  aura_buffer_get_s8 (struct aura_buffer *buf);
+int8_t  aura_buffer_get_s8(struct aura_buffer *buf);
 
 /**
  * \brief Get a signed 16 bit integer from aura buffer
@@ -540,7 +494,7 @@ int64_t aura_buffer_get_s64(struct aura_buffer *buf);
  * @param value
  * @return
  */
-void  aura_buffer_put_u8 (struct aura_buffer *buf, uint8_t value);
+void  aura_buffer_put_u8(struct aura_buffer *buf, uint8_t value);
 
 /**
  * \brief Put an unsigned 16 bit integer to aura buffer
@@ -590,7 +544,7 @@ void aura_buffer_put_u64(struct aura_buffer *buf, uint64_t value);
  * @param value
  * @return
  */
-void  aura_buffer_put_s8 (struct aura_buffer *buf, int8_t value);
+void  aura_buffer_put_s8(struct aura_buffer *buf, int8_t value);
 
 /**
  * \brief Put a signed 16 bit integer to aura buffer
@@ -688,32 +642,22 @@ const void *aura_buffer_get_ptr(struct aura_buffer *buf);
  * @}
  */
 
-void aura_etable_changed_cb(struct aura_node *node,
-			    void (*cb)(struct aura_node *node,
-				       struct aura_export_table *old,
-				       struct aura_export_table *newtbl,
-				       void *arg),
-			    void *arg);
+void aura_etable_changed_cb(struct aura_node *node, void (*cb)(struct aura_node *node,
+							       struct aura_export_table *old,
+							       struct aura_export_table *newtbl,
+							       void *arg), void *arg);
 
-void aura_status_changed_cb(struct aura_node *node,
-			    void (*cb)(struct aura_node *node, int newstatus, void *arg),
-			    void *arg);
+void aura_status_changed_cb(struct aura_node *node, void (*cb)(struct aura_node *node, int newstatus, void *arg), void *arg);
 
-void aura_fd_changed_cb(struct aura_node *node,
-			 void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
-			 void *arg);
+void aura_fd_changed_cb(struct aura_node *node, void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg), void *arg);
 
-void aura_unhandled_evt_cb(struct aura_node *node,
-			   void (*cb)(struct aura_node *node,
-				      struct aura_buffer *buf,
-				      void *arg),
-			   void *arg);
+void aura_unhandled_evt_cb(struct aura_node *node, void (*cb)(struct aura_node *node,
+							      struct aura_buffer *buf,
+							      void *arg), void *arg);
 
-void aura_object_migration_failed_cb(struct aura_node *node,
-				     void (*cb)(struct aura_node *node,
-						struct aura_object *failed,
-						void *arg),
-				     void *arg);
+void aura_object_migration_failed_cb(struct aura_node *node, void (*cb)(struct aura_node *node,
+									struct aura_object *failed,
+									void *arg), void *arg);
 
 const struct aura_object *aura_get_current_object(struct aura_node *node);
 
@@ -732,7 +676,7 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
  * @param ... one or more struct aura_node*
  */
 #define aura_eventloop_create(...) \
-	aura_eventloop_create__(0, ##__VA_ARGS__, NULL)
+	aura_eventloop_create__(0, ## __VA_ARGS__, NULL)
 
 
 /**
@@ -756,6 +700,13 @@ struct event_base *aura_eventloop_get_ebase(struct aura_eventloop *loop);
 void aura_wait_status(struct aura_node *node, int status);
 
 struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size);
+size_t aura_buffer_length(struct aura_buffer *buf);
+struct evbuffer_iovec;
+
+#ifdef AURA_HAS_LIBEVENT
+void aura_buffer_put_eviovec(struct aura_buffer *buf, struct evbuffer_iovec *vec, size_t length);
+struct aura_buffer *aura_buffer_from_eviovec(struct aura_node *node, struct evbuffer_iovec *vec, size_t length);
+#endif
 
 void aura_buffer_release(struct aura_buffer *buf);
 void aura_buffer_destroy(struct aura_buffer *buf);
@@ -767,15 +718,15 @@ void aura_print_stacktrace();
 const char *aura_node_call_strerror(int errcode);
 
 #define min_t(type, x, y) ({                                    \
-                        type __min1 = (x);                      \
-                        type __min2 = (y);                      \
-                        __min1 < __min2 ? __min1: __min2; })
+		type __min1 = (x);                      \
+		type __min2 = (y);                      \
+		__min1 < __min2 ? __min1 : __min2; })
 
 
 #define max_t(type, x, y) ({                                    \
-                        type __max1 = (x);                      \
-                        type __max2 = (y);                      \
-                        __max1 > __max2 ? __max1: __max2; })
+		type __max1 = (x);                      \
+		type __max2 = (y);                      \
+		__max1 > __max2 ? __max1 : __max2; })
 
 
 #endif

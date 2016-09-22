@@ -215,5 +215,20 @@ void aura_bufferpool_set_gc_threshold(struct aura_node *nd, int threshold)
 }
 
 /**
+ * Get the length of the data buffer without the transport overhead
+ * WARNING: This may be more than specified when calling aura_buffer_request
+ * due to buffer pooling. This value in no way identifies the size of the
+ * actual valid data strored inside.
+ *
+ * @param  buf [description]
+ * @return     [description]
+ */
+size_t aura_buffer_length(struct aura_buffer *buf)
+{
+	return (buf->size - buf->owner->tr->buffer_overhead);
+}
+
+
+/**
  * @}
  */

@@ -1,12 +1,12 @@
 /**
- * 
+ *
  * I grub it from linux kernel source code and fix it for user space
  * program. Of course, this is a GPL licensed header file.
  *
  * Here is a recipe to cook list.h for user space program
  *
  * 1. copy list.h from linux/include/list.h
- * 2. remove 
+ * 2. remove
  *     - #ifdef __KERNE__ and its #endif
  *     - all #include line
  *     - prefetch() and rcu related functions
@@ -26,8 +26,9 @@
 /**
  * Get offset of a member
  */
+#ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-
+#endif
 /**
  * Casts a member of a structure out to the containing structure
  * @param ptr        the pointer to the member.
