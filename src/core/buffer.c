@@ -223,11 +223,38 @@ void aura_bufferpool_set_gc_threshold(struct aura_node *nd, int threshold)
  * @param  buf [description]
  * @return     [description]
  */
-size_t aura_buffer_length(struct aura_buffer *buf)
+size_t aura_buffer_get_length(struct aura_buffer *buf)
 {
 	return (buf->size - buf->owner->tr->buffer_overhead);
 }
 
+/**
+ * Returns the payload length that is stored in the buffer. In other words,
+ * the length of actual data atored, not accounting the transport-specific
+ * overhead.
+ *
+ * @param  buf aura buffer
+ * @return     The length of the stored payload in bytes
+ */
+size_t aura_buffer_payload_length(struct aura_buffer *buf)
+{
+	return buf->payload_size;
+}
+
+/**
+ * \brief Obtain a pointer to the actual data stored in the buffer.
+ *
+ * Use aura_buffer_payload_length() to find out the actual payload size
+ *
+ * @param  -buf [description]
+ * @return     [description]
+ */
+void *aura_buffer_payload_ptr(struct aura_buffer *buf)
+{
+	char *pos = buf->data;
+	pos = &pos[buf->owner->tr->buffer_offset];
+	return pos;
+}
 
 /**
  * @}

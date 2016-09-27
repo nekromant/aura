@@ -295,17 +295,20 @@ struct aura_transport {
 /** Represents a buffer (surprize!) that is used for serialization/deserialization
  *
  *  * The data is stored in NODE endianness.
+ *  * The buffer size includes a transport-specific overhead if any
  *  * The buffer has an internal data pointer
  *  * The buffer has an associated object
- *  * The buffer can be allocated in transport-specific way
+ *  * The buffer can be allocated using a transport-specific memory allocator
  */
 struct aura_buffer {
 	/** Magic value, used for additional sanity-checking */
 	uint32_t		magic;
-	/** Size of the data in this buffer */
+	/** Total allocated space available in this buffer */
 	int			size;
-	/** Pointer to the next element */
+	/** Pointer to the next element to read/write */
 	int			pos;
+	/** The useful payload size. Functions that put data in the buffer increment this */
+	int payload_size;
 	/** object assosiated with this buffer */
 	struct aura_object *	object;
 	/** The node that owns the buffer */
@@ -637,6 +640,10 @@ struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf);
  * @param buf
  */
 const void *aura_buffer_get_ptr(struct aura_buffer *buf);
+
+void *aura_buffer_payload_ptr(struct aura_buffer *buf);
+size_t aura_buffer_payload_length(struct aura_buffer *buf);
+void aura_buffer_put_buf(struct aura_buffer *to, struct aura_buffer *to_put);
 
 /**
  * @}

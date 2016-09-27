@@ -136,99 +136,69 @@ char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args)
 //FixMe: This is likely to get messy due to integer promotion
 //       on different platforms
 
-#define AURA_SERDES_PARANOID
 
-#ifdef AURA_SERDES_PARANOID
-#define CHECK_BOUNDS(buf, src)   if (buf->pos + sizeof(src) > buf->size) \
-		BUG(NULL, "SERDES: Out of buffer bounds");
-#else
-#define CHECK_BOUNDS()
-#endif
-
-
-#define CHECK_AND_PUT(buf, src)                                 \
-	CHECK_BOUNDS(buf, src);                                  \
-	memcpy(&buf->data[buf->pos], &src, sizeof(src));        \
-	buf->pos += sizeof(src);                                  \
-
-
-#define va_put_U8(buf, ap, swap)                                \
+// We can't make these functions due to issues of passing ap
+// as an arg on some platforms
+#define va_put_U8(buf, ap)                                \
 	{                                                       \
 		uint8_t v = (uint8_t)va_arg(ap, unsigned int); \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_u8(buf, v);     \
 	}
 
-#define va_put_S8(buf, ap, swap)                                \
+#define va_put_S8(buf, ap)                                \
 	{                                                       \
 		int8_t v = (int8_t)va_arg(ap, int);            \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_s8(buf, v);                               \
 	}                                                       \
 
-#define va_put_U16(buf, ap, swap)                                       \
+#define va_put_U16(buf, ap)                                       \
 	{                                                               \
 		uint16_t v = (uint16_t)va_arg(ap, unsigned int);       \
-		if (swap)                                               \
-			v = __swap16(v);                                \
-		CHECK_AND_PUT(buf, v);                                  \
+		aura_buffer_put_u16(buf, v); \
 	}
 
-#define va_put_S16(buf, ap, swap)                               \
+#define va_put_S16(buf, ap)                               \
 	{                                                       \
 		int16_t v = (int16_t)va_arg(ap, int);          \
-		if (swap)                                       \
-			v = __swap16(v);                        \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_s16(buf, v); 						\
 	}
 
 /* FixMe: Portability, we assume no promotion here for now */
-#define va_put_U32(buf, ap, swap)                               \
+#define va_put_U32(buf, ap)                               \
 	{                                                       \
-		uint32_t v = (uint32_t)va_arg(ap, uint32_t);   \
-		if (swap)                                       \
-			v = __swap32(v);                        \
-		CHECK_AND_PUT(buf, v);                          \
+		uint32_t v = (uint32_t) va_arg(ap, uint32_t);   \
+		aura_buffer_put_u32(buf, v); 						\
 	}
 
-#define va_put_S32(buf, ap, swap)                               \
+#define va_put_S32(buf, ap)                               \
 	{                                                       \
 		int32_t v = (int32_t)va_arg(ap, int32_t);      \
-		if (swap)                                       \
-			v = __swap32(v);                        \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_s32(buf, v); \
 	}
 
-#define va_put_U64(buf, ap, swap)                               \
+#define va_put_U64(buf, ap)                               \
 	{                                                       \
 		uint64_t v = (uint64_t)va_arg(ap, uint64_t);   \
-		if (swap)                                       \
-			v = __swap64(v);                        \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_u64(buf, v); \
 	}
 
-#define va_put_S64(buf, ap, swap)                               \
+#define va_put_S64(buf, ap)                               \
 	{                                                       \
 		int64_t v = (int64_t)va_arg(ap, uint64_t);     \
-		if (swap)                                       \
-			v = __swap64(v);                        \
-		CHECK_AND_PUT(buf, v);                          \
+		aura_buffer_put_s64(buf, v); 					\
 	}                                                       \
 
 #define va_put_BIN(buf, len, ap)                        \
 	{                                               \
 		void *ptr = va_arg(ap, void *);         \
-		memcpy(&buf->data[buf->pos], ptr, len); \
-		buf->pos += len;                          \
+		aura_buffer_put_bin(buf, ptr, len); \
 	}
 
-#define va_put_BUF(buf, ap, swap)                                       \
+#define va_put_BUF(buf, ap)                                       \
 	{                                                               \
 		struct aura_buffer *out = va_arg(ap, void *);           \
-		struct aura_node *_node = buf->owner;                   \
-		if (!_node->tr->buffer_put)                             \
-			BUG(_node, "This node doesn't support aura_buffer as argument"); \
-		_node->tr->buffer_put(buf, out);                        \
+		aura_buffer_put_buf(buf, out); \
 	}
-
 
 /**
  * Serialize a va_list ap of arguments according to format in an allocated aura_buffer
@@ -242,13 +212,14 @@ char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args)
 struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap)
 {
 	struct aura_buffer *buf = aura_buffer_request(node, size);
+	size_t intitial_pos = buf->pos;
 
 	if (!buf)
 		return NULL;
 
 #define PUT(n)                                                  \
 case URPC_ ## n:                                        \
-	va_put_ ## n(buf, ap, node->need_endian_swap);  \
+	va_put_ ## n(buf, ap);  \
 	break;                                          \
 
 	while (*fmt) {
@@ -275,5 +246,9 @@ case URPC_ ## n:                                        \
 		;
 	}
 	;
+
+	/* Calculate the relevant payload size */
+	buf->payload_size = buf->pos - intitial_pos;
+
 	return buf;
 }

@@ -26,9 +26,10 @@
 		if (node->need_endian_swap)                             \
 			value = swapfunc(value);                        \
                                                                         \
-		if (buf->pos > buf->size)                               \
+		if (buf->pos + sizeof(tp) > buf->size)                               \
 			BUG(node, "attempt to access data beyound buffer boundary"); \
 		buf->pos += sizeof(tp);                                 \
+		buf->payload_size += sizeof(tp); \
                                                                         \
 		*target = value;                                        \
 	}                                                               \
@@ -78,6 +79,15 @@ void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len)
 
 	memcpy(&buf->data[pos], data, len);
 	buf->pos += len;
+	buf->payload_size += len;
+}
+
+void aura_buffer_put_buf(struct aura_buffer *to, struct aura_buffer *to_put)
+{
+	struct aura_node *node = to->owner;
+	if (!node->tr->buffer_put)
+		BUG(node, "This node doesn't support aura_buffer as argument");
+	node->tr->buffer_put(to, to_put);
 }
 
 struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf)
