@@ -176,6 +176,9 @@ void aura_node_write(struct aura_node *node, struct aura_buffer *buf)
 	node->current_object = o;
 	aura_buffer_rewind(buf);
 
+	/* Set the payload size accordingly */
+	buf->payload_size = o->retlen;
+
 	slog(4, SLOG_DEBUG, "Handling %s id %d (%s) sync_call_running=%d",
 	     object_is_method(o) ? "response" : "event",
 	     o->id, o->name, node->sync_call_running);
