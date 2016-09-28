@@ -5,6 +5,99 @@
 #include <inttypes.h>
 
 
+
+/** Set transport-specific data for this node
+ * @param node
+ * @param udata
+ */
+void  aura_set_transportdata(struct aura_node *node, void *udata)
+{
+	node->transport_data = udata;
+}
+
+/** Get transport-specific data for this node
+ * @param node
+ * @param udata
+ */
+void *aura_get_transportdata(struct aura_node *node)
+{
+	return node->transport_data;
+}
+
+/**
+ * Get the eventloop associated with this node
+ *
+ * @param node
+ *
+ * @return Pointer to node's eventloop or NULL if node has none
+ */
+struct aura_eventloop *aura_node_eventloop_get(struct aura_node *node)
+{
+	return node->loop;
+}
+
+void aura_node_eventloop_set(struct aura_node *node, struct aura_eventloop *loop)
+{
+	node->loop = loop;
+}
+
+void  aura_node_eventloopdata_set(struct aura_node *node, void *udata)
+{
+	node->eventloop_data = udata;
+}
+
+void *aura_node_eventloopdata_get(struct aura_node *node)
+{
+	return node->eventloop_data;
+}
+
+
+/**
+ * \addtogroup node
+ * @{
+ */
+
+ /** Set user data associated with this node.
+  *  Just a convenient way to attach an arbitary pointer to this node.
+  *  See aura_get_userdata()
+  *
+  * @param node
+  * @param udata
+  */
+void  aura_set_userdata(struct aura_node *node, void *udata)
+{
+	node->user_data = udata;
+}
+
+/**
+ * Get user data associated with this node.
+ * See aura_set_userdata()
+ *
+ * @param node
+ */
+void *aura_get_userdata(struct aura_node *node)
+{
+	return node->user_data;
+}
+
+/**
+ *  Retrieve current node status.
+ *
+ * @param node
+ *
+ * @return
+ */
+
+int aura_get_status(struct aura_node *node)
+{
+	return node->status;
+}
+
+/**
+ * @}
+ */
+
+
 void *aura_node_eventloop_get_autocreate(struct aura_node *node)
 {
 	struct aura_eventloop *loop = aura_node_eventloop_get(node);

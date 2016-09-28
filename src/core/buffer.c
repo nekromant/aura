@@ -257,5 +257,18 @@ void *aura_buffer_payload_ptr(struct aura_buffer *buf)
 }
 
 /**
+ * Reposition the internal pointer of the buffer buf to the start of serialized data.
+ * This function takes buffer_offset of the node's transport into account
+ *
+ * @param node
+ * @param buf
+ */
+void aura_buffer_rewind(struct aura_buffer *buf)
+{
+	struct aura_node *node = buf->owner;
+	buf->pos = node->tr->buffer_offset;
+}
+
+/**
  * @}
  */

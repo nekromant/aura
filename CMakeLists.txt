@@ -77,7 +77,6 @@ aura_pkg_require(STLINK stlink)
 aura_add_eventloop(epoll src/eventloop/epoll.c)
 
 if(LIBEVENT_FOUND)
-  list(APPEND CMAKE_C_FLAGS -DAURA_HAS_LIBEVENT)
   aura_add_eventloop(libevent src/eventloop/libevent.c)
 endif()
 
