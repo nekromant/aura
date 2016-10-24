@@ -1,0 +1,1673 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALOGE	src/allocators/ion.c	32;"	d	file:
+ANTARES_APP	test-firmwares/susb-test-fw/src/main.c	/^ANTARES_APP(usb_app)$/;"	f
+ANTARES_APP	test-firmwares/usb-test-dummy-fw/src/main.c	/^ANTARES_APP(usb_app)$/;"	f
+ANTARES_APP	test-firmwares/usb-test-fw/src/main.c	/^ANTARES_APP(usb_app)$/;"	f
+ANTARES_DIR	test-firmwares/susb-test-fw/Makefile	/^ANTARES_DIR=.\/antares$/;"	m
+ANTARES_DIR	test-firmwares/usb-test-dummy-fw/Makefile	/^ANTARES_DIR=.\/antares$/;"	m
+ANTARES_DIR	test-firmwares/usb-test-fw/Makefile	/^ANTARES_DIR=.\/antares$/;"	m
+ANTARES_INIT_HIGH	test-firmwares/susb-test-fw/src/main.c	/^ANTARES_INIT_HIGH(uinit)$/;"	f
+ANTARES_INIT_HIGH	test-firmwares/usb-test-dummy-fw/src/main.c	/^ANTARES_INIT_HIGH(uinit)$/;"	f
+ANTARES_INIT_HIGH	test-firmwares/usb-test-fw/src/main.c	/^ANTARES_INIT_HIGH(uinit)$/;"	f
+ANTARES_INIT_LOW	test-firmwares/susb-test-fw/src/main.c	/^ANTARES_INIT_LOW(io_init)$/;"	f
+ANTARES_INIT_LOW	test-firmwares/usb-test-dummy-fw/src/main.c	/^ANTARES_INIT_LOW(io_init)$/;"	f
+ANTARES_INIT_LOW	test-firmwares/usb-test-fw/src/main.c	/^ANTARES_INIT_LOW(io_init)$/;"	f
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	396;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	399;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	402;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	406;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	408;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	410;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	414;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	417;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	420;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	425;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	428;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	431;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	435;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	391;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	394;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	397;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	401;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	403;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	405;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	409;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	412;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	415;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	420;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	423;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	426;"	d	file:
+ARCHITECTURE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	430;"	d	file:
+ARG	src/lua/bindings.c	114;"	d	file:
+ARG	src/tests/dummy/async-by-id.c	3;"	d	file:
+ARG	src/tests/dummy/async.c	3;"	d	file:
+ARG	src/tests/dummy/unhandled-evt.c	3;"	d	file:
+ARG	src/tests/uart/async-by-id.c	3;"	d	file:
+ARG	src/tests/uart/async.c	3;"	d	file:
+ARG	src/tests/uart/unhandled-evt.c	3;"	d	file:
+ARG2	src/tests/dummy/async-by-id.c	4;"	d	file:
+ARG2	src/tests/dummy/async.c	4;"	d	file:
+ARG2	src/tests/dummy/unhandled-evt.c	4;"	d	file:
+ARG2	src/tests/uart/async-by-id.c	4;"	d	file:
+ARG2	src/tests/uart/async.c	4;"	d	file:
+ARG2	src/tests/uart/unhandled-evt.c	4;"	d	file:
+AURA_BUFFER_H	include/aura/buffer.h	2;"	d
+AURA_BUFFER_MAGIC_ID	include/aura/private.h	10;"	d
+AURA_BUF_ALLOC_H	include/aura/buffer_allocator.h	2;"	d
+AURA_CALL_COMPLETED	include/aura/aura.h	/^	AURA_CALL_COMPLETED,            \/\/!< AURA_CALL_COMPLETED$/;"	e	enum:aura_call_status
+AURA_CALL_TIMEOUT	include/aura/aura.h	/^	AURA_CALL_TIMEOUT,              \/\/!< AURA_CALL_TIMEOUT$/;"	e	enum:aura_call_status
+AURA_CALL_TRANSPORT_FAIL	include/aura/aura.h	/^	AURA_CALL_TRANSPORT_FAIL,       \/\/!< AURA_CALL_TRANSPORT_FAIL$/;"	e	enum:aura_call_status
+AURA_DECLARE_CACHED_ID	include/aura/aura.h	341;"	d
+AURA_ENDIAN_BIG	include/aura/endian.h	/^	AURA_ENDIAN_BIG,$/;"	e	enum:aura_endianness
+AURA_ENDIAN_LITTLE	include/aura/endian.h	/^	AURA_ENDIAN_LITTLE=0,$/;"	e	enum:aura_endianness
+AURA_ETABLE_H	include/aura/etable.h	2;"	d
+AURA_EVENTLOOP_H	include/aura/eventloop-funcs.h	2;"	d
+AURA_EVENTLOOP_MODULE	include/aura/eventloop.h	41;"	d
+AURA_EVTLOOP_H	include/aura/eventloop.h	2;"	d
+AURA_EVTLOOP_NONBLOCK	include/aura/aura.h	29;"	d
+AURA_EVTLOOP_NO_GC	include/aura/aura.h	30;"	d
+AURA_EVTLOOP_ONCE	include/aura/aura.h	28;"	d
+AURA_FD_ADDED	include/aura/aura.h	/^	AURA_FD_ADDED,  \/\/!< Descriptor added$/;"	e	enum:aura_fd_action
+AURA_FD_REMOVED	include/aura/aura.h	/^	AURA_FD_REMOVED \/\/!< Descriptor removed$/;"	e	enum:aura_fd_action
+AURA_H	include/aura/aura.h	2;"	d
+AURA_MAGIC_HDR	src/transports/transport-nmc.c	14;"	d	file:
+AURA_NODE_H	include/aura/node.h	2;"	d
+AURA_NODE_ION_BUFFER_ALLOCATOR	include/aura/ion_buffer_allocator.h	21;"	d
+AURA_OBJECT_EVENT	src/transports/transport-nmc.c	15;"	d	file:
+AURA_OBJECT_METHOD	src/transports/transport-nmc.c	16;"	d	file:
+AURA_PRIVATE_H	include/aura/private.h	2;"	d
+AURA_STATUS_OFFLINE	include/aura/aura.h	/^	AURA_STATUS_OFFLINE,    \/\/!< AURA_STATUS_OFFLINE$/;"	e	enum:aura_node_status
+AURA_STATUS_ONLINE	include/aura/aura.h	/^	AURA_STATUS_ONLINE,     \/\/!< AURA_STATUS_ONLINE$/;"	e	enum:aura_node_status
+AURA_STLINK_MAGIC	src/transports/transport-stlink.c	12;"	d	file:
+AURA_STRLEN	src/transports/transport-nmc.c	17;"	d	file:
+AURA_TIMER_FREE	include/aura/timer.h	5;"	d
+AURA_TIMER_H	include/aura/timer.h	2;"	d
+AURA_TIMER_PERIODIC	include/aura/timer.h	4;"	d
+AURA_TRANSPORT	include/aura/aura.h	328;"	d
+AUSB_DEVICE_FAILING	src/transports/transport-usb.c	/^	AUSB_DEVICE_FAILING,$/;"	e	enum:device_state	file:
+AUSB_DEVICE_INIT	src/transports/transport-usb.c	/^	AUSB_DEVICE_INIT,$/;"	e	enum:device_state	file:
+AUSB_DEVICE_OPERATIONAL	src/transports/transport-usb.c	/^	AUSB_DEVICE_OPERATIONAL,$/;"	e	enum:device_state	file:
+AUSB_DEVICE_RESTART	src/transports/transport-usb.c	/^	AUSB_DEVICE_RESTART,$/;"	e	enum:device_state	file:
+AUSB_DEVICE_SEARCHING	src/transports/transport-usb.c	/^	AUSB_DEVICE_SEARCHING,$/;"	e	enum:device_state	file:
+AUSB_DEVICE_STOP	src/transports/transport-usb.c	/^	AUSB_DEVICE_STOP$/;"	e	enum:device_state	file:
+BIN	include/aura/client.h	15;"	d
+BIN	lua/aura/conf-loader.lua	/^function BIN(v)$/;"	f
+BUF	include/aura/client.h	17;"	d
+BUG	src/core/panic.c	/^int __attribute__((noreturn)) BUG(struct aura_node *node, const char *msg, ...)$/;"	f
+CB_ARG	src/transports/transport-dummy.c	6;"	d	file:
+CB_ARG	src/transports/transport-uart.c	6;"	d	file:
+CHK	scripts/checkpatch.pl	/^sub CHK {$/;"	s
+CLIENT_H	include/aura/client.h	2;"	d
+CLR_BLUE	src/core/slog.c	33;"	d	file:
+CLR_CYAN	src/core/slog.c	35;"	d	file:
+CLR_GREEN	src/core/slog.c	31;"	d	file:
+CLR_NAGENTA	src/core/slog.c	34;"	d	file:
+CLR_NORM	src/core/slog.c	29;"	d	file:
+CLR_RED	src/core/slog.c	30;"	d	file:
+CLR_RESET	src/core/slog.c	37;"	d	file:
+CLR_WHITE	src/core/slog.c	36;"	d	file:
+CLR_YELLOW	src/core/slog.c	32;"	d	file:
+CMAKE_BINARY_DIR	build/Makefile	/^CMAKE_BINARY_DIR = \/home\/artem\/NIR\/my_aura\/aura\/build$/;"	m
+CMAKE_COMMAND	build/Makefile	/^CMAKE_COMMAND = \/usr\/bin\/cmake$/;"	m
+CMAKE_SOURCE_DIR	build/Makefile	/^CMAKE_SOURCE_DIR = \/home\/artem\/NIR\/my_aura\/aura$/;"	m
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	103;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	110;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	117;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	124;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	132;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	137;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	144;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	147;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	14;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	150;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	153;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	168;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	182;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	192;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	210;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	219;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	222;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	237;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	244;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	262;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	265;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	268;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	37;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	45;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	51;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	57;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	66;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	75;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	89;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	96;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	101;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	108;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	115;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	122;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	129;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	137;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	13;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	142;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	149;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	152;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	155;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	170;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	184;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	194;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	19;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	212;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	221;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	224;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	239;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	257;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	260;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	263;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	42;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	50;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	56;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	62;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	71;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	80;"	d	file:
+COMPILER_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	94;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	105;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	112;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	119;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	125;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	133;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	139;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	157;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	172;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	183;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	194;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	19;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	213;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	225;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	230;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	239;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	247;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	252;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	38;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	46;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	53;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	59;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	68;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	78;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	83;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	91;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	98;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	103;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	110;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	117;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	124;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	130;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	138;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	144;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	159;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	15;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	174;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	185;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	196;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	215;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	227;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	232;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	242;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	247;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	24;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	43;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	51;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	58;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	64;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	73;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	83;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	88;"	d	file:
+COMPILER_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	96;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	106;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	113;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	120;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	126;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	134;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	140;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	158;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	173;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	185;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	195;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	20;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	214;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	226;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	231;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	240;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	248;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	253;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	39;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	47;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	54;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	60;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	69;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	79;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	84;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	92;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	99;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	104;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	111;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	118;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	125;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	131;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	139;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	145;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	160;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	16;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	175;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	187;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	197;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	216;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	228;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	233;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	243;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	248;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	25;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	44;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	52;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	59;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	65;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	74;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	84;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	89;"	d	file:
+COMPILER_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	97;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	100;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	107;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	114;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	121;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	128;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	141;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	159;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	174;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	188;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	199;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	202;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	215;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	227;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	22;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	232;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	241;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	249;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	24;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	254;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	41;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	48;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	62;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	71;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	80;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	85;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	93;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	105;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	112;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	119;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	126;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	133;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	146;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	161;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	176;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	190;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	201;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	204;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	217;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	229;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	234;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	244;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	249;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	27;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	29;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	46;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	53;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	67;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	76;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	85;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	90;"	d	file:
+COMPILER_VERSION_PATCH	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	98;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	165;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	206;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	28;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	167;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	208;"	d	file:
+COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	33;"	d	file:
+CRC_H	include/aura/crc.h	2;"	d
+Cc	scripts/checkpatch.pl	/^	Cc:$/;"	l
+DEC	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	439;"	d	file:
+DEC	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	434;"	d	file:
+DECLARE_GETFUNC	src/core/retparse.c	4;"	d	file:
+DECLARE_PUTFUNC	src/core/retparse.c	20;"	d	file:
+DPKG_EXPORT_BUILDFLAGS	debian/rules	/^DPKG_EXPORT_BUILDFLAGS = 1$/;"	m
+DataDumper	lua/aura/dumper.lua	/^function DataDumper(value, varname, fastmode, ident)$/;"	f
+ENDIAN_H	include/aura/endian.h	2;"	d
+EQUALS	build/Makefile	/^EQUALS = =$/;"	m
+ERROR	scripts/checkpatch.pl	/^sub ERROR {$/;"	s
+GITURL	test-firmwares/susb-test-fw/Makefile	/^GITURL=https:\/\/nekromant@github.com\/nekromant\/antares.git$/;"	m
+GITURL	test-firmwares/usb-test-dummy-fw/Makefile	/^GITURL=https:\/\/nekromant@github.com\/nekromant\/antares.git$/;"	m
+GITURL	test-firmwares/usb-test-fw/Makefile	/^GITURL=https:\/\/nekromant@github.com\/nekromant\/antares.git$/;"	m
+HEX	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	450;"	d	file:
+HEX	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	445;"	d	file:
+HLIST_HEAD	include/aura/list.h	384;"	d
+HLIST_HEAD_INIT	include/aura/list.h	383;"	d
+ID_VOID_MAIN	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	6;"	d	file:
+INIT_HLIST_HEAD	include/aura/list.h	385;"	d
+INIT_HLIST_NODE	include/aura/list.h	386;"	d
+INIT_LIST_HEAD	include/aura/list.h	71;"	d
+ION_FLAG_CACHED	include/ion/ion.h	63;"	d
+ION_FLAG_CACHED_NEEDS_SYNC	include/ion/ion.h	67;"	d
+ION_HEAP_CARVEOUT_MASK	include/ion/ion.h	54;"	d
+ION_HEAP_SYSTEM_CONTIG_MASK	include/ion/ion.h	53;"	d
+ION_HEAP_SYSTEM_MASK	include/ion/ion.h	52;"	d
+ION_HEAP_TYPE_CARVEOUT	include/ion/ion.h	/^	ION_HEAP_TYPE_CARVEOUT,$/;"	e	enum:ion_heap_type
+ION_HEAP_TYPE_CHUNK	include/ion/ion.h	/^	ION_HEAP_TYPE_CHUNK,$/;"	e	enum:ion_heap_type
+ION_HEAP_TYPE_CUSTOM	include/ion/ion.h	/^	ION_HEAP_TYPE_CUSTOM, \/* must be last so device specific heaps always$/;"	e	enum:ion_heap_type
+ION_HEAP_TYPE_DMA	include/ion/ion.h	/^	ION_HEAP_TYPE_DMA,$/;"	e	enum:ion_heap_type
+ION_HEAP_TYPE_DMA_MASK	include/ion/ion.h	55;"	d
+ION_HEAP_TYPE_SYSTEM	include/ion/ion.h	/^	ION_HEAP_TYPE_SYSTEM,$/;"	e	enum:ion_heap_type
+ION_HEAP_TYPE_SYSTEM_CONTIG	include/ion/ion.h	/^	ION_HEAP_TYPE_SYSTEM_CONTIG,$/;"	e	enum:ion_heap_type
+ION_IOC_ALLOC	include/ion/ion.h	142;"	d
+ION_IOC_CUSTOM	include/ion/ion.h	198;"	d
+ION_IOC_FREE	include/ion/ion.h	150;"	d
+ION_IOC_IMPORT	include/ion/ion.h	180;"	d
+ION_IOC_MAGIC	include/ion/ion.h	134;"	d
+ION_IOC_MAP	include/ion/ion.h	160;"	d
+ION_IOC_SHARE	include/ion/ion.h	171;"	d
+ION_IOC_SYNC	include/ion/ion.h	190;"	d
+ION_NUM_HEAPS	include/ion/ion.h	/^	ION_NUM_HEAPS = 16,$/;"	e	enum:ion_heap_type
+ION_NUM_HEAP_IDS	include/ion/ion.h	57;"	d
+L	src/lua/bindings.c	/^	lua_State *		L;$/;"	m	struct:laura_node	file:
+LIST_HEAD	include/aura/list.h	68;"	d
+LIST_HEAD_INIT	include/aura/list.h	66;"	d
+LIST_POISON1	include/aura/list.h	50;"	d
+LIST_POISON2	include/aura/list.h	51;"	d
+LOG_TAG	src/allocators/ion.c	20;"	d	file:
+LUA_LIB	src/lua/bindings.c	1;"	d	file:
+MAGIC	src/transports/transport-nmc.c	13;"	d	file:
+MAXMSG	src/core/slog.c	40;"	d	file:
+NEW	lua/aura/class.lua	/^function NEW(name, ...)$/;"	f
+NMC_EVENT_STDIO	src/transports/transport-nmc.c	/^	NMC_EVENT_STDIO=1 << 0,$/;"	e	enum:__anon3	file:
+NMC_EVENT_TRANSPORT	src/transports/transport-nmc.c	/^	NMC_EVENT_TRANSPORT=1 << 1$/;"	e	enum:__anon3	file:
+NODE_EVENT_DESCRIPTOR	include/aura/aura.h	/^	NODE_EVENT_DESCRIPTOR$/;"	e	enum:node_event
+NODE_EVENT_HAVE_OUTBOUND	include/aura/aura.h	/^	NODE_EVENT_HAVE_OUTBOUND,$/;"	e	enum:node_event
+NODE_EVENT_STARTED	include/aura/aura.h	/^	NODE_EVENT_STARTED,$/;"	e	enum:node_event
+NODE_QUEUE_INBOUND	include/aura/private.h	/^	NODE_QUEUE_INBOUND$/;"	e	enum:node_buffer_queue
+NODE_QUEUE_OUTBOUND	include/aura/private.h	/^	NODE_QUEUE_OUTBOUND,$/;"	e	enum:node_buffer_queue
+NONE	include/aura/client.h	4;"	d
+NONE	lua/aura/conf-loader.lua	/^function NONE(name)$/;"	f
+OBJDIR	test-firmwares/susb-test-fw/Makefile	/^OBJDIR=.$/;"	m
+OBJDIR	test-firmwares/usb-test-dummy-fw/Makefile	/^OBJDIR=.$/;"	m
+OBJDIR	test-firmwares/usb-test-fw/Makefile	/^OBJDIR=.$/;"	m
+OPCODE	src/transports/transport-sysfs-gpio.c	157;"	d	file:
+Options	scripts/checkpatch.pl	/^Options:$/;"	l
+PACKETIZER_H	include/aura/packetizer.h	2;"	d
+PACKET_CALL	src/transports/transport-serial.c	/^	PACKET_CALL,$/;"	e	enum:serpacket_type	file:
+PACKET_HELLO	src/transports/transport-serial.c	/^	PACKET_HELLO,$/;"	e	enum:serpacket_type	file:
+PACKET_INFO	src/transports/transport-serial.c	/^	PACKET_INFO,$/;"	e	enum:serpacket_type	file:
+PACKET_PING	src/transports/transport-serial.c	/^	PACKET_PING,$/;"	e	enum:serpacket_type	file:
+PACKET_START	include/aura/packetizer.h	6;"	d
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	293;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	296;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	299;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	302;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	305;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	308;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	311;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	314;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	317;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	320;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	323;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	326;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	329;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	332;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	335;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	338;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	341;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	344;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	347;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	350;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	353;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	356;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	359;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	362;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	365;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	369;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	372;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	375;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	378;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	381;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	385;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	288;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	291;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	294;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	297;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	300;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	303;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	306;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	309;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	312;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	315;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	318;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	321;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	324;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	327;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	330;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	333;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	336;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	339;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	342;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	345;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	348;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	351;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	354;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	357;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	360;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	364;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	367;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	370;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	373;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	376;"	d	file:
+PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	380;"	d	file:
+PREPARE_ARG	src/lua/bindings.c	103;"	d	file:
+PUT	src/core/serdes.c	220;"	d	file:
+READ	lua/aura/conf-loader.lua	/^function READ(name,...)$/;"	f
+READ_UINT32_LE	src/transports/transport-stlink.c	13;"	d	file:
+REF_ETABLE_CB	src/lua/bindings.c	15;"	d	file:
+REF_EVENT_CB	src/lua/bindings.c	16;"	d	file:
+REF_NODE_CONTAINER	src/lua/bindings.c	13;"	d	file:
+REF_STATUS_CB	src/lua/bindings.c	14;"	d	file:
+RM	build/Makefile	/^RM = \/usr\/bin\/cmake -E remove -f$/;"	m
+RQ_GET_DEV_INFO	src/transports/transport-usb.c	/^	RQ_GET_DEV_INFO,$/;"	e	enum:usb_requests	file:
+RQ_GET_DEV_INFO	test-firmwares/usb-test-dummy-fw/src/main.c	/^	RQ_GET_DEV_INFO,$/;"	e	enum:usb_requests	file:
+RQ_GET_DEV_INFO	test-firmwares/usb-test-fw/src/main.c	/^	RQ_GET_DEV_INFO,$/;"	e	enum:usb_requests	file:
+RQ_GET_EVENT	src/transports/transport-usb.c	/^	RQ_GET_EVENT,$/;"	e	enum:usb_requests	file:
+RQ_GET_EVENT	test-firmwares/usb-test-dummy-fw/src/main.c	/^	RQ_GET_EVENT,$/;"	e	enum:usb_requests	file:
+RQ_GET_EVENT	test-firmwares/usb-test-fw/src/main.c	/^	RQ_GET_EVENT,$/;"	e	enum:usb_requests	file:
+RQ_GET_OBJ_INFO	src/transports/transport-usb.c	/^	RQ_GET_OBJ_INFO,$/;"	e	enum:usb_requests	file:
+RQ_GET_OBJ_INFO	test-firmwares/usb-test-dummy-fw/src/main.c	/^	RQ_GET_OBJ_INFO,$/;"	e	enum:usb_requests	file:
+RQ_GET_OBJ_INFO	test-firmwares/usb-test-fw/src/main.c	/^	RQ_GET_OBJ_INFO,$/;"	e	enum:usb_requests	file:
+RQ_PUT_CALL	src/transports/transport-usb.c	/^	RQ_PUT_CALL$/;"	e	enum:usb_requests	file:
+RQ_PUT_CALL	test-firmwares/usb-test-dummy-fw/src/main.c	/^	RQ_PUT_CALL$/;"	e	enum:usb_requests	file:
+RQ_PUT_CALL	test-firmwares/usb-test-fw/src/main.c	/^	RQ_PUT_CALL$/;"	e	enum:usb_requests	file:
+S16	include/aura/client.h	11;"	d
+S32	include/aura/client.h	12;"	d
+S64	include/aura/client.h	13;"	d
+S8	include/aura/client.h	10;"	d
+SHELL	build/Makefile	/^SHELL = \/bin\/sh$/;"	m
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	155;"	d	file:
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	16;"	d	file:
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	170;"	d	file:
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	157;"	d	file:
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	172;"	d	file:
+SIMULATE_ID	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	21;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	162;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	177;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	32;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	164;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	179;"	d	file:
+SIMULATE_VERSION_MAJOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	37;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	163;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	178;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	33;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	165;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	180;"	d	file:
+SIMULATE_VERSION_MINOR	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	38;"	d	file:
+SLOGBUILD_NUM	include/aura/slog.h	31;"	d
+SLOGVERSION_MAX	include/aura/slog.h	29;"	d
+SLOGVERSION_MIN	include/aura/slog.h	30;"	d
+SLOG_DEBUG	include/aura/slog.h	38;"	d
+SLOG_ERROR	include/aura/slog.h	39;"	d
+SLOG_FATAL	include/aura/slog.h	40;"	d
+SLOG_H	include/aura/slog.h	19;"	d
+SLOG_INFO	include/aura/slog.h	36;"	d
+SLOG_LIVE	include/aura/slog.h	35;"	d
+SLOG_NONE	include/aura/slog.h	41;"	d
+SLOG_WARN	include/aura/slog.h	37;"	d
+SRCDIR	test-firmwares/susb-test-fw/Makefile	/^SRCDIR=antares$/;"	m
+SRCDIR	test-firmwares/usb-test-dummy-fw/Makefile	/^SRCDIR=antares$/;"	m
+SRCDIR	test-firmwares/usb-test-fw/Makefile	/^SRCDIR=antares$/;"	m
+STATE_READ_DATA	src/transports/packetizer.c	/^	STATE_READ_DATA$/;"	e	enum:packetizer_state	file:
+STATE_READ_HEADER	src/transports/packetizer.c	/^	STATE_READ_HEADER,$/;"	e	enum:packetizer_state	file:
+STATE_SEARCH_START	src/transports/packetizer.c	/^	STATE_SEARCH_START=0,$/;"	e	enum:packetizer_state	file:
+STRINGIFY	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	289;"	d	file:
+STRINGIFY	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	284;"	d	file:
+STRINGIFY_HELPER	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	288;"	d	file:
+STRINGIFY_HELPER	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	283;"	d	file:
+SUFFIXES	build/Makefile	/^SUFFIXES =$/;"	m
+SUSB_DEVICE_OPERATIONAL	src/transports/transport-susb.c	/^	SUSB_DEVICE_OPERATIONAL,$/;"	e	enum:device_state	file:
+SUSB_DEVICE_RESTART	src/transports/transport-susb.c	/^	SUSB_DEVICE_RESTART$/;"	e	enum:device_state	file:
+SUSB_DEVICE_SEARCHING	src/transports/transport-susb.c	/^	SUSB_DEVICE_SEARCHING=0,$/;"	e	enum:device_state	file:
+SYNCBUF_ARGOUT	src/transports/transport-nmc.c	/^	SYNCBUF_ARGOUT = 1,$/;"	e	enum:__anon2	file:
+SYNCBUF_IDLE	src/transports/transport-nmc.c	/^	SYNCBUF_IDLE = 0,$/;"	e	enum:__anon2	file:
+SYNCBUF_RETIN	src/transports/transport-nmc.c	/^	SYNCBUF_RETIN = 2$/;"	e	enum:__anon2	file:
+SystemDate	include/aura/slog.h	/^} SystemDate;$/;"	t	typeref:struct:__anon4
+TMPDIR	test-firmwares/susb-test-fw/Makefile	/^TMPDIR=tmp$/;"	m
+TMPDIR	test-firmwares/usb-test-dummy-fw/Makefile	/^TMPDIR=tmp$/;"	m
+TMPDIR	test-firmwares/usb-test-fw/Makefile	/^TMPDIR=tmp$/;"	m
+TOPDIR	test-firmwares/susb-test-fw/Makefile	/^TOPDIR=.$/;"	m
+TOPDIR	test-firmwares/usb-test-dummy-fw/Makefile	/^TOPDIR=.$/;"	m
+TOPDIR	test-firmwares/usb-test-fw/Makefile	/^TOPDIR=.$/;"	m
+TRACE	src/lua/bindings.c	21;"	d	file:
+TRACE	src/lua/bindings.c	23;"	d	file:
+TRACE_LEN	src/core/panic.c	9;"	d	file:
+TRANSPORT	benchmarks/dummy-benchmark.c	8;"	d	file:
+To	scripts/checkpatch.pl	/^	To:|$/;"	l
+U16	include/aura/client.h	6;"	d
+U32	include/aura/client.h	7;"	d
+U64	include/aura/client.h	8;"	d
+U8	include/aura/client.h	5;"	d
+URPC_BIN	include/aura/format.h	15;"	d
+URPC_BUF	include/aura/format.h	17;"	d
+URPC_H	include/aura/format.h	2;"	d
+URPC_METHOD	test-firmwares/usb-test-fw/src/main.c	/^URPC_METHOD(getButton, $/;"	f
+URPC_METHOD	test-firmwares/usb-test-fw/src/main.c	/^URPC_METHOD(setLed, $/;"	f
+URPC_NONE	include/aura/format.h	4;"	d
+URPC_S16	include/aura/format.h	11;"	d
+URPC_S32	include/aura/format.h	12;"	d
+URPC_S64	include/aura/format.h	13;"	d
+URPC_S8	include/aura/format.h	10;"	d
+URPC_U16	include/aura/format.h	6;"	d
+URPC_U32	include/aura/format.h	7;"	d
+URPC_U64	include/aura/format.h	8;"	d
+URPC_U8	include/aura/format.h	5;"	d
+USB_HELPERS_H	include/aura/usb_helpers.h	2;"	d
+USB_STRING_DESCRIPTOR_HEADER	src/tests/broken/susb-set-serial.c	3;"	d	file:
+Usage	scripts/checkpatch.pl	/^Usage: $P [OPTION]... [FILE]...$/;"	l
+Version	scripts/checkpatch.pl	/^Version: $V$/;"	l
+WARN	scripts/checkpatch.pl	/^sub WARN {$/;"	s
+WRITE	lua/aura/conf-loader.lua	/^function WRITE(name,...)$/;"	f
+['function'] 	lua/aura/dumper.lua	/^    ['function'] = function(value) $/;"	f
+['nil'] 	lua/aura/dumper.lua	/^    ['nil'] = function(value) return 'nil' end,$/;"	f
+_ION_BUFFER_ALLOCATOR_H	include/aura/ion_buffer_allocator.h	2;"	d
+_LINUX_LIST_H	include/aura/list.h	18;"	d
+__BIT	include/aura/aura.h	148;"	d
+__SYS_CORE_ION_H	include/ion/ion.h	22;"	d
+__hlist_del	include/aura/list.h	/^static inline void __hlist_del(struct hlist_node *n)$/;"	f
+__list_add	include/aura/list.h	/^static inline void __list_add(struct list_head *neu,$/;"	f
+__list_del	include/aura/list.h	/^static inline void __list_del(struct list_head * prev, struct list_head * next)$/;"	f
+__list_for_each	include/aura/list.h	258;"	d
+__list_splice	include/aura/list.h	/^static inline void __list_splice(struct list_head *list,$/;"	f
+__swap16	include/aura/endian.h	11;"	d
+__swap32	include/aura/endian.h	15;"	d
+__swap64	include/aura/endian.h	21;"	d
+align	include/ion/ion.h	/^	size_t align;$/;"	m	struct:ion_allocation_data
+allocator	include/aura/aura.h	/^	struct aura_buffer_allocator *	allocator;$/;"	m	struct:aura_transport	typeref:struct:aura_transport::aura_buffer_allocator
+allocator_data	include/aura/aura.h	/^	void *				allocator_data;$/;"	m	struct:aura_node
+annotate_reset	scripts/checkpatch.pl	/^sub annotate_reset {$/;"	s
+annotate_values	scripts/checkpatch.pl	/^sub annotate_values {$/;"	s
+arg	include/aura/aura.h	/^	void *	arg;$/;"	m	struct:aura_object
+arg	include/aura/usb_helpers.h	/^	void *arg;$/;"	m	struct:ncusb_devwatch_data
+arg	include/ion/ion.h	/^	unsigned long arg;$/;"	m	struct:ion_custom_data
+arg_fmt	include/aura/aura.h	/^	char *	arg_fmt;$/;"	m	struct:aura_object
+arg_format	src/transports/transport-stlink.c	/^	uint32_t arg_format;$/;"	m	struct:export_object	file:
+arg_pprinted	include/aura/aura.h	/^	char *	arg_pprinted;$/;"	m	struct:aura_object
+argfmt	src/transports/transport-nmc.c	/^	uint32_t	argfmt[AURA_STRLEN];$/;"	m	struct:nmc_aura_object	file:
+arglen	include/aura/aura.h	/^	int	arglen;$/;"	m	struct:aura_object
+aura.close 	lua/aura.lua	/^aura.close = function(node)$/;"	f
+aura.dumpnodes 	lua/aura.lua	/^aura.dumpnodes = function()$/;"	f
+aura.eventloop 	lua/aura.lua	/^aura.eventloop = function(...)$/;"	f
+aura.open 	lua/aura.lua	/^aura.open = function(name, params)$/;"	f
+aura_add_pollfds	src/core/transport.c	/^struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)$/;"	f
+aura_buffer	include/aura/aura.h	/^struct aura_buffer {$/;"	s
+aura_buffer_allocator	include/aura/buffer_allocator.h	/^struct aura_buffer_allocator {$/;"	s
+aura_buffer_destroy	src/core/buffer.c	/^void aura_buffer_destroy(struct aura_buffer *buf)$/;"	f
+aura_buffer_from_eviovec	src/core/libevent-helpers.c	/^struct aura_buffer *aura_buffer_from_eviovec(struct aura_node *		node,$/;"	f
+aura_buffer_from_eviovec	src/core/libevent-helpers.c	/^struct aura_buffer *aura_buffer_from_eviovec(struct aura_node *		node,struct evbuffer_iovec *	vec, size_t			length)$/;"	f
+aura_buffer_get_bin	src/core/retparse.c	/^const void *aura_buffer_get_bin(struct aura_buffer *buf, int len)$/;"	f
+aura_buffer_get_buf	src/core/retparse.c	/^struct aura_buffer *aura_buffer_get_buf(struct aura_buffer *buf)$/;"	f
+aura_buffer_get_length	src/core/buffer.c	/^size_t aura_buffer_get_length(struct aura_buffer *buf)$/;"	f
+aura_buffer_payload_length	src/core/buffer.c	/^size_t aura_buffer_payload_length(struct aura_buffer *buf)$/;"	f
+aura_buffer_payload_ptr	src/core/buffer.c	/^void *aura_buffer_payload_ptr(struct aura_buffer *buf)$/;"	f
+aura_buffer_put_bin	src/core/retparse.c	/^void aura_buffer_put_bin(struct aura_buffer *buf, const void *data, int len)$/;"	f
+aura_buffer_put_buf	src/core/retparse.c	/^void aura_buffer_put_buf(struct aura_buffer *to, struct aura_buffer *to_put)$/;"	f
+aura_buffer_put_eviovec	src/core/libevent-helpers.c	/^void aura_buffer_put_eviovec(struct aura_buffer *	buf,$/;"	f
+aura_buffer_put_eviovec	src/core/libevent-helpers.c	/^void aura_buffer_put_eviovec(struct aura_buffer *buf, struct evbuffer_iovec *vec, size_t length)$/;"	f
+aura_buffer_release	src/core/buffer.c	/^void aura_buffer_release(struct aura_buffer *buf)$/;"	f
+aura_buffer_request	src/core/buffer.c	/^struct aura_buffer *aura_buffer_request(struct aura_node *nd, int size)$/;"	f
+aura_buffer_rewind	src/core/buffer.c	/^void aura_buffer_rewind(struct aura_buffer *buf)$/;"	f
+aura_buffer_to_nmc	src/transports/transport-nmc.c	/^static uint32_t aura_buffer_to_nmc(struct aura_buffer *buf)$/;"	f	file:
+aura_bufferpool_gc	src/core/buffer.c	/^void aura_bufferpool_gc(struct aura_node *nd, int numdrop, int threshold)$/;"	f
+aura_bufferpool_preheat	src/core/buffer.c	/^void aura_bufferpool_preheat(struct aura_node *nd, int size, int count)$/;"	f
+aura_bufferpool_set_gc_threshold	src/core/buffer.c	/^void aura_bufferpool_set_gc_threshold(struct aura_node *nd, int threshold)$/;"	f
+aura_call	src/core/aura.c	/^int aura_call($/;"	f
+aura_call_fail	src/core/aura.c	/^void aura_call_fail(struct aura_node *node, struct aura_object *o)$/;"	f
+aura_call_raw	src/core/aura.c	/^int aura_call_raw($/;"	f
+aura_call_status	include/aura/aura.h	/^enum aura_call_status {$/;"	g
+aura_check_args	src/lua/bindings.c	26;"	d	file:
+aura_close	src/core/aura.c	/^void aura_close(struct aura_node *node)$/;"	f
+aura_core_call	src/core/aura.c	/^int aura_core_call($/;"	f
+aura_core_start_call	src/core/aura.c	/^int aura_core_start_call(struct aura_node *node,$/;"	f
+aura_del_pollfds	src/core/transport.c	/^void aura_del_pollfds(struct aura_node *node, int fd)$/;"	f
+aura_dequeue_buffer	src/core/queue.c	/^struct aura_buffer *aura_dequeue_buffer(struct list_head *head)$/;"	f
+aura_do_check_args	src/lua/bindings.c	/^static void aura_do_check_args(lua_State *L, const char *func, int need)$/;"	f	file:
+aura_enable_sync_events	src/core/aura.c	/^void aura_enable_sync_events(struct aura_node *node, int count)$/;"	f
+aura_endianness	include/aura/endian.h	/^enum aura_endianness$/;"	g
+aura_epoll_loop	src/eventloop/epoll.c	/^struct aura_epoll_loop {$/;"	s	file:
+aura_etable_activate	src/core/export.c	/^void aura_etable_activate(struct aura_export_table *tbl)$/;"	f
+aura_etable_add	src/core/export.c	/^void aura_etable_add(struct aura_export_table * tbl,$/;"	f
+aura_etable_changed_cb	src/core/aura.c	/^void aura_etable_changed_cb(struct aura_node *								node,$/;"	f
+aura_etable_create	src/core/export.c	/^struct aura_export_table *aura_etable_create(struct aura_node *owner, int n)$/;"	f
+aura_etable_destroy	src/core/export.c	/^void aura_etable_destroy(struct aura_export_table *tbl)$/;"	f
+aura_etable_find	src/core/export.c	/^struct aura_object *aura_etable_find(struct aura_export_table * tbl,$/;"	f
+aura_etable_find_id	src/core/export.c	/^struct aura_object *aura_etable_find_id(struct aura_export_table *	tbl,$/;"	f
+aura_eventloop	include/aura/eventloop.h	/^struct aura_eventloop {$/;"	s
+aura_eventloop_add	src/core/eventloop.c	/^void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)$/;"	f
+aura_eventloop_create	include/aura/eventloop-funcs.h	17;"	d
+aura_eventloop_create__	src/core/eventloop.c	/^void *aura_eventloop_create__(int dummy, ...)$/;"	f
+aura_eventloop_create_empty	src/core/eventloop.c	/^void *aura_eventloop_create_empty()$/;"	f
+aura_eventloop_del	src/core/eventloop.c	/^void aura_eventloop_del(struct aura_node *node)$/;"	f
+aura_eventloop_destroy	src/core/eventloop.c	/^void aura_eventloop_destroy(struct aura_eventloop *loop)$/;"	f
+aura_eventloop_dispatch	src/core/eventloop.c	/^void aura_eventloop_dispatch(struct aura_eventloop *loop, int flags)$/;"	f
+aura_eventloop_loopexit	src/core/eventloop.c	/^void aura_eventloop_loopexit(struct aura_eventloop *loop, struct timeval *tv)$/;"	f
+aura_eventloop_module	include/aura/eventloop.h	/^struct aura_eventloop_module {$/;"	s
+aura_eventloop_module_get	src/core/eventloop-factory.c	/^const struct aura_eventloop_module *aura_eventloop_module_get()$/;"	f
+aura_eventloop_module_register	src/core/eventloop-factory.c	/^void aura_eventloop_module_register(struct aura_eventloop_module *m)$/;"	f
+aura_eventloop_module_select	src/core/eventloop-factory.c	/^int aura_eventloop_module_select(const char *name)$/;"	f
+aura_eventloop_moduledata_get	include/aura/eventloop.h	/^static inline void *aura_eventloop_moduledata_get(struct aura_eventloop *loop)$/;"	f
+aura_eventloop_moduledata_set	include/aura/eventloop.h	/^static inline void aura_eventloop_moduledata_set(struct aura_eventloop *loop,$/;"	f
+aura_eventloop_vcreate	src/core/eventloop.c	/^void *aura_eventloop_vcreate(va_list ap)$/;"	f
+aura_export_table	include/aura/etable.h	/^struct aura_export_table {$/;"	s
+aura_fd_action	include/aura/aura.h	/^enum aura_fd_action {$/;"	g
+aura_fd_changed_cb	src/core/aura.c	/^void aura_fd_changed_cb(struct aura_node *node,$/;"	f
+aura_fmt_len	src/core/serdes.c	/^int  aura_fmt_len(struct aura_node *node, const char *fmt)$/;"	f
+aura_fmt_pretty_print	src/core/serdes.c	/^char *aura_fmt_pretty_print(const char *fmt, int *valid, int *num_args)$/;"	f
+aura_get_current_object	src/core/aura.c	/^const struct aura_object *aura_get_current_object(struct aura_node *node)$/;"	f
+aura_get_host_endianness	src/core/utils.c	/^enum aura_endianness aura_get_host_endianness()$/;"	f
+aura_get_next_event	src/core/aura.c	/^int aura_get_next_event(struct aura_node *node, const struct aura_object **obj, struct aura_buffer **retbuf)$/;"	f
+aura_get_pending_events	src/core/aura.c	/^int aura_get_pending_events(struct aura_node *node)$/;"	f
+aura_get_pollfds	src/core/transport.c	/^int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)$/;"	f
+aura_get_status	src/core/aura.c	/^int aura_get_status(struct aura_node *node)$/;"	f
+aura_get_transportdata	src/core/aura.c	/^void *aura_get_transportdata(struct aura_node *node)$/;"	f
+aura_get_userdata	src/core/aura.c	/^void *aura_get_userdata(struct aura_node *node)$/;"	f
+aura_get_version	src/core/utils.c	/^const char *aura_get_version()$/;"	f
+aura_get_version_code	src/core/utils.c	/^unsigned int aura_get_version_code()$/;"	f
+aura_hexdump	src/core/utils.c	/^void aura_hexdump(char *desc, void *addr, int len)$/;"	f
+aura_ion_allocator_data	include/aura/ion_buffer_allocator.h	/^struct aura_ion_allocator_data {$/;"	s
+aura_ion_buffer_descriptor	include/aura/ion_buffer_allocator.h	/^struct aura_ion_buffer_descriptor {$/;"	s
+aura_libevent_timer	src/eventloop/libevent.c	/^struct aura_libevent_timer {$/;"	s	file:
+aura_node	include/aura/aura.h	/^struct aura_node {$/;"	s
+aura_node_allocatordata_get	include/aura/buffer_allocator.h	/^static inline void *aura_node_allocatordata_get(struct aura_node *node)$/;"	f
+aura_node_allocatordata_set	include/aura/buffer_allocator.h	/^static inline void aura_node_allocatordata_set(struct aura_node *node, void *data)$/;"	f
+aura_node_buffer_pool_gc_full	src/core/buffer.c	/^int aura_node_buffer_pool_gc_full(struct aura_node *pos)$/;"	f
+aura_node_buffer_pool_gc_once	src/core/buffer.c	/^int aura_node_buffer_pool_gc_once(struct aura_node *pos)$/;"	f
+aura_node_call_strerror	src/core/aura.c	/^const char *aura_node_call_strerror(int errcode)$/;"	f
+aura_node_dispatch_event	src/core/aura.c	/^void aura_node_dispatch_event(struct aura_node *node, enum node_event event, const struct aura_pollfds *fd)$/;"	f
+aura_node_eventloop_get	src/core/aura.c	/^struct aura_eventloop *aura_node_eventloop_get(struct aura_node *node)$/;"	f
+aura_node_eventloop_get_autocreate	src/core/aura.c	/^void *aura_node_eventloop_get_autocreate(struct aura_node *node)$/;"	f
+aura_node_eventloop_set	src/core/aura.c	/^void aura_node_eventloop_set(struct aura_node *node, struct aura_eventloop *loop)$/;"	f
+aura_node_eventloopdata_get	src/core/aura.c	/^void *aura_node_eventloopdata_get(struct aura_node *node)$/;"	f
+aura_node_eventloopdata_set	src/core/aura.c	/^void  aura_node_eventloopdata_set(struct aura_node *node, void *udata)$/;"	f
+aura_node_outbound_avail	src/core/queue.c	/^int aura_node_outbound_avail(struct aura_node *node)$/;"	f
+aura_node_read	src/core/queue.c	/^struct aura_buffer *aura_node_read(struct aura_node *node)$/;"	f
+aura_node_status	include/aura/aura.h	/^enum aura_node_status {$/;"	g
+aura_node_write	src/core/aura.c	/^void aura_node_write(struct aura_node *node, struct aura_buffer *buf)$/;"	f
+aura_object	include/aura/aura.h	/^struct aura_object {$/;"	s
+aura_object_migration_failed_cb	src/core/aura.c	/^void aura_object_migration_failed_cb(struct aura_node *						node,$/;"	f
+aura_open	src/core/aura.c	/^struct aura_node *aura_open(const char *name, const char *opts)$/;"	f
+aura_packet8	include/aura/packetizer.h	/^struct __attribute__((packed)) aura_packet8  {$/;"	s
+aura_packetizer	include/aura/packetizer.h	/^struct aura_packetizer {$/;"	s
+aura_packetizer_create	src/transports/packetizer.c	/^struct aura_packetizer *aura_packetizer_create(struct aura_node *node)$/;"	f
+aura_packetizer_destroy	src/transports/packetizer.c	/^void aura_packetizer_destroy(struct aura_packetizer *pkt)$/;"	f
+aura_packetizer_encapsulate	src/transports/packetizer.c	/^void aura_packetizer_encapsulate(struct aura_packetizer *	pkt,$/;"	f
+aura_packetizer_feed	src/transports/packetizer.c	/^void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)$/;"	f
+aura_packetizer_feed_once	src/transports/packetizer.c	/^int aura_packetizer_feed_once(struct aura_packetizer *pkt, const char *data, size_t len)$/;"	f
+aura_packetizer_max_overhead	src/transports/packetizer.c	/^int aura_packetizer_max_overhead()$/;"	f
+aura_packetizer_reset	src/transports/packetizer.c	/^void aura_packetizer_reset(struct aura_packetizer *pkt)$/;"	f
+aura_packetizer_set_receive_cb	src/transports/packetizer.c	/^void aura_packetizer_set_receive_cb($/;"	f
+aura_packetizer_verify_data	src/transports/packetizer.c	/^int aura_packetizer_verify_data(struct aura_packetizer *pkt, struct aura_packet8 *packet)$/;"	f
+aura_packetizer_verify_header	src/transports/packetizer.c	/^int aura_packetizer_verify_header(struct aura_packetizer *pkt, struct aura_packet8 *packet)$/;"	f
+aura_panic	src/core/panic.c	/^void __attribute__((noreturn)) aura_panic(struct aura_node *node)$/;"	f
+aura_peek_buffer	src/core/queue.c	/^struct aura_buffer *aura_peek_buffer(struct list_head *head)$/;"	f
+aura_platform_timestamp	src/core/utils-linux.c	/^uint64_t aura_platform_timestamp()$/;"	f
+aura_pollfds	include/aura/aura.h	/^struct aura_pollfds {$/;"	s
+aura_print_stacktrace	src/core/panic.c	/^void aura_print_stacktrace()$/;"	f
+aura_queue_buffer	src/core/queue.c	/^void aura_queue_buffer(struct list_head *queue, struct aura_buffer *buf)$/;"	f
+aura_requeue_buffer	src/core/queue.c	/^void aura_requeue_buffer(struct list_head *list, struct aura_buffer *buf)$/;"	f
+aura_serialize	src/core/serdes.c	/^struct aura_buffer *aura_serialize(struct aura_node *node, const char *fmt, int size, va_list ap)$/;"	f
+aura_set_event_callback	src/core/aura.c	/^int aura_set_event_callback($/;"	f
+aura_set_event_callback_raw	src/core/aura.c	/^int aura_set_event_callback_raw($/;"	f
+aura_set_node_endian	src/core/aura.c	/^void aura_set_node_endian(struct aura_node *node, enum aura_endianness en)$/;"	f
+aura_set_status	src/core/aura.c	/^void aura_set_status(struct aura_node *node, int status)$/;"	f
+aura_set_transportdata	src/core/aura.c	/^void  aura_set_transportdata(struct aura_node *node, void *udata)$/;"	f
+aura_set_userdata	src/core/aura.c	/^void  aura_set_userdata(struct aura_node *node, void *udata)$/;"	f
+aura_start_call	src/core/aura.c	/^int aura_start_call($/;"	f
+aura_start_call_raw	src/core/aura.c	/^int aura_start_call_raw($/;"	f
+aura_status_changed_cb	src/core/aura.c	/^void aura_status_changed_cb(struct aura_node *node,$/;"	f
+aura_stlink_close	src/transports/transport-stlink.c	/^static void aura_stlink_close(struct aura_node *node)$/;"	f	file:
+aura_stlink_connect	src/transports/transport-stlink.c	/^static int aura_stlink_connect(struct stlink_transport_data *stl, uint32_t addr)$/;"	f	file:
+aura_stlink_handle_event	src/transports/transport-stlink.c	/^static void aura_stlink_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+aura_stlink_open	src/transports/transport-stlink.c	/^static int aura_stlink_open(struct aura_node *node, const char *opts)$/;"	f	file:
+aura_timer	include/aura/timer.h	/^struct aura_timer {$/;"	s
+aura_timer_cb_fn	include/aura/timer.h	/^typedef void (*aura_timer_cb_fn)(struct aura_node *node, struct aura_timer *tm, void *arg);$/;"	t
+aura_timer_create	src/core/timer.c	/^struct aura_timer *aura_timer_create(struct aura_node *node, aura_timer_cb_fn timer_cb_fn, void *arg)$/;"	f
+aura_timer_destroy	src/core/timer.c	/^void aura_timer_destroy(struct aura_timer *timer)$/;"	f
+aura_timer_dispatch	src/core/timer.c	/^void aura_timer_dispatch(struct aura_timer *tm)$/;"	f
+aura_timer_is_active	src/core/timer.c	/^bool aura_timer_is_active(struct aura_timer *timer)$/;"	f
+aura_timer_start	src/core/timer.c	/^void aura_timer_start(struct aura_timer *tm, int flags, struct timeval *tv)$/;"	f
+aura_timer_stop	src/core/timer.c	/^void aura_timer_stop(struct aura_timer *timer)$/;"	f
+aura_timer_update	src/core/timer.c	/^void aura_timer_update(struct aura_timer *tm, aura_timer_cb_fn timer_cb_fn, void *arg)$/;"	f
+aura_timerfd_timer	src/eventloop/epoll.c	/^struct aura_timerfd_timer {$/;"	s	file:
+aura_transport	include/aura/aura.h	/^struct aura_transport {$/;"	s
+aura_transport_dump_usage	src/core/transport.c	/^void aura_transport_dump_usage()$/;"	f
+aura_transport_lookup	src/core/transport.c	/^const struct aura_transport *aura_transport_lookup(const char *name)$/;"	f
+aura_transport_register	src/core/transport.c	/^void aura_transport_register(struct aura_transport *tr)$/;"	f
+aura_transport_release	src/core/transport.c	/^void aura_transport_release(const struct aura_transport *tr)$/;"	f
+aura_typeerror	src/lua/bindings.c	/^static int aura_typeerror(lua_State *L, int narg, const char *tname)$/;"	f	file:
+aura_unhandled_evt_cb	src/core/aura.c	/^void aura_unhandled_evt_cb(struct aura_node *						node,$/;"	f
+aura_wait_status	src/core/aura.c	/^void aura_wait_status(struct aura_node *node, int status)$/;"	f
+average_aggregate	benchmarks/dummy-benchmark.c	/^void average_aggregate(struct aura_node *n, long (*test)(struct aura_node *n), int runs, char *lbl)$/;"	f
+bench	src/transports/transport-bench.c	/^AURA_TRANSPORT(bench);$/;"	v
+bench	src/transports/transport-bench.c	/^static struct aura_transport bench = {$/;"	v	typeref:struct:aura_transport	file:
+boolean 	lua/aura/dumper.lua	/^    boolean = function(value) return tostring(value) end,$/;"	f
+bpos	test-firmwares/usb-test-fw/src/main.c	/^unsigned char *bpos; $/;"	v
+buf	include/aura/ion_buffer_allocator.h	/^	struct aura_buffer	buf;$/;"	m	struct:aura_ion_buffer_descriptor	typeref:struct:aura_ion_buffer_descriptor::aura_buffer
+buffer_get	include/aura/aura.h	/^	struct aura_buffer *		(*buffer_get)(struct aura_buffer *buf);$/;"	m	struct:aura_transport	typeref:struct:aura_transport::buffer_get
+buffer_offset	include/aura/aura.h	/^	int buffer_offset;$/;"	m	struct:aura_transport
+buffer_overhead	include/aura/aura.h	/^	int buffer_overhead;$/;"	m	struct:aura_transport
+buffer_pool	include/aura/aura.h	/^	struct list_head		buffer_pool;$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+buffer_put	include/aura/aura.h	/^	void (*buffer_put)(struct aura_buffer *dst, struct aura_buffer *buf);$/;"	m	struct:aura_transport
+buffer_to_lua	src/lua/bindings.c	/^static int buffer_to_lua(lua_State *L, struct aura_node *node, const struct aura_object *o, struct aura_buffer *buf)$/;"	f	file:
+build_types	scripts/checkpatch.pl	/^sub build_types {$/;"	s
+c.__copy 	lua/aura/class.lua	/^   c.__copy = function(self)$/;"	f
+c.__is_a 	lua/aura/class.lua	/^   c.__is_a = function(self, klass)$/;"	f
+c_functions[v] 	lua/aura/dumper.lua	/^      c_functions[v] = lib..k$/;"	f
+callback	include/aura/timer.h	/^	aura_timer_cb_fn callback;$/;"	m	struct:aura_timer
+callback	test.lua	/^function callback(node, arg, ...)$/;"	f
+callback_arg	include/aura/timer.h	/^	void *callback_arg;$/;"	m	struct:aura_timer
+calldone_cb	src/lua/bindings.c	/^static void calldone_cb(struct aura_node *node, int status, struct aura_buffer *retbuf, void *arg)$/;"	f	file:
+calldonecb	include/aura/aura.h	/^	void	(*calldonecb)(struct aura_node *dev, int status, struct aura_buffer *ret, void *arg);$/;"	m	struct:aura_object
+calldonecb	src/tests/dummy/async-by-id.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+calldonecb	src/tests/dummy/async.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+calldonecb	src/tests/dummy/unhandled-evt.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+calldonecb	src/tests/uart/async-by-id.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+calldonecb	src/tests/uart/async.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+calldonecb	src/tests/uart/unhandled-evt.c	/^void calldonecb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+cat_vet	scripts/checkpatch.pl	/^sub cat_vet {$/;"	s
+cb	pw-ctl-init.lua	/^function cb(arg) $/;"	f
+cb	test.lua	/^function cb(arg) $/;"	f
+cb_call_done	src/transports/transport-susb.c	/^static void cb_call_done(struct libusb_transfer *transfer)$/;"	f	file:
+cb_call_write_done	src/transports/transport-usb.c	/^static void cb_call_write_done(struct libusb_transfer *transfer)$/;"	f	file:
+cb_event_readout_done	src/transports/transport-usb.c	/^static void cb_event_readout_done(struct libusb_transfer *transfer)$/;"	f	file:
+cb_got_dev_info	src/transports/transport-usb.c	/^static void cb_got_dev_info(struct libusb_transfer *transfer)$/;"	f	file:
+cb_interrupt	src/transports/transport-usb.c	/^static void cb_interrupt(struct libusb_transfer *transfer)$/;"	f	file:
+cb_parse_object	src/transports/transport-usb.c	/^static void cb_parse_object(struct libusb_transfer *transfer)$/;"	f	file:
+cbusy	src/transports/transport-susb.c	/^	bool				cbusy;$/;"	m	struct:usb_dev_info	file:
+cbusy	src/transports/transport-usb.c	/^	bool				cbusy;$/;"	m	struct:usb_dev_info	file:
+check_absolute_file	scripts/checkpatch.pl	/^sub check_absolute_file {$/;"	s
+check_control	src/transports/transport-susb.c	/^static int check_control(struct libusb_transfer *transfer)$/;"	f	file:
+check_control	src/transports/transport-usb.c	/^static int check_control(struct libusb_transfer *transfer)$/;"	f	file:
+check_exported	src/transports/transport-sysfs-gpio.c	/^static int check_exported(int gpio)$/;"	f	file:
+check_interrupt	src/transports/transport-usb.c	/^static int check_interrupt(struct libusb_transfer *transfer)$/;"	f	file:
+check_node_and_push	src/lua/bindings.c	/^static inline int check_node_and_push(lua_State *L, struct aura_node *node)$/;"	f	file:
+circ_buf	src/transports/transport-stlink.c	/^struct circ_buf {$/;"	s	file:
+class	lua/aura/class.lua	/^function class(base, init)$/;"	f
+cleanup_buffer_queue	src/core/aura.c	/^static void cleanup_buffer_queue(struct list_head *q, bool destroy)$/;"	f	file:
+clk_add_ms	src/eventloop/epoll.c	/^static struct timespec clk_add_ms(struct timespec src, int ms)$/;"	f	file:
+clk_get	src/eventloop/epoll.c	/^static struct timespec clk_get()$/;"	f	file:
+close	include/aura/aura.h	/^	void (*close)(struct aura_node *node);$/;"	m	struct:aura_transport
+closure	lua/aura/dumper.lua	/^local function closure(t) $/;"	f
+cmd	include/ion/ion.h	/^	unsigned int cmd;$/;"	m	struct:ion_custom_data
+cmpfct	lua/aura/dumper.lua	/^  local function cmpfct(a,b)$/;"	f
+cont	include/aura/packetizer.h	/^	uint8_t			cont;$/;"	m	struct:aura_packetizer
+cont	include/aura/packetizer.h	/^	uint8_t cont;$/;"	m	struct:aura_packet8
+container_of	include/aura/list.h	39;"	d
+control_retry_count	src/transports/transport-susb.c	/^	int				control_retry_count;$/;"	m	struct:usb_dev_info	file:
+control_retry_max	src/transports/transport-susb.c	/^	int				control_retry_max;$/;"	m	struct:usb_dev_info	file:
+copied	include/aura/packetizer.h	/^	int			copied;$/;"	m	struct:aura_packetizer
+copy 	lua/aura.lua	/^local function copy (t)$/;"	f
+copy_spacing	scripts/checkpatch.pl	/^sub copy_spacing {$/;"	s
+count	src/transports/transport-stlink.c	/^	uint32_t count;$/;"	m	struct:export_table	file:
+crc16	crc.c	/^uint16_t crc16(uint16_t crc, uint8_t const *buffer, size_t len)$/;"	f
+crc16_byte	crc.c	/^static inline uint16_t crc16_byte(uint16_t crc, const uint8_t data)$/;"	f	file:
+crc16_table	crc.c	/^uint16_t const crc16_table[256] = {$/;"	v
+crc32	src/transports/transport-serial.c	/^	uint32_t crc32;$/;"	m	struct:serpacket	file:
+crc8	crc.c	/^uint8_t crc8(uint8_t crc, uint8_t *data, size_t len)$/;"	f
+crc8	include/aura/packetizer.h	/^	uint8_t crc8;$/;"	m	struct:aura_packet8
+crc8_table	crc.c	/^static uint8_t crc8_table[] = {$/;"	v	file:
+create	include/aura/buffer_allocator.h	/^    void *(*create)(struct aura_node *node);$/;"	m	struct:aura_buffer_allocator
+create	include/aura/eventloop.h	/^        int  (*create)(struct aura_eventloop *loop);$/;"	m	struct:aura_eventloop_module
+ctl	src/tests/broken/susb-pw-ctl.c	/^void ctl(struct aura_node *node, int out, int reg, int state)$/;"	f
+ctransfer	src/transports/transport-susb.c	/^	struct libusb_transfer *	ctransfer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::libusb_transfer	file:
+ctransfer	src/transports/transport-usb.c	/^	struct libusb_transfer *	ctransfer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::libusb_transfer	file:
+ctrlbuf	src/transports/transport-usb.c	/^	unsigned char *			ctrlbuf;$/;"	m	struct:usb_dev_info	file:
+ctx	src/transports/transport-susb.c	/^	struct libusb_context *		ctx;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::libusb_context	file:
+ctx	src/transports/transport-usb.c	/^	struct libusb_context *		ctx;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::libusb_context	file:
+ctx_block	scripts/checkpatch.pl	/^sub ctx_block {$/;"	s
+ctx_block_get	scripts/checkpatch.pl	/^sub ctx_block_get {$/;"	s
+ctx_block_level	scripts/checkpatch.pl	/^sub ctx_block_level {$/;"	s
+ctx_block_outer	scripts/checkpatch.pl	/^sub ctx_block_outer {$/;"	s
+ctx_has_comment	scripts/checkpatch.pl	/^sub ctx_has_comment {$/;"	s
+ctx_locate_comment	scripts/checkpatch.pl	/^sub ctx_locate_comment {$/;"	s
+ctx_statement	scripts/checkpatch.pl	/^sub ctx_statement {$/;"	s
+ctx_statement_block	scripts/checkpatch.pl	/^sub ctx_statement_block {$/;"	s
+ctx_statement_full	scripts/checkpatch.pl	/^sub ctx_statement_full {$/;"	s
+ctx_statement_level	scripts/checkpatch.pl	/^sub ctx_statement_level {$/;"	s
+curbuf	include/aura/packetizer.h	/^	struct aura_buffer *	curbuf;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_buffer
+curmagic	src/transports/transport-serial.c	/^	uint16_t	curmagic;$/;"	m	struct:serialdata	file:
+curpacket	src/tests/broken/packetizer8-simple.c	/^static int curpacket;$/;"	v	file:
+current	test-firmwares/susb-test-fw/src/main.c	/^struct cRGB current[2] = { $/;"	v	typeref:struct:cRGB
+current_buffer	src/transports/transport-susb.c	/^	struct aura_buffer *		current_buffer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_buffer	file:
+current_buffer	src/transports/transport-usb.c	/^	struct aura_buffer *		current_buffer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_buffer	file:
+current_call	src/lua/bindings.c	/^	const char *		current_call;$/;"	m	struct:laura_node	file:
+current_device	include/aura/usb_helpers.h	/^	struct libusb_device *current_device;$/;"	m	struct:ncusb_devwatch_data	typeref:struct:ncusb_devwatch_data::libusb_device
+current_in	src/transports/transport-nmc.c	/^	struct aura_buffer *		current_in;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_buffer	file:
+current_loop_module	src/core/eventloop-factory.c	/^static struct aura_eventloop_module *current_loop_module;$/;"	v	typeref:struct:aura_eventloop_module	file:
+current_object	include/aura/aura.h	/^	const struct aura_object *	current_object;$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_object
+current_object	src/transports/transport-susb.c	/^	int				current_object;$/;"	m	struct:usb_dev_info	file:
+current_object	src/transports/transport-usb.c	/^	int				current_object;$/;"	m	struct:usb_dev_info	file:
+current_out	src/transports/transport-nmc.c	/^	struct aura_buffer *		current_out;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_buffer	file:
+current_time	benchmarks/dummy-benchmark.c	/^long current_time(void)$/;"	f
+data	include/aura/aura.h	/^	char *			data;$/;"	m	struct:aura_buffer
+data	include/aura/packetizer.h	/^	char data[];$/;"	m	struct:aura_packet8
+data	src/transports/transport-serial.c	/^	char data[];$/;"	m	struct:serpacket	file:
+data	src/transports/transport-serial.c	/^	} data;$/;"	m	struct:serpacket_data	typeref:union:serpacket_data::__anon1	file:
+data	src/transports/transport-usb.c	/^	char		data[];$/;"	m	struct:usb_event_packet	file:
+data_ptr	src/transports/transport-stlink.c	/^	uint32_t data_ptr;$/;"	m	struct:circ_buf	file:
+datalen	include/aura/packetizer.h	/^	uint8_t datalen;$/;"	m	struct:aura_packet8
+datalen	src/transports/transport-serial.c	/^	uint16_t datalen;$/;"	m	struct:serpacket	file:
+day	include/aura/slog.h	/^    int day;$/;"	m	struct:__anon4
+deferred_inbound	include/aura/eventloop.h	/^        int deferred_inbound;$/;"	m	struct:aura_eventloop
+deparenthesize	scripts/checkpatch.pl	/^sub deparenthesize {$/;"	s
+destroy	include/aura/buffer_allocator.h	/^    void (*destroy)(struct aura_node *node, void *data);$/;"	m	struct:aura_buffer_allocator
+destroy	include/aura/eventloop.h	/^        void (*destroy)(struct aura_eventloop *loop);$/;"	m	struct:aura_eventloop_module
+dev_descr	src/transports/transport-susb.c	/^	struct ncusb_devwatch_data	dev_descr;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::ncusb_devwatch_data	file:
+dev_descr	src/transports/transport-usb.c	/^	struct ncusb_devwatch_data	dev_descr;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::ncusb_devwatch_data	file:
+device_found_func	include/aura/usb_helpers.h	/^	void (*device_found_func)(struct libusb_device_handle *, void *arg);$/;"	m	struct:ncusb_devwatch_data
+device_left_func	include/aura/usb_helpers.h	/^	void (*device_left_func)(void *arg);$/;"	m	struct:ncusb_devwatch_data
+device_state	src/transports/transport-susb.c	/^enum device_state {$/;"	g	file:
+device_state	src/transports/transport-usb.c	/^enum device_state {$/;"	g	file:
+dispatch	include/aura/eventloop.h	/^        void (*dispatch)(struct aura_eventloop *loop, int flags);$/;"	m	struct:aura_eventloop_module
+dispatch_cb_fn	src/eventloop/libevent.c	/^static void dispatch_cb_fn(evutil_socket_t fd, short evt, void *arg)$/;"	f	file:
+displayDocs	doc-index/index.html	/^        function displayDocs() {$/;"	f
+dmut	src/transports/transport-stlink.c	/^	pthread_mutex_t dmut;$/;"	m	struct:stlink_transport_data	file:
+do_issue_next_call	src/transports/transport-nmc.c	/^static inline void do_issue_next_call(struct aura_node *node)$/;"	f	file:
+do_load	lua/aura/conf-loader.lua	/^function do_load()$/;"	f
+do_test_once	src/tests/xusb/susb-reconnect-persist.c	/^int do_test_once(struct aura_node *n)$/;"	f
+do_test_once	src/tests/xusb/usb-reconnect-persist.c	/^int do_test_once(struct aura_node *n)$/;"	f
+dummy	src/transports/transport-dummy.c	/^AURA_TRANSPORT(dummy);$/;"	v
+dummy	src/transports/transport-dummy.c	/^static struct aura_transport dummy = {$/;"	v	typeref:struct:aura_transport	file:
+dummy.ping 	test.lua	/^dummy.ping = function(self, farg)$/;"	f
+dummy_buffer_get	src/transports/transport-bench.c	/^static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)$/;"	f	file:
+dummy_buffer_get	src/transports/transport-dummy.c	/^static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)$/;"	f	file:
+dummy_buffer_get	src/transports/transport-null.c	/^static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)$/;"	f	file:
+dummy_buffer_put	src/transports/transport-bench.c	/^static void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f	file:
+dummy_buffer_put	src/transports/transport-dummy.c	/^static void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f	file:
+dummy_buffer_put	src/transports/transport-null.c	/^static void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f	file:
+dummy_close	src/transports/transport-bench.c	/^static void dummy_close(struct aura_node *node)$/;"	f	file:
+dummy_close	src/transports/transport-dummy.c	/^static void dummy_close(struct aura_node *node)$/;"	f	file:
+dummy_close	src/transports/transport-null.c	/^static void dummy_close(struct aura_node *node)$/;"	f	file:
+dummy_handle_event	src/transports/transport-bench.c	/^static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+dummy_handle_event	src/transports/transport-dummy.c	/^static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+dummy_handle_event	src/transports/transport-null.c	/^static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+dummy_open	src/transports/transport-bench.c	/^static int dummy_open(struct aura_node *node, const char *opts)$/;"	f	file:
+dummy_open	src/transports/transport-dummy.c	/^static int dummy_open(struct aura_node *node, const char *opts)$/;"	f	file:
+dummy_open	src/transports/transport-null.c	/^static int dummy_open(struct aura_node *node, const char *opts)$/;"	f	file:
+dummy_populate_etable	src/transports/transport-bench.c	/^static void dummy_populate_etable(struct aura_node *node)$/;"	f	file:
+dummy_populate_etable	src/transports/transport-dummy.c	/^static void dummy_populate_etable(struct aura_node *node)$/;"	f	file:
+dummy_populate_etable	src/transports/transport-null.c	/^static void dummy_populate_etable(struct aura_node *node)$/;"	f	file:
+dump	lua/aura/dumper.lua	/^function dump(...)$/;"	f
+dumplua	lua/aura/dumper.lua	/^  function dumplua(value, ident, path)$/;"	f
+eaddr	src/transports/transport-nmc.c	/^	uint32_t			eaddr;$/;"	m	struct:nmc_private	file:
+endian	include/aura/packetizer.h	/^	int			endian;$/;"	m	struct:aura_packetizer
+entry	include/aura/timer.h	/^	struct list_head entry; \/* For node linked list *\/$/;"	m	struct:aura_timer	typeref:struct:aura_timer::list_head
+ep	src/transports/transport-nmc.c	/^	uint32_t			ep;$/;"	m	struct:nmc_private	file:
+epollfd	src/eventloop/epoll.c	/^	int			epollfd;$/;"	m	struct:aura_epoll_loop	file:
+esz	src/transports/transport-nmc.c	/^	uint32_t			esz;$/;"	m	struct:nmc_private	file:
+etable_changed_arg	include/aura/aura.h	/^	void *				etable_changed_arg;$/;"	m	struct:aura_node
+etable_changed_cb	include/aura/aura.h	/^	void				(*etable_changed_cb)(struct aura_node *node, struct aura_export_table *old, struct aura_export_table *newtbl, void *arg);$/;"	m	struct:aura_node
+etable_migrate	src/core/export.c	/^static void etable_migrate(struct aura_export_table *old, struct aura_export_table *new)$/;"	f	file:
+etbl	src/transports/transport-nmc.c	/^	struct aura_export_table *	etbl;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_export_table	file:
+etbl	src/transports/transport-stlink.c	/^	struct aura_export_table *etbl;$/;"	m	struct:stlink_transport_data	typeref:struct:stlink_transport_data::aura_export_table	file:
+etbl	src/transports/transport-susb.c	/^	struct aura_export_table *	etbl;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_export_table	file:
+etbl	src/transports/transport-usb.c	/^	struct aura_export_table *	etbl;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_export_table	file:
+event_buffers	include/aura/aura.h	/^	struct list_head		event_buffers;$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+event_cb	src/lua/bindings.c	/^static void event_cb(struct aura_node *node, struct aura_buffer *buf, void *arg)$/;"	f	file:
+eventloop_data	include/aura/aura.h	/^	void *				eventloop_data; \/* eventloop module private data *\/$/;"	m	struct:aura_node
+eventloop_fd_changed_cb	src/core/eventloop.c	/^static void eventloop_fd_changed_cb(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg)$/;"	f	file:
+eventloop_node_list	include/aura/aura.h	/^	struct list_head		eventloop_node_list;$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+events	include/aura/aura.h	/^	uint32_t		events;$/;"	m	struct:aura_pollfds
+events	src/transports/transport-nmc.c	/^	uint32_t events[];$/;"	m	struct:nmc_aura_eventbuf	file:
+eventsysdata	include/aura/aura.h	/^	void *			eventsysdata; \/* Private eventsystem data *\/$/;"	m	struct:aura_pollfds
+eventsysdata	include/aura/eventloop.h	/^        void *eventsysdata;$/;"	m	struct:aura_eventloop
+evt	src/eventloop/libevent.c	/^	struct event		evt;$/;"	m	struct:aura_libevent_timer	typeref:struct:aura_libevent_timer::event	file:
+evtfd	src/eventloop/epoll.c	/^	struct aura_pollfds	evtfd;$/;"	m	struct:aura_epoll_loop	typeref:struct:aura_epoll_loop::aura_pollfds	file:
+evtloop_is_autocreated	include/aura/aura.h	/^	int				evtloop_is_autocreated;$/;"	m	struct:aura_node
+exit_after_ms	src/eventloop/epoll.c	/^	int			exit_after_ms;$/;"	m	struct:aura_epoll_loop	file:
+exitcode	src/tests/dummy/timer-basic.c	/^static int exitcode = -1;$/;"	v	file:
+exitcode	src/tests/uart/timer-basic.c	/^static int exitcode = -1;$/;"	v	file:
+expand_tabs	scripts/checkpatch.pl	/^sub expand_tabs {$/;"	s
+expect_cont	include/aura/packetizer.h	/^	uint8_t			expect_cont;$/;"	m	struct:aura_packetizer
+expected	src/tests/broken/packetizer8-simple.c	/^int expected[] =$/;"	v
+export_header	src/transports/transport-stlink.c	/^struct export_header {$/;"	s	file:
+export_object	src/transports/transport-stlink.c	/^struct export_object {$/;"	s	file:
+export_table	src/transports/transport-stlink.c	/^struct export_table {$/;"	s	file:
+export_tbl_addr	src/transports/transport-stlink.c	/^	uint32_t export_tbl_addr; \/* Pointer to flash *\/$/;"	m	struct:export_header	file:
+failing	src/transports/transport-usb.c	92;"	d	file:
+fcts.table 	lua/aura/dumper.lua	/^    fcts.table = function (value)$/;"	f
+fcts.table 	lua/aura/dumper.lua	/^    fcts.table = function (value, ident, path)$/;"	f
+fcts['function'] 	lua/aura/dumper.lua	/^    fcts['function'] = function (value, ident, path)$/;"	f
+fd	include/aura/aura.h	/^	int			fd;$/;"	m	struct:aura_pollfds
+fd	include/ion/ion.h	/^	int fd;$/;"	m	struct:ion_fd_data
+fd	src/eventloop/epoll.c	/^	int			fd;$/;"	m	struct:aura_timerfd_timer	file:
+fd	src/transports/transport-serial.c	/^	int		fd;$/;"	m	struct:serialdata	file:
+fd	src/transports/transport-stlink.c	/^	int fd[2];$/;"	m	struct:stlink_transport_data	file:
+fd_action	include/aura/eventloop.h	/^        void (*fd_action)(struct aura_eventloop *loop,$/;"	m	struct:aura_eventloop_module
+fd_changed_arg	include/aura/aura.h	/^	void *				fd_changed_arg;$/;"	m	struct:aura_node
+fd_changed_cb	include/aura/aura.h	/^	void				(*fd_changed_cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg);$/;"	m	struct:aura_node
+fds	include/aura/aura.h	/^	struct aura_pollfds *		fds;            \/* descriptor and event array *\/$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_pollfds
+features	build/CMakeFiles/feature_tests.c	/^  const char features[] = {"\\n"$/;"	v
+features	build/CMakeFiles/feature_tests.cxx	/^  const char features[] = {"\\n"$/;"	v
+fetch	doc-index/index.html	/^        function fetch(url) {$/;"	f
+fetch_buffer_from_pool	src/core/buffer.c	/^static struct aura_buffer *fetch_buffer_from_pool(struct aura_node *	nd,$/;"	f	file:
+fetch_stdout	src/transports/transport-nmc.c	/^static void fetch_stdout(struct aura_node *node)$/;"	f	file:
+file_get	src/transports/transport-sysfs-gpio.c	/^static int file_get(const char *path, char *dbuf, int dlen)$/;"	f	file:
+file_put	src/transports/transport-sysfs-gpio.c	/^static int file_put(const char *path, const char *dbuf)$/;"	f	file:
+first	include/aura/list.h	/^	struct hlist_node *first;$/;"	m	struct:hlist_head	typeref:struct:hlist_head::hlist_node
+fix_delete_line	scripts/checkpatch.pl	/^sub fix_delete_line {$/;"	s
+fix_insert_line	scripts/checkpatch.pl	/^sub fix_insert_line {$/;"	s
+fix_inserted_deleted_lines	scripts/checkpatch.pl	/^sub fix_inserted_deleted_lines {$/;"	s
+fixup_current_range	scripts/checkpatch.pl	/^sub fixup_current_range {$/;"	s
+flags	include/aura/aura.h	/^	uint32_t	flags;$/;"	m	struct:aura_transport
+flags	include/aura/timer.h	/^	int flags;$/;"	m	struct:aura_timer
+flags	include/ion/ion.h	/^	unsigned int flags;$/;"	m	struct:ion_allocation_data
+flags	src/transports/transport-nmc.c	/^	uint32_t			flags;$/;"	m	struct:nmc_private	file:
+flags	src/transports/transport-susb.c	/^	uint8_t				flags;$/;"	m	struct:usb_dev_info	file:
+flags	src/transports/transport-usb.c	/^	uint8_t				flags;$/;"	m	struct:usb_dev_info	file:
+flags	src/transports/transport-usb.c	/^	uint8_t		flags;$/;"	m	struct:usb_info_packet	file:
+flags	test-firmwares/usb-test-dummy-fw/src/main.c	/^	uint8_t  flags;$/;"	m	struct:usb_info_packet	file:
+flags	test-firmwares/usb-test-fw/src/main.c	/^	uint8_t  flags;$/;"	m	struct:usb_info_packet	file:
+fname	include/aura/slog.h	/^    const char* fname;$/;"	m	struct:__anon5
+format_email	scripts/checkpatch.pl	/^sub format_email {$/;"	s
+format_matches	src/core/export.c	107;"	d	file:
+g_aura_ion_buffer_allocator	src/allocators/ion_buffer_allocator.c	/^struct aura_buffer_allocator g_aura_ion_buffer_allocator = {$/;"	v	typeref:struct:aura_buffer_allocator
+gc_threshold	include/aura/aura.h	/^	int				gc_threshold;$/;"	m	struct:aura_node
+get_quoted_string	scripts/checkpatch.pl	/^sub get_quoted_string {$/;"	s
+get_system_date	src/core/slog.c	/^void get_system_date(SystemDate *mdate)$/;"	f
+git_commit_info	scripts/checkpatch.pl	/^sub git_commit_info {$/;"	s
+gpin	pw-ctl-serv.lua	/^function gpin(g, pullup)$/;"	f
+gpio	src/transports/transport-sysfs-gpio.c	/^AURA_TRANSPORT(gpio);$/;"	v
+gpio	src/transports/transport-sysfs-gpio.c	/^static struct aura_transport gpio = {$/;"	v	typeref:struct:aura_transport	file:
+gpio_close	src/transports/transport-sysfs-gpio.c	/^static void gpio_close(struct aura_node *node)$/;"	f	file:
+gpio_export	src/transports/transport-sysfs-gpio.c	/^static int gpio_export(int gpio)$/;"	f	file:
+gpio_handle_event	src/transports/transport-sysfs-gpio.c	/^static void gpio_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+gpio_in	src/transports/transport-sysfs-gpio.c	/^static int gpio_in(int gpio)$/;"	f	file:
+gpio_open	src/transports/transport-sysfs-gpio.c	/^static int gpio_open(struct aura_node *node, const char *opts)$/;"	f	file:
+gpio_out	src/transports/transport-sysfs-gpio.c	/^static int gpio_out(int gpio)$/;"	f	file:
+gpio_read	src/transports/transport-sysfs-gpio.c	/^static int gpio_read(int gpio, int *value)$/;"	f	file:
+gpio_write	src/transports/transport-sysfs-gpio.c	/^static int gpio_write(int gpio, int value)$/;"	f	file:
+gpout	pw-ctl-serv.lua	/^function gpout(g,v)$/;"	f
+gpout_one	pw-ctl-init.lua	/^function gpout_one(g)$/;"	f
+h	src/transports/transport-nmc.c	/^	struct easynmc_handle *		h;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::easynmc_handle	file:
+h2s	src/transports/transport-stlink.c	/^	struct circ_buf h2s;$/;"	m	struct:export_header	typeref:struct:export_header::circ_buf	file:
+handle	include/ion/ion.h	/^	ion_user_handle_t handle;$/;"	m	struct:ion_allocation_data
+handle	include/ion/ion.h	/^	ion_user_handle_t handle;$/;"	m	struct:ion_fd_data
+handle	include/ion/ion.h	/^	ion_user_handle_t handle;$/;"	m	struct:ion_handle_data
+handle	src/transports/transport-susb.c	/^	libusb_device_handle *		handle;$/;"	m	struct:usb_dev_info	file:
+handle	src/transports/transport-usb.c	/^	libusb_device_handle *		handle;$/;"	m	struct:usb_dev_info	file:
+handle_aura_rpc_section	src/transports/transport-nmc.c	/^static int handle_aura_rpc_section(struct easynmc_handle *h, char *name, FILE *rfd, GElf_Shdr shdr)$/;"	f	file:
+handle_event	include/aura/aura.h	/^	void (*handle_event)(struct aura_node *node, enum node_event, const struct aura_pollfds *fd);$/;"	m	struct:aura_transport
+handle_outbound	src/transports/transport-sysfs-gpio.c	/^static void handle_outbound(struct aura_node *node, struct aura_object *o, struct aura_buffer *buf)$/;"	f	file:
+handler	src/core/panic.c	/^static void handler(int sig, siginfo_t *si, void *unused)$/;"	f	file:
+hash_save_array_words	scripts/checkpatch.pl	/^sub hash_save_array_words {$/;"	s
+hash_show_words	scripts/checkpatch.pl	/^sub hash_show_words {$/;"	s
+hdr	src/transports/transport-nmc.c	/^	struct nmc_aura_header	hdr;$/;"	m	struct:nmc_export_table	typeref:struct:nmc_export_table::nmc_aura_header	file:
+head	src/transports/transport-stlink.c	/^	uint32_t head;$/;"	m	struct:circ_buf	file:
+headerbuf	include/aura/packetizer.h	/^	struct aura_packet8	headerbuf; \/* FixMe: ... *\/$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_packet8
+heap_id_mask	include/ion/ion.h	/^	unsigned int heap_id_mask;$/;"	m	struct:ion_allocation_data
+help	scripts/checkpatch.pl	/^sub help {$/;"	s
+hlist_add_after	include/aura/list.h	/^static inline void hlist_add_after(struct hlist_node *n,$/;"	f
+hlist_add_before	include/aura/list.h	/^static inline void hlist_add_before(struct hlist_node *n,$/;"	f
+hlist_add_head	include/aura/list.h	/^static inline void hlist_add_head(struct hlist_node *n, struct hlist_head *h)$/;"	f
+hlist_del	include/aura/list.h	/^static inline void hlist_del(struct hlist_node *n)$/;"	f
+hlist_del_init	include/aura/list.h	/^static inline void hlist_del_init(struct hlist_node *n)$/;"	f
+hlist_empty	include/aura/list.h	/^static inline int hlist_empty(const struct hlist_head *h)$/;"	f
+hlist_entry	include/aura/list.h	458;"	d
+hlist_for_each	include/aura/list.h	460;"	d
+hlist_for_each_entry	include/aura/list.h	475;"	d
+hlist_for_each_entry_continue	include/aura/list.h	487;"	d
+hlist_for_each_entry_from	include/aura/list.h	499;"	d
+hlist_for_each_entry_safe	include/aura/list.h	512;"	d
+hlist_for_each_safe	include/aura/list.h	464;"	d
+hlist_head	include/aura/list.h	/^struct hlist_head {$/;"	s
+hlist_node	include/aura/list.h	/^struct hlist_node {$/;"	s
+hlist_unhashed	include/aura/list.h	/^static inline int hlist_unhashed(const struct hlist_node *h)$/;"	f
+hndl	include/aura/ion_buffer_allocator.h	/^	ion_user_handle_t	hndl;$/;"	m	struct:aura_ion_buffer_descriptor
+hotplug_callback_fn	src/transports/usb-helpers.c	/^static int hotplug_callback_fn(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event, void *user_data)$/;"	f	file:
+hotplug_timer_fn	src/transports/usb-helpers.c	/^static void hotplug_timer_fn(struct aura_node *node, struct aura_timer *tm, void *arg)$/;"	f	file:
+hour	include/aura/slog.h	/^    int hour;$/;"	m	struct:__anon4
+ibuffer	src/transports/transport-usb.c	/^	unsigned char			ibuffer[8]; \/* static interrupt buffer *\/$/;"	m	struct:usb_dev_info	file:
+ibusy	src/transports/transport-usb.c	/^	bool				ibusy;$/;"	m	struct:usb_dev_info	file:
+id	include/aura/aura.h	/^	int	id;$/;"	m	struct:aura_object
+id	src/transports/transport-nmc.c	/^	uint32_t	id;$/;"	m	struct:nmc_aura_object	file:
+id	src/transports/transport-nmc.c	/^	uint32_t	id;$/;"	m	struct:nmc_aura_syncbuffer	file:
+id	src/transports/transport-usb.c	/^	uint16_t	id;$/;"	m	struct:usb_event_packet	file:
+if not init and type(base) 	lua/aura/class.lua	/^   if not init and type(base) == 'function' then$/;"	f
+if type(v) 	lua/aura/dumper.lua	/^    if type(v) == 'function' and not pcall(string.dump, v) then$/;"	f
+inbound_buffer_ptr	src/transports/transport-nmc.c	/^	uint32_t	inbound_buffer_ptr;$/;"	m	struct:nmc_aura_syncbuffer	file:
+inbound_buffers	include/aura/aura.h	/^	struct list_head		inbound_buffers;$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+inbound_event_arg_ref	src/lua/bindings.c	/^	int			inbound_event_arg_ref;$/;"	m	struct:laura_node	file:
+inbound_event_ref	src/lua/bindings.c	/^	int			inbound_event_ref;$/;"	m	struct:laura_node	file:
+inbufsize	src/transports/transport-nmc.c	/^	int				inbufsize;$/;"	m	struct:nmc_private	file:
+index	include/aura/etable.h	/^	struct hsearch_data	index;$/;"	m	struct:aura_export_table	typeref:struct:aura_export_table::hsearch_data
+info_arch	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";$/;"	v
+info_arch	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";$/;"	v
+info_compiler	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";$/;"	v
+info_compiler	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";$/;"	v
+info_cray	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";$/;"	v
+info_cray	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";$/;"	v
+info_language_dialect_default	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^const char* info_language_dialect_default = "INFO" ":" "dialect_default["$/;"	v
+info_language_dialect_default	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^const char* info_language_dialect_default = "INFO" ":" "dialect_default["$/;"	v
+info_platform	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";$/;"	v
+info_platform	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";$/;"	v
+info_simulate	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";$/;"	v
+info_simulate	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";$/;"	v
+info_simulate_version	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const info_simulate_version[] = {$/;"	v
+info_simulate_version	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const info_simulate_version[] = {$/;"	v
+info_version	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const info_version[] = {$/;"	v
+info_version	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const info_version[] = {$/;"	v
+init	pw-ctl-serv.lua	/^function init()$/;"	f
+initDocs	doc-index/index.html	/^        function initDocs() {$/;"	f
+init_factory	src/core/eventloop-factory.c	/^static void __attribute__((constructor (102))) init_factory() {$/;"	f	file:
+invdatalen	include/aura/packetizer.h	/^	uint8_t invdatalen;$/;"	m	struct:aura_packet8
+invdatalen	src/transports/transport-serial.c	/^	uint16_t invdatalen;$/;"	m	struct:serpacket	file:
+io_buf_size	src/transports/transport-susb.c	/^	uint16_t			io_buf_size;$/;"	m	struct:usb_dev_info	file:
+io_buf_size	src/transports/transport-usb.c	/^	uint16_t			io_buf_size;$/;"	m	struct:usb_dev_info	file:
+io_buf_size	src/transports/transport-usb.c	/^	uint16_t	io_buf_size;$/;"	m	struct:usb_info_packet	file:
+io_buf_size	test-firmwares/usb-test-dummy-fw/src/main.c	/^	uint16_t io_buf_size;$/;"	m	struct:usb_info_packet	file:
+io_buf_size	test-firmwares/usb-test-fw/src/main.c	/^	uint16_t io_buf_size;$/;"	m	struct:usb_info_packet	file:
+iobuf	test-firmwares/susb-test-fw/src/main.c	/^unsigned char iobuf[16];$/;"	v
+iobuf	test-firmwares/usb-test-dummy-fw/src/main.c	/^unsigned char iobuf[512];$/;"	v
+iobuf	test-firmwares/usb-test-fw/src/main.c	/^unsigned char iobuf[512];$/;"	v
+ion_alloc	src/allocators/ion.c	/^int ion_alloc(int fd, size_t len, size_t align, unsigned int heap_mask,$/;"	f
+ion_alloc_fd	src/allocators/ion.c	/^int ion_alloc_fd(int fd, size_t len, size_t align, unsigned int heap_mask,$/;"	f
+ion_allocation_data	include/ion/ion.h	/^struct ion_allocation_data {$/;"	s
+ion_buffer_alloc_create	src/allocators/ion_buffer_allocator.c	/^static void *ion_buffer_alloc_create(struct aura_node *node)$/;"	f	file:
+ion_buffer_alloc_destroy	src/allocators/ion_buffer_allocator.c	/^static void ion_buffer_alloc_destroy(struct aura_node *node, void *data)$/;"	f	file:
+ion_buffer_release	src/allocators/ion_buffer_allocator.c	/^static void ion_buffer_release(struct aura_node *node, void *data, struct aura_buffer *buf)$/;"	f	file:
+ion_buffer_request	src/allocators/ion_buffer_allocator.c	/^static struct aura_buffer *ion_buffer_request(struct aura_node *node, void *data, int size)$/;"	f	file:
+ion_close	src/allocators/ion.c	/^int ion_close(int fd)$/;"	f
+ion_custom_data	include/ion/ion.h	/^struct ion_custom_data {$/;"	s
+ion_fd	include/aura/ion_buffer_allocator.h	/^	int ion_fd;$/;"	m	struct:aura_ion_allocator_data
+ion_fd_data	include/ion/ion.h	/^struct ion_fd_data {$/;"	s
+ion_free	src/allocators/ion.c	/^int ion_free(int fd, ion_user_handle_t handle)$/;"	f
+ion_handle_data	include/ion/ion.h	/^struct ion_handle_data {$/;"	s
+ion_heap_type	include/ion/ion.h	/^enum ion_heap_type {$/;"	g
+ion_import	src/allocators/ion.c	/^int ion_import(int fd, int share_fd, ion_user_handle_t *handle)$/;"	f
+ion_ioctl	src/allocators/ion.c	/^int ion_ioctl(int fd, int req, void *arg)$/;"	f
+ion_map	src/allocators/ion.c	/^int ion_map(int fd, ion_user_handle_t handle, size_t length, int prot,$/;"	f
+ion_open	src/allocators/ion.c	/^int ion_open()$/;"	f
+ion_share	src/allocators/ion.c	/^int ion_share(int fd, ion_user_handle_t handle, int *share_fd)$/;"	f
+ion_sync_fd	src/allocators/ion.c	/^int ion_sync_fd(int fd, int handle_fd)$/;"	f
+ion_user_handle_t	include/ion/ion.h	/^typedef int ion_user_handle_t;$/;"	t
+iothread	src/transports/transport-stlink.c	/^	pthread_t iothread;$/;"	m	struct:stlink_transport_data	file:
+is_active	include/aura/timer.h	/^	bool is_active;$/;"	m	struct:aura_timer
+is_online	src/transports/transport-nmc.c	/^	int				is_online;$/;"	m	struct:nmc_private	file:
+is_opening	include/aura/aura.h	/^	bool				is_opening;$/;"	m	struct:aura_node
+itransfer	src/transports/transport-usb.c	/^	struct libusb_transfer *	itransfer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::libusb_transfer	file:
+itransfer_enable	src/transports/transport-usb.c	/^static void itransfer_enable(struct aura_node *node, bool enable)$/;"	f	file:
+itransfer_enabled	src/transports/transport-usb.c	/^	bool				itransfer_enabled;$/;"	m	struct:usb_dev_info	file:
+keep_running	include/aura/eventloop.h	/^        int keep_running;$/;"	m	struct:aura_eventloop
+keys	lua/aura/dumper.lua	/^local function keys(t)$/;"	f
+l_close_node	src/lua/bindings.c	/^static int l_close_node(lua_State *L)$/;"	f	file:
+l_etable_activate	src/lua/bindings.c	/^static int l_etable_activate(lua_State *L)$/;"	f	file:
+l_etable_add	src/lua/bindings.c	/^static int l_etable_add(lua_State *L)$/;"	f	file:
+l_etable_create	src/lua/bindings.c	/^static int l_etable_create(lua_State *L)$/;"	f	file:
+l_etable_get	src/lua/bindings.c	/^static int l_etable_get(lua_State *L)$/;"	f	file:
+l_eventloop_add	src/lua/bindings.c	/^static int l_eventloop_add(lua_State *L)$/;"	f	file:
+l_eventloop_create	src/lua/bindings.c	/^static int l_eventloop_create(lua_State *L)$/;"	f	file:
+l_eventloop_del	src/lua/bindings.c	/^static int l_eventloop_del(lua_State *L)$/;"	f	file:
+l_eventloop_destroy	src/lua/bindings.c	/^static int l_eventloop_destroy(lua_State *L)$/;"	f	file:
+l_eventloop_dispatch	src/lua/bindings.c	/^static int l_eventloop_dispatch(lua_State *L)$/;"	f	file:
+l_eventloop_loopexit	src/lua/bindings.c	/^static int l_eventloop_loopexit(lua_State *L)$/;"	f	file:
+l_loop_gc	src/lua/bindings.c	/^static int l_loop_gc(lua_State *L)$/;"	f	file:
+l_node_gc	src/lua/bindings.c	/^static int l_node_gc(lua_State *L)$/;"	f	file:
+l_node_index	src/lua/bindings.c	/^static int l_node_index(lua_State *L)$/;"	f	file:
+l_open_node	src/lua/bindings.c	/^static int l_open_node(lua_State *L)$/;"	f	file:
+l_set_node_container	src/lua/bindings.c	/^static int l_set_node_container(lua_State *L)$/;"	f	file:
+l_set_status_change_cb	src/lua/bindings.c	/^static int l_set_status_change_cb(lua_State *L)$/;"	f	file:
+l_slog_init	src/lua/bindings.c	/^static int l_slog_init(lua_State *L)$/;"	f	file:
+l_status	src/lua/bindings.c	/^static int l_status(lua_State *L)$/;"	f	file:
+l_wait_status	src/lua/bindings.c	/^static int l_wait_status(lua_State *L)$/;"	f	file:
+lastping	src/transports/transport-serial.c	/^	uint64_t	lastping;$/;"	m	struct:serialdata	file:
+laura_do_async_call	src/lua/bindings.c	/^static int laura_do_async_call(lua_State *L)$/;"	f	file:
+laura_do_sync_call	src/lua/bindings.c	/^static int laura_do_sync_call(lua_State *L)$/;"	f	file:
+laura_eventloop	src/lua/bindings.c	/^struct laura_eventloop {$/;"	s	file:
+laura_eventloop_type	src/lua/bindings.c	28;"	d	file:
+laura_node	src/lua/bindings.c	/^struct laura_node {$/;"	s	file:
+laura_node_type	src/lua/bindings.c	29;"	d	file:
+len	include/ion/ion.h	/^	size_t len;$/;"	m	struct:ion_allocation_data
+lepoll	src/eventloop/epoll.c	/^AURA_EVENTLOOP_MODULE(lepoll);$/;"	v
+lepoll	src/eventloop/epoll.c	/^static struct aura_eventloop_module lepoll =$/;"	v	typeref:struct:aura_eventloop_module	file:
+lepoll_create	src/eventloop/epoll.c	/^static int lepoll_create(struct aura_eventloop *loop)$/;"	f	file:
+lepoll_destroy	src/eventloop/epoll.c	/^void lepoll_destroy(struct aura_eventloop *loop)$/;"	f
+lepoll_dispatch	src/eventloop/epoll.c	/^static void lepoll_dispatch(struct aura_eventloop *loop, int flags)$/;"	f	file:
+lepoll_fd_action	src/eventloop/epoll.c	/^static void lepoll_fd_action($/;"	f	file:
+lepoll_loopbreak	src/eventloop/epoll.c	/^static void lepoll_loopbreak(struct aura_eventloop *loop, struct timeval *tv)$/;"	f	file:
+lepoll_node_added	src/eventloop/epoll.c	/^static void lepoll_node_added(struct aura_eventloop *loop, struct aura_node *node)$/;"	f	file:
+lepoll_node_removed	src/eventloop/epoll.c	/^static void lepoll_node_removed(struct aura_eventloop *loop, struct aura_node *node)$/;"	f	file:
+level	include/aura/slog.h	/^    int level;$/;"	m	struct:__anon5
+levt	src/eventloop/libevent.c	/^AURA_EVENTLOOP_MODULE(levt);$/;"	v
+levt	src/eventloop/libevent.c	/^static struct aura_eventloop_module levt =$/;"	v	typeref:struct:aura_eventloop_module	file:
+libevent_create	src/eventloop/libevent.c	/^static int libevent_create(struct aura_eventloop *loop)$/;"	f	file:
+libevent_destroy	src/eventloop/libevent.c	/^void libevent_destroy(struct aura_eventloop *loop)$/;"	f
+libevent_dispatch	src/eventloop/libevent.c	/^static void libevent_dispatch(struct aura_eventloop *loop, int flags)$/;"	f	file:
+libevent_fd_action	src/eventloop/libevent.c	/^static void libevent_fd_action($/;"	f	file:
+libevent_loopbreak	src/eventloop/libevent.c	/^static void libevent_loopbreak(struct aura_eventloop *loop, struct timeval *tv)$/;"	f	file:
+libevent_node_added	src/eventloop/libevent.c	/^static void libevent_node_added(struct aura_eventloop *loop, struct aura_node *node)$/;"	f	file:
+libevent_node_removed	src/eventloop/libevent.c	/^static void libevent_node_removed(struct aura_eventloop *loop, struct aura_node *node)$/;"	f	file:
+libevent_timer_create	src/eventloop/libevent.c	/^static void libevent_timer_create(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+libevent_timer_destroy	src/eventloop/libevent.c	/^static void libevent_timer_destroy(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+libevent_timer_start	src/eventloop/libevent.c	/^static void libevent_timer_start(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+libevent_timer_stop	src/eventloop/libevent.c	/^static void libevent_timer_stop(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+libfuncs	src/lua/bindings.c	/^static const luaL_Reg libfuncs[] = {$/;"	v	file:
+line_stats	scripts/checkpatch.pl	/^sub line_stats {$/;"	s
+linkage	include/aura/eventloop.h	/^        struct list_head linkage;$/;"	m	struct:aura_eventloop_module	typeref:struct:aura_eventloop_module::list_head
+list_add	include/aura/list.h	/^static inline void list_add(struct list_head *neu, struct list_head *head)$/;"	f
+list_add_tail	include/aura/list.h	/^static inline void list_add_tail(struct list_head *neu, struct list_head *head)$/;"	f
+list_del	include/aura/list.h	/^static inline void list_del(struct list_head *entry)$/;"	f
+list_del_init	include/aura/list.h	/^static inline void list_del_init(struct list_head *entry)$/;"	f
+list_empty	include/aura/list.h	/^static inline int list_empty(const struct list_head *head)$/;"	f
+list_entry	include/aura/list.h	235;"	d
+list_for_each	include/aura/list.h	244;"	d
+list_for_each_entry	include/aura/list.h	286;"	d
+list_for_each_entry_continue	include/aura/list.h	319;"	d
+list_for_each_entry_reverse	include/aura/list.h	297;"	d
+list_for_each_entry_safe	include/aura/list.h	331;"	d
+list_for_each_entry_safe_continue	include/aura/list.h	345;"	d
+list_for_each_entry_safe_reverse	include/aura/list.h	359;"	d
+list_for_each_prev	include/aura/list.h	266;"	d
+list_for_each_safe	include/aura/list.h	276;"	d
+list_head	include/aura/list.h	/^struct list_head {$/;"	s
+list_move	include/aura/list.h	/^static inline void list_move(struct list_head *list, struct list_head *head)$/;"	f
+list_move_tail	include/aura/list.h	/^static inline void list_move_tail(struct list_head *list,$/;"	f
+list_prepare_entry	include/aura/list.h	309;"	d
+list_splice	include/aura/list.h	/^static inline void list_splice(struct list_head *list, struct list_head *head)$/;"	f
+list_splice_init	include/aura/list.h	/^static inline void list_splice_init(struct list_head *list,$/;"	f
+local c_functions 	lua/aura/dumper.lua	/^local c_functions = {}$/;"	f
+log_to_file	src/core/slog.c	/^void log_to_file(char *out, const char *fname, SystemDate *mdate)$/;"	f
+loop	include/aura/aura.h	/^	struct aura_eventloop *		loop;           \/* eventloop structure *\/$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_eventloop
+loop	include/aura/timer.h	/^	struct aura_eventloop *loop;$/;"	m	struct:aura_timer	typeref:struct:aura_timer::aura_eventloop
+loop	src/lua/bindings.c	/^	struct aura_eventloop *loop;$/;"	m	struct:laura_eventloop	typeref:struct:laura_eventloop::aura_eventloop	file:
+loop	test.lua	/^function loop()$/;"	f
+loop.add 	lua/aura/loop.lua	/^loop.add = function(self, node)$/;"	f
+loop.del 	lua/aura/loop.lua	/^loop.del = function(self, node)$/;"	f
+loop.destroy 	lua/aura/loop.lua	/^loop.destroy = function(self)$/;"	f
+loop.dispatch 	lua/aura/loop.lua	/^loop.dispatch = function(self, flags)$/;"	f
+loop.init 	lua/aura/loop.lua	/^loop.init = function(self, fnode, ...)$/;"	f
+loop.loopexit 	lua/aura/loop.lua	/^loop.loopexit = function(self, timeout)$/;"	f
+loop_meta	src/lua/bindings.c	/^static const struct luaL_Reg loop_meta[] = {$/;"	v	typeref:struct:luaL_Reg	file:
+loopbreak	include/aura/eventloop.h	/^        void (*loopbreak)(struct aura_eventloop *loop, struct timeval *tv);$/;"	m	struct:aura_eventloop_module
+ltrim	scripts/checkpatch.pl	/^sub ltrim {$/;"	s
+luaL_newlib	src/lua/bindings.c	58;"	d	file:
+luaL_setfuncs	src/lua/bindings.c	/^static void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)$/;"	f	file:
+luaL_setmetatable	src/lua/bindings.c	38;"	d	file:
+lua_fetch_node	src/lua/bindings.c	/^static struct laura_node *lua_fetch_node(lua_State *L, int idx)$/;"	f	file:
+lua_push_etable	src/lua/bindings.c	/^static int lua_push_etable(lua_State *L, struct aura_export_table *tbl)$/;"	f	file:
+lua_setfield_bool	src/lua/bindings.c	/^static void lua_setfield_bool(lua_State *L, const char *key, bool value)$/;"	f	file:
+lua_setfield_int	src/lua/bindings.c	/^static void lua_setfield_int(lua_State *L, const char *key, long value)$/;"	f	file:
+lua_setfield_string	src/lua/bindings.c	/^static void lua_setfield_string(lua_State *L, const char *key, const char *value)$/;"	f	file:
+lua_settoken	src/transports/transport-susb.c	/^static void lua_settoken(lua_State *L, const char *name, char t)$/;"	f	file:
+lua_stackdump	src/lua/utils-lua.c	/^void lua_stackdump(lua_State *L)$/;"	f
+lua_strfromstack	src/transports/transport-susb.c	/^static char *lua_strfromstack(lua_State *L, int n)$/;"	f	file:
+lua_to_buffer	src/lua/bindings.c	/^static struct aura_buffer *lua_to_buffer(lua_State *L, struct aura_node *node, int stackpos, struct aura_object *o)$/;"	f	file:
+luaopen_auracore	src/lua/bindings.c	/^LUALIB_API int luaopen_auracore(lua_State *L)$/;"	f
+magic	include/aura/aura.h	/^	int			magic;$/;"	m	struct:aura_pollfds
+magic	include/aura/aura.h	/^	uint32_t		magic;$/;"	m	struct:aura_buffer
+magic	src/transports/transport-nmc.c	/^	uint32_t	magic;$/;"	m	struct:nmc_aura_header	file:
+magic	src/transports/transport-stlink.c	/^	uint32_t magic; \/* AURA_STLINK_MAGIC *\/$/;"	m	struct:export_header	file:
+magic	src/transports/transport-stlink.c	/^	uint32_t magic;$/;"	m	struct:message	file:
+main	benchmarks/dummy-benchmark.c	/^int main() {$/;"	f
+main	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^int main(int argc, char* argv[])$/;"	f
+main	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^void main() {}$/;"	f
+main	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^int main(int argc, char* argv[])$/;"	f
+main	build/CMakeFiles/feature_tests.c	/^int main(int argc, char** argv) { (void)argv; return features[argc]; }$/;"	f
+main	build/CMakeFiles/feature_tests.cxx	/^int main(int argc, char** argv) { (void)argv; return features[argc]; }$/;"	f
+main	src/lua/lua-test-wrapper.c	/^int main(int argc, char *argv[])$/;"	f
+main	src/tests/broken/packetizer8-simple.c	/^int main() {$/;"	f
+main	src/tests/broken/susb-pw-ctl.c	/^int main(int argc, const char **argv) {$/;"	f
+main	src/tests/broken/susb-pwctl-clicker.c	/^int main() {$/;"	f
+main	src/tests/broken/susb-set-serial.c	/^int main(int argc, const char **argv) {$/;"	f
+main	src/tests/broken/test-timestamp.c	/^int main()$/;"	f
+main	src/tests/dummy/async-by-id.c	/^int main() {$/;"	f
+main	src/tests/dummy/async.c	/^int main() {$/;"	f
+main	src/tests/dummy/buffer-arg.c	/^int main() {$/;"	f
+main	src/tests/dummy/cached-id.c	/^int main() {$/;"	f
+main	src/tests/dummy/call-too-early.c	/^int main() {$/;"	f
+main	src/tests/dummy/open-close.c	/^int main() {$/;"	f
+main	src/tests/dummy/serdes-test.c	/^int main() {$/;"	f
+main	src/tests/dummy/sync-call-by-id.c	/^int main() {$/;"	f
+main	src/tests/dummy/sync-call.c	/^int main() {$/;"	f
+main	src/tests/dummy/sync-evt-free.c	/^int main() {$/;"	f
+main	src/tests/dummy/sync-evt-read.c	/^int main() {$/;"	f
+main	src/tests/dummy/timer-basic.c	/^int main()$/;"	f
+main	src/tests/dummy/unhandled-evt.c	/^int main() {$/;"	f
+main	src/tests/dummy/versioncheck.c	/^int main() {$/;"	f
+main	src/tests/nmc/basic.c	/^int main()$/;"	f
+main	src/tests/stlink/sync-call.c	/^int main() {$/;"	f
+main	src/tests/sysfsgpio/basic.c	/^int main() {$/;"	f
+main	src/tests/uart/async-by-id.c	/^int main() {$/;"	f
+main	src/tests/uart/async.c	/^int main() {$/;"	f
+main	src/tests/uart/buffer-arg.c	/^int main() {$/;"	f
+main	src/tests/uart/cached-id.c	/^int main() {$/;"	f
+main	src/tests/uart/call-too-early.c	/^int main() {$/;"	f
+main	src/tests/uart/open-close.c	/^int main() {$/;"	f
+main	src/tests/uart/serdes-test.c	/^int main() {$/;"	f
+main	src/tests/uart/sync-call-by-id.c	/^int main() {$/;"	f
+main	src/tests/uart/sync-call.c	/^int main() {$/;"	f
+main	src/tests/uart/sync-evt-free.c	/^int main() {$/;"	f
+main	src/tests/uart/sync-evt-read.c	/^int main() {$/;"	f
+main	src/tests/uart/timer-basic.c	/^int main()$/;"	f
+main	src/tests/uart/unhandled-evt.c	/^int main() {$/;"	f
+main	src/tests/uart/versioncheck.c	/^int main() {$/;"	f
+main	src/tests/xusb/susb-open-close.c	/^int main() {$/;"	f
+main	src/tests/xusb/susb-reconnect-persist.c	/^int main()$/;"	f
+main	src/tests/xusb/susb-stability-io.c	/^int main() {$/;"	f
+main	src/tests/xusb/susb-stability-none.c	/^int main() {$/;"	f
+main	src/tests/xusb/susb.c	/^int main() {$/;"	f
+main	src/tests/xusb/usb-open-close.c	/^int main() {$/;"	f
+main	src/tests/xusb/usb-reconnect-persist.c	/^int main()$/;"	f
+main	src/tests/xusb/usb.c	/^int main() {$/;"	f
+main	test-susb.c	/^int main()$/;"	f
+make_key	lua/aura/dumper.lua	/^  local function make_key(t, key)$/;"	f
+map_fd	include/aura/ion_buffer_allocator.h	/^	int			map_fd;$/;"	m	struct:aura_ion_buffer_descriptor
+max_t	include/aura/aura.h	368;"	d
+message	src/transports/transport-stlink.c	/^struct message {$/;"	s	file:
+migrate_object	src/core/export.c	/^static int migrate_object(struct aura_object *src, struct aura_object *dst)$/;"	f	file:
+min	include/aura/slog.h	/^    int min;$/;"	m	struct:__anon4
+min_t	include/aura/aura.h	362;"	d
+module	include/aura/eventloop.h	/^        const struct aura_eventloop_module *module;$/;"	m	struct:aura_eventloop	typeref:struct:aura_eventloop::aura_eventloop_module
+module	include/aura/timer.h	/^	const struct aura_eventloop_module *module;$/;"	m	struct:aura_timer	typeref:struct:aura_timer::aura_eventloop_module
+mon	include/aura/slog.h	/^    int mon;$/;"	m	struct:__anon4
+mt.__call 	lua/aura/class.lua	/^   mt.__call = function(class_tbl, ...)$/;"	f
+mt.__index 	lua/aura.lua	/^   mt.__index = function(self, idx)$/;"	f
+n.ping 	src/tests/bindings/event.lua	/^n.ping = function(self, arg)$/;"	f
+name	include/aura/aura.h	/^	char *	name;$/;"	m	struct:aura_object
+name	include/aura/aura.h	/^	const char *	name;$/;"	m	struct:aura_transport
+name	include/aura/buffer_allocator.h	/^    const char *name;$/;"	m	struct:aura_buffer_allocator
+name	include/aura/eventloop.h	/^        const char *name;$/;"	m	struct:aura_eventloop_module
+name	src/transports/transport-nmc.c	/^	uint32_t	name[AURA_STRLEN];$/;"	m	struct:nmc_aura_object	file:
+name	src/transports/transport-stlink.c	/^	uint32_t name;$/;"	m	struct:export_object	file:
+ncusb_devwatch_data	include/aura/usb_helpers.h	/^struct ncusb_devwatch_data {$/;"	s
+ncusb_find_and_open	src/transports/usb-helpers.c	/^struct libusb_device_handle *ncusb_find_and_open(struct libusb_context *ctx,$/;"	f
+ncusb_handle_events_nonblock_once	src/transports/usb-helpers.c	/^void ncusb_handle_events_nonblock_once(struct aura_node *	node,$/;"	f
+ncusb_match_string	src/transports/usb-helpers.c	/^int ncusb_match_string(libusb_device_handle *dev, int index, const char *string)$/;"	f
+ncusb_print_libusb_transfer	src/transports/usb-helpers.c	/^void ncusb_print_libusb_transfer(struct libusb_transfer *p_t)$/;"	f
+ncusb_start_descriptor_watching	src/transports/usb-helpers.c	/^void ncusb_start_descriptor_watching(struct aura_node *node, libusb_context *ctx)$/;"	f
+ncusb_timer_create	src/transports/usb-helpers.c	/^struct aura_timer *ncusb_timer_create(struct aura_node *node, struct libusb_context *ctx)$/;"	f
+ncusb_try_device	src/transports/usb-helpers.c	/^struct libusb_device_handle *ncusb_try_device(struct libusb_context *ctx,$/;"	f
+ncusb_watch_for_device	src/transports/usb-helpers.c	/^int ncusb_watch_for_device(libusb_context *		ctx,$/;"	f
+need_endian_swap	include/aura/aura.h	/^	bool				need_endian_swap;$/;"	m	struct:aura_node
+next	include/aura/etable.h	/^	int			next;$/;"	m	struct:aura_export_table
+next	include/aura/list.h	/^	struct hlist_node *next, **pprev;$/;"	m	struct:hlist_node	typeref:struct:hlist_node::hlist_node
+next	include/aura/list.h	/^	struct list_head *next, *prev;$/;"	m	struct:list_head	typeref:struct:list_head::list_head
+next	src/transports/transport-usb.c	/^static inline char *next(char *nx)$/;"	f	file:
+nextfd	include/aura/aura.h	/^	int				nextfd;         \/* Next descriptor to add *\/$/;"	m	struct:aura_node
+nmc	src/transports/transport-nmc.c	/^AURA_TRANSPORT(nmc);$/;"	v
+nmc	src/transports/transport-nmc.c	/^static struct aura_transport nmc = {$/;"	v	typeref:struct:aura_transport	file:
+nmc_aura_eventbuf	src/transports/transport-nmc.c	/^struct nmc_aura_eventbuf$/;"	s	file:
+nmc_aura_header	src/transports/transport-nmc.c	/^struct nmc_aura_header {$/;"	s	file:
+nmc_aura_object	src/transports/transport-nmc.c	/^struct nmc_aura_object {$/;"	s	file:
+nmc_aura_syncbuffer	src/transports/transport-nmc.c	/^struct nmc_aura_syncbuffer {$/;"	s	file:
+nmc_buffer_get	src/transports/transport-nmc.c	/^struct aura_buffer *nmc_buffer_get(struct aura_buffer *buf)$/;"	f
+nmc_buffer_put	src/transports/transport-nmc.c	/^void nmc_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f
+nmc_close	src/transports/transport-nmc.c	/^static void nmc_close(struct aura_node *node)$/;"	f	file:
+nmc_export_table	src/transports/transport-nmc.c	/^struct nmc_export_table {$/;"	s	file:
+nmc_fetch_str	src/transports/transport-nmc.c	/^static char *nmc_fetch_str(void *nmstr)$/;"	f	file:
+nmc_handle_events	src/transports/transport-nmc.c	/^static void nmc_handle_events(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+nmc_open	src/transports/transport-nmc.c	/^static int nmc_open(struct aura_node *node, const char *filepath)$/;"	f	file:
+nmc_private	src/transports/transport-nmc.c	/^struct nmc_private {$/;"	s	file:
+node	include/aura/aura.h	/^	struct aura_node *	node;$/;"	m	struct:aura_pollfds	typeref:struct:aura_pollfds::aura_node
+node	include/aura/packetizer.h	/^	struct aura_node *	node;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_node
+node	include/aura/timer.h	/^	struct aura_node *node;$/;"	m	struct:aura_timer	typeref:struct:aura_timer::aura_node
+node	src/lua/bindings.c	/^	struct aura_node *	node;$/;"	m	struct:laura_node	typeref:struct:laura_node::aura_node	file:
+node	src/transports/transport-nmc.c	/^	struct aura_node *		node;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_node	file:
+node	src/transports/transport-stlink.c	/^	struct aura_node *node;$/;"	m	struct:stlink_transport_data	typeref:struct:stlink_transport_data::aura_node	file:
+node	src/transports/transport-susb.c	/^	struct aura_node *		node;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_node	file:
+node	src/transports/transport-usb.c	/^	struct aura_node *		node;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_node	file:
+node.__ 	lua/aura/node.lua	/^node.__ = function(self, method, callback, callback_arg, ...)$/;"	f
+node.ping 	pw-ctl-init.lua	/^node.ping = function(arg)$/;"	f
+node.ping 	test.lua	/^node.ping = function(self, arg)$/;"	f
+node_added	include/aura/eventloop.h	/^        void (*node_added)(struct aura_eventloop *loop, struct aura_node *node);$/;"	m	struct:aura_eventloop_module
+node_buffer_queue	include/aura/private.h	/^enum node_buffer_queue$/;"	g
+node_container	src/lua/bindings.c	/^	int			node_container; \/* lua table representing this node *\/$/;"	m	struct:laura_node	file:
+node_event	include/aura/aura.h	/^enum node_event {$/;"	g
+node_meta	src/lua/bindings.c	/^static const struct luaL_Reg node_meta[] = {$/;"	v	typeref:struct:luaL_Reg	file:
+node_removed	include/aura/eventloop.h	/^        void (*node_removed)(struct aura_eventloop *loop, struct aura_node *node);$/;"	m	struct:aura_eventloop_module
+nodelist	include/aura/eventloop.h	/^        struct list_head nodelist;$/;"	m	struct:aura_eventloop	typeref:struct:aura_eventloop::list_head
+nonblock	src/transports/transport-nmc.c	/^static void nonblock(int fd, int state)$/;"	f	file:
+noswap	src/core/retparse.c	18;"	d	file:
+notify_aura_thread	src/transports/transport-stlink.c	/^static void notify_aura_thread(struct stlink_transport_data *stl)$/;"	f	file:
+null	src/transports/transport-null.c	/^AURA_TRANSPORT(null);$/;"	v
+null	src/transports/transport-null.c	/^static struct aura_transport null = {$/;"	v	typeref:struct:aura_transport	file:
+num_args	include/aura/aura.h	/^	int	num_args;$/;"	m	struct:aura_object
+num_buffers_in_pool	include/aura/aura.h	/^	int				num_buffers_in_pool;$/;"	m	struct:aura_node
+num_evt_pending	test-firmwares/usb-test-dummy-fw/src/main.c	/^static uint8_t num_evt_pending=0;$/;"	v	file:
+num_evt_pending	test-firmwares/usb-test-fw/src/main.c	/^static uint8_t num_evt_pending=0;$/;"	v	file:
+num_methods	src/transports/transport-bench.c	/^static int num_methods = 8192;$/;"	v	file:
+num_objects	src/transports/transport-susb.c	/^	uint16_t			num_objects;$/;"	m	struct:usb_dev_info	file:
+num_objects	src/transports/transport-usb.c	/^	uint16_t			num_objects;$/;"	m	struct:usb_dev_info	file:
+num_objs	src/transports/transport-usb.c	/^	uint16_t	num_objs;$/;"	m	struct:usb_info_packet	file:
+num_objs	test-firmwares/usb-test-dummy-fw/src/main.c	/^	uint16_t num_objs;$/;"	m	struct:usb_info_packet	file:
+num_objs	test-firmwares/usb-test-fw/src/main.c	/^	uint16_t num_objs;$/;"	m	struct:usb_info_packet	file:
+num_rets	include/aura/aura.h	/^	int	num_rets;$/;"	m	struct:aura_object
+number 	lua/aura/dumper.lua	/^    number = function(value) return value end,$/;"	f
+numevt	src/tests/dummy/async-by-id.c	/^static int numevt=0;$/;"	v	file:
+numevt	src/tests/dummy/async.c	/^static int numevt=0;$/;"	v	file:
+numevt	src/tests/dummy/unhandled-evt.c	/^static int numevt=0;$/;"	v	file:
+numevt	src/tests/uart/async-by-id.c	/^static int numevt=0;$/;"	v	file:
+numevt	src/tests/uart/async.c	/^static int numevt=0;$/;"	v	file:
+numevt	src/tests/uart/unhandled-evt.c	/^static int numevt=0;$/;"	v	file:
+numfails	src/tests/broken/packetizer8-simple.c	/^static int numfails;$/;"	v	file:
+numfds	include/aura/aura.h	/^	int				numfds;         \/* Currently available space for descriptors *\/$/;"	m	struct:aura_node
+object	include/aura/aura.h	/^	struct aura_object *	object;$/;"	m	struct:aura_buffer	typeref:struct:aura_buffer::aura_object
+object_is_equal	src/core/export.c	/^static int object_is_equal(struct aura_object *one, struct aura_object *two)$/;"	f	file:
+object_is_event	include/aura/aura.h	144;"	d
+object_is_method	include/aura/aura.h	145;"	d
+object_migration_failed_arg	include/aura/aura.h	/^	void *				object_migration_failed_arg;$/;"	m	struct:aura_node
+object_migration_failed_cb	include/aura/aura.h	/^	void				(*object_migration_failed_cb)(struct aura_node *node, struct aura_object *failed, void *arg);$/;"	m	struct:aura_node
+objects	include/aura/etable.h	/^	struct aura_object	objects[];$/;"	m	struct:aura_export_table	typeref:struct:aura_export_table::aura_object
+objects	src/transports/transport-stlink.c	/^	uint32_t objects[]; \/* pointers! *\/$/;"	m	struct:export_table	file:
+objs	src/transports/transport-nmc.c	/^	struct nmc_aura_object	objs[];$/;"	m	struct:nmc_export_table	typeref:struct:nmc_export_table::nmc_aura_object	file:
+offsetof	include/aura/list.h	30;"	d
+online_cb_fn	src/transports/transport-dummy.c	/^static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)$/;"	f	file:
+online_cb_fn	src/transports/transport-uart.c	/^static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)$/;"	f	file:
+open	include/aura/aura.h	/^	int (*open)(struct aura_node *node, const char *opts);$/;"	m	struct:aura_transport
+openshit	src/tests/bindings/open-invalid.lua	/^function openshit()$/;"	f
+optbuf	src/transports/transport-usb.c	/^	char *				optbuf;$/;"	m	struct:usb_dev_info	file:
+outbound_buffer_ptr	src/transports/transport-nmc.c	/^	uint32_t	outbound_buffer_ptr;$/;"	m	struct:nmc_aura_syncbuffer	file:
+outbound_buffers	include/aura/aura.h	/^	struct list_head		outbound_buffers;$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+owner	include/aura/aura.h	/^	struct aura_node *	owner;$/;"	m	struct:aura_buffer	typeref:struct:aura_buffer::aura_node
+owner	include/aura/etable.h	/^	struct aura_node *	owner;$/;"	m	struct:aura_export_table	typeref:struct:aura_export_table::aura_node
+packarg	include/aura/packetizer.h	/^	void *			packarg;$/;"	m	struct:aura_packetizer
+packet_packfn	include/aura/packetizer.h	/^	struct aura_buffer *	(*packet_packfn)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::packet_packfn
+packet_unpackfn	include/aura/packetizer.h	/^	struct aura_buffer *	(*packet_unpackfn)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::packet_unpackfn
+packetizer_dispatch_packet	src/transports/packetizer.c	/^static void packetizer_dispatch_packet(struct aura_packetizer *pkt)$/;"	f	file:
+packetizer_state	src/transports/packetizer.c	/^enum packetizer_state {$/;"	g	file:
+parse_and_register_exports	src/transports/transport-nmc.c	/^static int parse_and_register_exports(struct nmc_private *pv)$/;"	f	file:
+parse_email	scripts/checkpatch.pl	/^sub parse_email {$/;"	s
+parse_params	src/transports/transport-usb.c	/^static void parse_params(struct usb_dev_info *inf)$/;"	f	file:
+paths	run_cppcheck.sh	/^paths() {$/;"	f
+paths_list	run_cppcheck.sh	/^paths_list() {$/;"	f
+payload_size	include/aura/aura.h	/^	int payload_size;$/;"	m	struct:aura_buffer
+pending	include/aura/aura.h	/^	int	pending;$/;"	m	struct:aura_object
+pending	src/transports/transport-susb.c	/^	int				pending;$/;"	m	struct:usb_dev_info	file:
+pending	src/transports/transport-usb.c	/^	int				pending;$/;"	m	struct:usb_dev_info	file:
+pending_evts	src/transports/transport-usb.c	/^	uint8_t pending_evts;$/;"	m	struct:usb_interrupt_packet	file:
+pending_evts	test-firmwares/usb-test-dummy-fw/src/main.c	/^	uint8_t pending_evts; $/;"	m	struct:usb_interrupt_packet	file:
+pending_evts	test-firmwares/usb-test-fw/src/main.c	/^	uint8_t pending_evts; $/;"	m	struct:usb_interrupt_packet	file:
+pendingmask	src/transports/transport-nmc.c	/^	uint32_t pendingmask;$/;"	m	struct:nmc_aura_eventbuf	file:
+pid	include/aura/usb_helpers.h	/^	int pid;$/;"	m	struct:ncusb_devwatch_data
+pingcb	src/tests/dummy/async-by-id.c	/^void pingcb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+pingcb	src/tests/dummy/async.c	/^void pingcb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+pingcb	src/tests/uart/async-by-id.c	/^void pingcb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+pingcb	src/tests/uart/async.c	/^void pingcb(struct aura_node *dev, int status, struct aura_buffer *retbuf, void *arg)$/;"	f
+poll_timeout	include/aura/eventloop.h	/^        int poll_timeout;$/;"	m	struct:aura_eventloop
+pollfd_added_cb	src/transports/usb-helpers.c	/^static void pollfd_added_cb(int fd, short events, void *user_data)$/;"	f	file:
+pollfd_removed_cb	src/transports/usb-helpers.c	/^static void pollfd_removed_cb(int fd, void *user_data)$/;"	f	file:
+populateDropDown	doc-index/index.html	/^        function populateDropDown(url, dropdown) {$/;"	f
+pos	include/aura/aura.h	/^	int			pos;$/;"	m	struct:aura_buffer
+pos_last_openparen	scripts/checkpatch.pl	/^sub pos_last_openparen {$/;"	s
+possible	scripts/checkpatch.pl	/^sub possible {$/;"	s
+pprev	include/aura/list.h	/^	struct hlist_node *next, **pprev;$/;"	m	struct:hlist_node	typeref:struct:hlist_node::
+prev	include/aura/list.h	/^	struct list_head *next, *prev;$/;"	m	struct:list_head	typeref:struct:list_head::
+process	scripts/checkpatch.pl	/^sub process {$/;"	s
+product	include/aura/usb_helpers.h	/^	char *product;$/;"	m	struct:ncusb_devwatch_data
+project_sources	test-firmwares/susb-test-fw/Makefile	/^project_sources=src$/;"	m
+project_sources	test-firmwares/usb-test-dummy-fw/Makefile	/^project_sources=src$/;"	m
+project_sources	test-firmwares/usb-test-fw/Makefile	/^project_sources=src$/;"	m
+ptr	src/transports/transport-nmc.c	/^	uint32_t	ptr;$/;"	m	struct:nmc_aura_object	file:
+put_object	test-firmwares/usb-test-dummy-fw/src/main.c	/^int put_object(unsigned char *dest, int dlen, const void *name, const void* afmt, const void* rfmt)$/;"	f
+put_object	test-firmwares/usb-test-fw/src/main.c	/^int put_object(unsigned char *dest, int dlen, const void *name, const void* afmt, const void* rfmt)$/;"	f
+qentry	include/aura/aura.h	/^	struct list_head	qentry;$/;"	m	struct:aura_buffer	typeref:struct:aura_buffer::list_head
+qnxnto	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* qnxnto = "INFO" ":" "qnxnto[]";$/;"	v
+qnxnto	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* qnxnto = "INFO" ":" "qnxnto[]";$/;"	v
+queue_packet	src/tests/broken/packetizer8-simple.c	/^void queue_packet(struct aura_packetizer *pkt, char *buf, int offset, uint32_t value)$/;"	f
+randstring	src/transports/transport-bench.c	/^static char *randstring(size_t length)$/;"	f	file:
+raw_line	scripts/checkpatch.pl	/^sub raw_line {$/;"	s
+reading	src/transports/transport-nmc.c	/^	struct aura_buffer *		reading;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_buffer	file:
+recvarg	include/aura/packetizer.h	/^	void *			recvarg;$/;"	m	struct:aura_packetizer
+recvcb	include/aura/packetizer.h	/^	void			(*recvcb)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer
+recvcb	src/tests/broken/packetizer8-simple.c	/^void recvcb(struct aura_buffer *buf, void *arg)$/;"	f
+refs	src/lua/bindings.c	/^	uint32_t		refs;$/;"	m	struct:laura_node	file:
+reg_seg_handler	src/core/panic.c	/^void __attribute__((constructor(101))) reg_seg_handler()$/;"	f
+registry	include/aura/aura.h	/^	struct list_head		registry;$/;"	m	struct:aura_transport	typeref:struct:aura_transport::list_head
+release	include/aura/buffer_allocator.h	/^    void (*release)(struct aura_node *node, void *data, struct aura_buffer *buf);$/;"	m	struct:aura_buffer_allocator
+report	scripts/checkpatch.pl	/^sub report {$/;"	s
+report_dump	scripts/checkpatch.pl	/^sub report_dump {$/;"	s
+request	include/aura/buffer_allocator.h	/^    struct aura_buffer *(*request)(struct aura_node *node, void *data, int size);$/;"	m	struct:aura_buffer_allocator	typeref:struct:aura_buffer_allocator::request
+request_object	src/transports/transport-usb.c	/^static void request_object(struct aura_node *node, int id)$/;"	f	file:
+required	src/core/transport.c	5;"	d	file:
+ret_fmt	include/aura/aura.h	/^	char *	ret_fmt;$/;"	m	struct:aura_object
+ret_format	src/transports/transport-stlink.c	/^	uint32_t ret_format;$/;"	m	struct:export_object	file:
+ret_pprinted	include/aura/aura.h	/^	char *	ret_pprinted;$/;"	m	struct:aura_object
+retfmt	src/transports/transport-nmc.c	/^	uint32_t	retfmt[AURA_STRLEN];$/;"	m	struct:nmc_aura_object	file:
+retlen	include/aura/aura.h	/^	int	retlen;$/;"	m	struct:aura_object
+rpc_filter	src/transports/transport-nmc.c	/^static struct easynmc_section_filter rpc_filter = {$/;"	v	typeref:struct:easynmc_section_filter	file:
+rq_len	test-firmwares/usb-test-fw/src/main.c	/^int rq_len;$/;"	v
+rtrim	scripts/checkpatch.pl	/^sub rtrim {$/;"	s
+run_env	src/tests/xusb/susb-reconnect-persist.c	/^void run_env(const char *env)$/;"	f
+run_env	src/tests/xusb/usb-reconnect-persist.c	/^void run_env(const char *env)$/;"	f
+run_first	benchmarks/dummy-benchmark.c	/^long run_first(struct aura_node *n)$/;"	f
+run_second	benchmarks/dummy-benchmark.c	/^long run_second(struct aura_node *n)$/;"	f
+running	src/transports/transport-stlink.c	/^	int running;$/;"	m	struct:stlink_transport_data	file:
+rxbuf	src/transports/transport-stlink.c	/^	struct aura_buffer *rxbuf;$/;"	m	struct:stlink_transport_data	typeref:struct:stlink_transport_data::aura_buffer	file:
+s2h	src/transports/transport-stlink.c	/^	struct circ_buf s2h;$/;"	m	struct:export_header	typeref:struct:export_header::circ_buf	file:
+sanitise_line	scripts/checkpatch.pl	/^sub sanitise_line {$/;"	s
+sanitise_line_reset	scripts/checkpatch.pl	/^sub sanitise_line_reset {$/;"	s
+sbuf	src/transports/transport-nmc.c	/^	struct nmc_aura_syncbuffer *	sbuf;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::nmc_aura_syncbuffer	file:
+scan_for_magic	src/transports/transport-stlink.c	/^static int scan_for_magic(struct stlink_transport_data *stl)$/;"	f	file:
+sec	include/aura/slog.h	/^    int sec;$/;"	m	struct:__anon4
+seed_camelcase_file	scripts/checkpatch.pl	/^sub seed_camelcase_file {$/;"	s
+seed_camelcase_includes	scripts/checkpatch.pl	/^sub seed_camelcase_includes {$/;"	s
+ser_close	src/transports/transport-serial.c	/^static void ser_close(struct aura_node *node)$/;"	f	file:
+ser_loop	src/transports/transport-serial.c	/^static void ser_loop(struct aura_node *node, const struct aura_pollfds *fd)$/;"	f	file:
+ser_open	src/transports/transport-serial.c	/^static int ser_open(struct aura_node *node, const char *opts)$/;"	f	file:
+serial	include/aura/usb_helpers.h	/^	char *serial;$/;"	m	struct:ncusb_devwatch_data
+serial	src/transports/transport-serial.c	/^AURA_TRANSPORT(serial);$/;"	v
+serial	src/transports/transport-serial.c	/^static struct aura_transport serial = {$/;"	v	typeref:struct:aura_transport	file:
+serial	src/transports/transport-stlink.c	/^	char *serial;$/;"	m	struct:stlink_transport_data	file:
+serialdata	src/transports/transport-serial.c	/^struct serialdata {$/;"	s	file:
+serpacket	src/transports/transport-serial.c	/^struct __attribute__((packed)) serpacket  {$/;"	s	file:
+serpacket_data	src/transports/transport-serial.c	/^struct __attribute__((packed)) serpacket_data {$/;"	s	file:
+serpacket_type	src/transports/transport-serial.c	/^enum serpacket_type {$/;"	g	file:
+servo_mode	pw-ctl-serv.lua	/^function servo_mode(pin, on)$/;"	f
+setApi	doc-index/index.html	/^        function setApi(api) {$/;"	f
+setVersion	doc-index/index.html	/^        function setVersion(ver) {$/;"	f
+setfuncs	src/lua/bindings.c	42;"	d	file:
+setmetatable(strvalcache, {__index 	lua/aura/dumper.lua	/^  setmetatable(strvalcache, {__index = function(t,value)$/;"	f
+share_fd	include/aura/ion_buffer_allocator.h	/^	int			share_fd;$/;"	m	struct:aura_ion_buffer_descriptor
+showApiMenu	doc-index/index.html	/^        function showApiMenu() {$/;"	f
+showVersionMenu	doc-index/index.html	/^        function showVersionMenu() {$/;"	f
+show_type	scripts/checkpatch.pl	/^sub show_type {$/;"	s
+size	include/aura/aura.h	/^	int			size;$/;"	m	struct:aura_buffer
+size	include/aura/etable.h	/^	int			size;$/;"	m	struct:aura_export_table
+size	include/aura/ion_buffer_allocator.h	/^	int			size;$/;"	m	struct:aura_ion_buffer_descriptor
+size	src/transports/transport-nmc.c	/^	uint32_t size;$/;"	m	struct:nmc_aura_eventbuf	file:
+sl	src/transports/transport-stlink.c	/^	stlink_t* sl;$/;"	m	struct:stlink_transport_data	file:
+slg	src/core/slog.c	/^static slog_flags slg;$/;"	v	file:
+slog	src/core/slog.c	/^void slog(int level, int flag, const char *msg, ...)$/;"	f
+slog_flags	include/aura/slog.h	/^} slog_flags;$/;"	t	typeref:struct:__anon5
+slog_init	src/core/slog.c	/^void slog_init(const char *fname, int lvl)$/;"	f
+slog_sprintf	src/core/slog.c	/^char *slog_sprintf(char *msg, ...)$/;"	f
+slog_version	src/core/slog.c	/^const char *slog_version(int min)$/;"	f
+slogmut	src/core/slog.c	/^static pthread_mutex_t slogmut = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+slogv	src/core/slog.c	/^void slogv(int level, int flag, const char *msg, va_list args)$/;"	f
+split	lua-guess-lib-install-path.lua	/^function split(inputstr, sep)$/;"	f
+start	include/aura/packetizer.h	/^	uint8_t start;$/;"	m	struct:aura_packet8
+start	src/transports/transport-serial.c	/^	uint8_t start;$/;"	m	struct:serpacket	file:
+start_event_sent	include/aura/aura.h	/^	bool				start_event_sent;$/;"	m	struct:aura_node
+state	include/aura/packetizer.h	/^	int			state;$/;"	m	struct:aura_packetizer
+state	src/transports/transport-nmc.c	/^	uint32_t	state;$/;"	m	struct:nmc_aura_syncbuffer	file:
+state	src/transports/transport-susb.c	/^	int				state;$/;"	m	struct:usb_dev_info	file:
+state	src/transports/transport-usb.c	/^	int				state;$/;"	m	struct:usb_dev_info	file:
+statement_block_size	scripts/checkpatch.pl	/^sub statement_block_size {$/;"	s
+statement_lines	scripts/checkpatch.pl	/^sub statement_lines {$/;"	s
+statement_rawlines	scripts/checkpatch.pl	/^sub statement_rawlines {$/;"	s
+status	include/aura/aura.h	/^	enum aura_node_status		status;$/;"	m	struct:aura_node	typeref:enum:aura_node::aura_node_status
+status_cb	src/lua/bindings.c	/^static void status_cb(struct aura_node *node, int newstatus, void *arg)$/;"	f	file:
+status_cb	test.lua	/^function status_cb(node, status, arg)$/;"	f
+status_changed_arg	include/aura/aura.h	/^	void *				status_changed_arg;$/;"	m	struct:aura_node
+status_changed_arg_ref	src/lua/bindings.c	/^	int			status_changed_arg_ref;$/;"	m	struct:laura_node	file:
+status_changed_cb	include/aura/aura.h	/^	void				(*status_changed_cb)(struct aura_node *node, int newstatus, void *arg);$/;"	m	struct:aura_node
+status_changed_ref	src/lua/bindings.c	/^	int			status_changed_ref;$/;"	m	struct:laura_node	file:
+stlink	src/transports/transport-stlink.c	/^AURA_TRANSPORT(stlink);$/;"	v
+stlink	src/transports/transport-stlink.c	/^static struct aura_transport stlink = {$/;"	v	typeref:struct:aura_transport	file:
+stlink_io_thread	src/transports/transport-stlink.c	/^static void *stlink_io_thread(void *arg)$/;"	f	file:
+stlink_open_first	src/transports/transport-stlink.c	/^static stlink_t *stlink_open_first(char *serial)$/;"	f	file:
+stlink_panic	src/transports/transport-stlink.c	/^static void stlink_panic(struct stlink_transport_data *stl)$/;"	f	file:
+stlink_prepare	src/transports/transport-stlink.c	/^static int stlink_prepare(struct stlink_transport_data *stl)$/;"	f	file:
+stlink_transport_data	src/transports/transport-stlink.c	/^struct stlink_transport_data {$/;"	s	file:
+strclr	src/core/slog.c	/^char *strclr(int clr, char *str, ...)$/;"	f
+string 	lua/aura/dumper.lua	/^    string = function(value) return strvalcache[value] end,$/;"	f
+string_find_replace	scripts/checkpatch.pl	/^sub string_find_replace {$/;"	s
+strlen	src/transports/transport-nmc.c	/^	uint32_t	strlen;$/;"	m	struct:nmc_aura_header	file:
+submit_call_write	src/transports/transport-usb.c	/^static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)$/;"	f	file:
+submit_control	src/transports/transport-susb.c	/^static void submit_control(struct aura_node *node)$/;"	f	file:
+submit_control	src/transports/transport-usb.c	/^static void submit_control(struct aura_node *node)$/;"	f	file:
+submit_event_readout	src/transports/transport-usb.c	/^static void submit_event_readout(struct aura_node *node)$/;"	f	file:
+submit_interrupt	src/transports/transport-usb.c	/^static void submit_interrupt(struct aura_node *node)$/;"	f	file:
+susb_close	src/transports/transport-susb.c	/^static void susb_close(struct aura_node *node)$/;"	f	file:
+susb_handle_event	src/transports/transport-susb.c	/^static void susb_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+susb_issue_call	src/transports/transport-susb.c	/^static void susb_issue_call(struct aura_node *node, struct aura_buffer *buf)$/;"	f	file:
+susb_offline_transport	src/transports/transport-susb.c	/^static void susb_offline_transport(struct usb_dev_info *inf)$/;"	f	file:
+susb_open	src/transports/transport-susb.c	/^static int susb_open(struct aura_node *node, const char *conf)$/;"	f	file:
+sync_call_result	include/aura/aura.h	/^	int				sync_call_result;$/;"	m	struct:aura_node
+sync_call_running	include/aura/aura.h	/^	bool				sync_call_running;$/;"	m	struct:aura_node
+sync_event_count	include/aura/aura.h	/^	int				sync_event_count;$/;"	m	struct:aura_node
+sync_event_max	include/aura/aura.h	/^	int				sync_event_max;$/;"	m	struct:aura_node
+sync_ret_buf	include/aura/aura.h	/^	struct aura_buffer *		sync_ret_buf;$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_buffer
+tabify	scripts/checkpatch.pl	/^sub tabify {$/;"	s
+tail	src/transports/transport-stlink.c	/^	uint32_t tail;$/;"	m	struct:circ_buf	file:
+target	test-firmwares/susb-test-fw/src/main.c	/^struct cRGB target[2] = { $/;"	v	typeref:struct:cRGB
+tbl	include/aura/aura.h	/^	struct aura_export_table *	tbl;$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_export_table
+test	src/tests/dummy/timer-basic.c	/^int test(int type) {$/;"	f
+test	src/tests/uart/timer-basic.c	/^int test(int type) {$/;"	f
+test_bin	src/tests/nmc/basic.c	/^void test_bin(struct aura_node *n)$/;"	f
+test_bin_32_32	src/tests/dummy/serdes-test.c	/^void test_bin_32_32(struct aura_node *n )$/;"	f
+test_bin_32_32	src/tests/uart/serdes-test.c	/^void test_bin_32_32(struct aura_node *n )$/;"	f
+test_buf	src/tests/nmc/basic.c	/^void test_buf(struct aura_node *n)$/;"	f
+test_defined	lua/aura/dumper.lua	/^  local function test_defined(value, path)$/;"	f
+test_echo	src/tests/bindings/serdes.lua	/^function test_echo(node, method, value)$/;"	f
+test_seq	src/tests/dummy/serdes-test.c	/^void test_seq(struct aura_node *n)$/;"	f
+test_seq	src/tests/uart/serdes-test.c	/^void test_seq(struct aura_node *n)$/;"	f
+test_u16	src/tests/dummy/serdes-test.c	/^void test_u16(struct aura_node *n)$/;"	f
+test_u16	src/tests/uart/serdes-test.c	/^void test_u16(struct aura_node *n)$/;"	f
+test_u32	src/tests/dummy/serdes-test.c	/^void test_u32(struct aura_node *n)$/;"	f
+test_u32	src/tests/nmc/basic.c	/^void test_u32(struct aura_node *n)$/;"	f
+test_u32	src/tests/uart/serdes-test.c	/^void test_u32(struct aura_node *n)$/;"	f
+test_u32u32	src/tests/nmc/basic.c	/^void test_u32u32(struct aura_node *n)$/;"	f
+test_u64	src/tests/nmc/basic.c	/^void test_u64(struct aura_node *n)$/;"	f
+tfd_timer_create	src/eventloop/epoll.c	/^static void tfd_timer_create(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+tfd_timer_destroy	src/eventloop/epoll.c	/^static void tfd_timer_destroy(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+tfd_timer_start	src/eventloop/epoll.c	/^static void tfd_timer_start(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+tfd_timer_stop	src/eventloop/epoll.c	/^static void tfd_timer_stop(struct aura_eventloop *loop, struct aura_timer *tm)$/;"	f	file:
+thread 	lua/aura/dumper.lua	/^    thread = function() error("Cannot dump threads") end,$/;"	f
+timer	src/eventloop/epoll.c	/^	struct aura_timer	timer;$/;"	m	struct:aura_timerfd_timer	typeref:struct:aura_timerfd_timer::aura_timer	file:
+timer	src/eventloop/libevent.c	/^	struct aura_timer	timer;$/;"	m	struct:aura_libevent_timer	typeref:struct:aura_libevent_timer::aura_timer	file:
+timer	src/transports/transport-susb.c	/^	struct aura_timer *		timer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_timer	file:
+timer	src/transports/transport-usb.c	/^	struct aura_timer *timer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_timer	file:
+timer_cb_fn	src/tests/dummy/timer-basic.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *timer, void *arg)$/;"	f	file:
+timer_cb_fn	src/tests/uart/timer-basic.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *timer, void *arg)$/;"	f	file:
+timer_cb_fn	src/transports/transport-dummy.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)$/;"	f	file:
+timer_cb_fn	src/transports/transport-uart.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)$/;"	f	file:
+timer_create	include/aura/eventloop.h	/^        void (*timer_create)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
+timer_destroy	include/aura/eventloop.h	/^        void (*timer_destroy)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
+timer_dispatch_fn	src/eventloop/libevent.c	/^static void timer_dispatch_fn(int fd, short events, void *arg)$/;"	f	file:
+timer_list	include/aura/aura.h	/^	struct list_head		timer_list;     \/* List of timers associated with the node *\/$/;"	m	struct:aura_node	typeref:struct:aura_node::list_head
+timer_size	include/aura/eventloop.h	/^        int timer_size;$/;"	m	struct:aura_eventloop_module
+timer_start	include/aura/eventloop.h	/^        void (*timer_start)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
+timer_stop	include/aura/eventloop.h	/^        void (*timer_stop)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
+timespeccmp	src/eventloop/epoll.c	125;"	d	file:
+timespecsub	src/eventloop/epoll.c	115;"	d	file:
+tm	include/aura/usb_helpers.h	/^	struct aura_timer *tm;$/;"	m	struct:ncusb_devwatch_data	typeref:struct:ncusb_devwatch_data::aura_timer
+tm	src/tests/dummy/timer-basic.c	/^static struct aura_timer *tm;$/;"	v	typeref:struct:aura_timer	file:
+tm	src/tests/uart/timer-basic.c	/^static struct aura_timer *tm;$/;"	v	typeref:struct:aura_timer	file:
+to_file	include/aura/slog.h	/^    int to_file;$/;"	m	struct:__anon5
+top_of_kernel_tree	scripts/checkpatch.pl	/^sub top_of_kernel_tree {$/;"	s
+tr	include/aura/aura.h	/^	const struct aura_transport *	tr;$/;"	m	struct:aura_node	typeref:struct:aura_node::aura_transport
+transport_data	include/aura/aura.h	/^	void *				transport_data;$/;"	m	struct:aura_node
+trim	scripts/checkpatch.pl	/^sub trim {$/;"	s
+ts_deadline	src/eventloop/epoll.c	/^	struct timespec		ts_deadline;$/;"	m	struct:aura_epoll_loop	typeref:struct:aura_epoll_loop::timespec	file:
+tusb	src/transports/transport-susb.c	/^AURA_TRANSPORT(tusb);$/;"	v
+tusb	src/transports/transport-susb.c	/^static struct aura_transport tusb = {$/;"	v	typeref:struct:aura_transport	file:
+tv	include/aura/timer.h	/^	struct timeval tv;$/;"	m	struct:aura_timer	typeref:struct:aura_timer::timeval
+tx_complete	src/transports/transport-stlink.c	/^	bool tx_complete;$/;"	m	struct:stlink_transport_data	file:
+txbuf	src/transports/transport-stlink.c	/^	struct aura_buffer *txbuf;$/;"	m	struct:stlink_transport_data	typeref:struct:stlink_transport_data::aura_buffer	file:
+type	src/transports/transport-nmc.c	/^	uint32_t	type;$/;"	m	struct:nmc_aura_object	file:
+type	src/transports/transport-serial.c	/^	uint8_t type;$/;"	m	struct:serpacket_data	file:
+type	src/transports/transport-stlink.c	/^	uint32_t type;$/;"	m	struct:export_object	file:
+uart	src/transports/transport-uart.c	/^AURA_TRANSPORT(uart);$/;"	v
+uart	src/transports/transport-uart.c	/^static struct aura_transport uart = {$/;"	v	typeref:struct:aura_transport	file:
+uart_buffer_get	src/transports/transport-uart.c	/^static struct aura_buffer *uart_buffer_get(struct aura_buffer *buf)$/;"	f	file:
+uart_buffer_put	src/transports/transport-uart.c	/^static void uart_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f	file:
+uart_close	src/transports/transport-uart.c	/^static void uart_close(struct aura_node *node)$/;"	f	file:
+uart_handle_event	src/transports/transport-uart.c	/^static void uart_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+uart_open	src/transports/transport-uart.c	/^static int uart_open(struct aura_node *node, const char *opts)$/;"	f	file:
+uart_populate_etable	src/transports/transport-uart.c	/^static void uart_populate_etable(struct aura_node *node)$/;"	f	file:
+unhandled_cb	benchmarks/dummy-benchmark.c	/^void unhandled_cb(struct aura_node *dev,$/;"	f
+unhandled_cb	src/tests/dummy/unhandled-evt.c	/^void unhandled_cb(struct aura_node *dev,$/;"	f
+unhandled_cb	src/tests/uart/unhandled-evt.c	/^void unhandled_cb(struct aura_node *dev,$/;"	f
+unhandled_evt_arg	include/aura/aura.h	/^	void *				unhandled_evt_arg;$/;"	m	struct:aura_node
+unhandled_evt_cb	include/aura/aura.h	/^	void				(*unhandled_evt_cb)(struct aura_node *node, struct aura_buffer *ret, void *arg);$/;"	m	struct:aura_node
+unpackarg	include/aura/packetizer.h	/^	void *			unpackarg;$/;"	m	struct:aura_packetizer
+usage	include/aura/aura.h	/^	int				usage;$/;"	m	struct:aura_transport
+usage	include/aura/eventloop.h	/^        int usage;$/;"	m	struct:aura_eventloop_module
+usb	src/transports/transport-usb.c	/^AURA_TRANSPORT(usb);$/;"	v
+usb	src/transports/transport-usb.c	/^static struct aura_transport usb = {$/;"	v	typeref:struct:aura_transport	file:
+usbFunctionSetup	test-firmwares/susb-test-fw/src/main.c	/^uchar   usbFunctionSetup(uchar data[8])$/;"	f
+usbFunctionSetup	test-firmwares/usb-test-dummy-fw/src/main.c	/^uchar   usbFunctionSetup(uchar data[8])$/;"	f
+usbFunctionSetup	test-firmwares/usb-test-fw/src/main.c	/^uchar   usbFunctionSetup(uchar data[8])$/;"	f
+usbFunctionWrite	test-firmwares/susb-test-fw/src/main.c	/^uchar usbFunctionWrite(uchar *data, uchar len)$/;"	f
+usbFunctionWrite	test-firmwares/usb-test-dummy-fw/src/main.c	/^uchar usbFunctionWrite(uchar *data, uchar len)$/;"	f
+usbFunctionWrite	test-firmwares/usb-test-fw/src/main.c	/^uchar usbFunctionWrite(uchar *data, uchar len)$/;"	f
+usbReconnect	test-firmwares/susb-test-fw/src/main.c	/^inline void usbReconnect()$/;"	f
+usbReconnect	test-firmwares/usb-test-dummy-fw/src/main.c	/^inline void usbReconnect()$/;"	f
+usbReconnect	test-firmwares/usb-test-fw/src/main.c	/^inline void usbReconnect()$/;"	f
+usb_close	src/transports/transport-usb.c	/^static void usb_close(struct aura_node *node)$/;"	f	file:
+usb_dev_info	src/transports/transport-susb.c	/^struct usb_dev_info {$/;"	s	file:
+usb_dev_info	src/transports/transport-usb.c	/^struct usb_dev_info {$/;"	s	file:
+usb_event_packet	src/transports/transport-usb.c	/^struct usb_event_packet {$/;"	s	file:
+usb_handle_event	src/transports/transport-usb.c	/^static void usb_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
+usb_info_packet	src/transports/transport-usb.c	/^struct usb_info_packet {$/;"	s	file:
+usb_info_packet	test-firmwares/usb-test-dummy-fw/src/main.c	/^struct usb_info_packet { $/;"	s	file:
+usb_info_packet	test-firmwares/usb-test-fw/src/main.c	/^struct usb_info_packet { $/;"	s	file:
+usb_interrupt_packet	src/transports/transport-usb.c	/^struct usb_interrupt_packet {$/;"	s	file:
+usb_interrupt_packet	test-firmwares/usb-test-dummy-fw/src/main.c	/^struct usb_interrupt_packet { $/;"	s	file:
+usb_interrupt_packet	test-firmwares/usb-test-fw/src/main.c	/^struct usb_interrupt_packet { $/;"	s	file:
+usb_open	src/transports/transport-usb.c	/^static int usb_open(struct aura_node *node, const char *opts)$/;"	f	file:
+usb_panic_and_reset_state	src/transports/transport-susb.c	/^static void usb_panic_and_reset_state(struct aura_node *node)$/;"	f	file:
+usb_panic_and_reset_state	src/transports/transport-usb.c	/^static void usb_panic_and_reset_state(struct aura_node *node)$/;"	f	file:
+usb_requests	src/transports/transport-usb.c	/^enum usb_requests {$/;"	g	file:
+usb_requests	test-firmwares/usb-test-dummy-fw/src/main.c	/^enum usb_requests { $/;"	g	file:
+usb_requests	test-firmwares/usb-test-fw/src/main.c	/^enum usb_requests { $/;"	g	file:
+usb_start_ops	src/transports/transport-susb.c	/^static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)$/;"	f	file:
+usb_start_ops	src/transports/transport-usb.c	/^static void usb_start_ops(struct libusb_device_handle *hndl, void *arg)$/;"	f	file:
+usb_stop_ops	src/transports/transport-susb.c	/^static void usb_stop_ops(void *arg)$/;"	f	file:
+usb_stop_ops	src/transports/transport-usb.c	/^static void usb_stop_ops(void *arg)$/;"	f	file:
+usbdev_is_be	src/transports/transport-usb.c	10;"	d	file:
+usbdev_is_be	test-firmwares/usb-test-dummy-fw/src/main.c	22;"	d	file:
+usbdev_is_be	test-firmwares/usb-test-fw/src/main.c	37;"	d	file:
+user_data	include/aura/aura.h	/^	void *				user_data;$/;"	m	struct:aura_node
+userdata 	lua/aura/dumper.lua	/^    userdata = function() error("Cannot dump userdata") end,$/;"	f
+va_put_BIN	src/core/serdes.c	191;"	d	file:
+va_put_BUF	src/core/serdes.c	197;"	d	file:
+va_put_S16	src/core/serdes.c	160;"	d	file:
+va_put_S32	src/core/serdes.c	173;"	d	file:
+va_put_S64	src/core/serdes.c	185;"	d	file:
+va_put_S8	src/core/serdes.c	148;"	d	file:
+va_put_U16	src/core/serdes.c	154;"	d	file:
+va_put_U32	src/core/serdes.c	167;"	d	file:
+va_put_U64	src/core/serdes.c	179;"	d	file:
+va_put_U8	src/core/serdes.c	142;"	d	file:
+valid	include/aura/aura.h	/^	int	valid;$/;"	m	struct:aura_object
+vendor	include/aura/usb_helpers.h	/^	char *vendor;$/;"	m	struct:ncusb_devwatch_data
+vid	include/aura/usb_helpers.h	/^	int vid;$/;"	m	struct:ncusb_devwatch_data
+waiting_for_status	include/aura/aura.h	/^	bool				waiting_for_status;$/;"	m	struct:aura_node
+which	scripts/checkpatch.pl	/^sub which {$/;"	s
+which_conf	scripts/checkpatch.pl	/^sub which_conf {$/;"	s
+write_serial	src/tests/broken/susb-set-serial.c	/^void write_serial(struct aura_node *node, const char *str)$/;"	f
+writing	src/transports/transport-nmc.c	/^	struct aura_buffer *		writing;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_buffer	file:
+year	include/aura/slog.h	/^    int year;$/;"	m	struct:__anon4

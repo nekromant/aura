@@ -13,7 +13,6 @@ static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg
 	struct aura_object *o = aura_etable_find(node->tbl, "ping");
 	if (!o)
 		return;
-
 	struct aura_buffer *buf = aura_buffer_request(node, 32);
 	memset(buf->data, 12, buf->size);
 	buf->object = o;
@@ -21,7 +20,7 @@ static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg
 		aura_node_write(node, buf);
 }
 
-static void dummy_populate_etable(struct aura_node *node)
+static void uart_populate_etable(struct aura_node *node)
 {
 	struct aura_export_table *etbl = aura_etable_create(node, 16);
 
@@ -49,13 +48,13 @@ static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *a
 {
 	if (arg != CB_ARG)
 		BUG(NULL, "Unexpected CB arg: %x %x", arg, CB_ARG);
-	dummy_populate_etable(node);
+	uart_populate_etable(node);
 	aura_set_status(node, AURA_STATUS_ONLINE);
 }
 
-static int dummy_open(struct aura_node *node, const char *opts)
+static int uart_open(struct aura_node *node, const char *opts)
 {
-	slog(1, SLOG_INFO, "Opening dummy transport");
+	slog(1, SLOG_INFO, "Opening uart transport");
 	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, CB_ARG);
 	struct aura_timer *online = aura_timer_create(node, online_cb_fn, CB_ARG);
 	struct timeval tv;
@@ -70,12 +69,12 @@ static int dummy_open(struct aura_node *node, const char *opts)
 
 
 
-static void dummy_close(struct aura_node *node)
+static void uart_close(struct aura_node *node)
 {
-	slog(1, SLOG_INFO, "Closing dummy transport");
+	slog(1, SLOG_INFO, "Closing uart transport");
 }
 
-static void dummy_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
+static void uart_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
 
@@ -83,33 +82,37 @@ static void dummy_handle_event(struct aura_node *node, enum node_event evt, cons
 		buf = aura_node_read(node);
 		if (!buf)
 			break;
+
+		if (buf->object != NULL)
+			printf("s1='%s'\n", buf->object->name);
+
 		aura_node_write(node, buf);
 	}
 }
 
-static void dummy_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
+static void uart_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
 {
-	slog(0, SLOG_DEBUG, "dummy: serializing buf 0x%x", buf);
+	slog(0, SLOG_DEBUG, "uart: serializing buf 0x%x", buf);
 	uint64_t ptr = (uintptr_t)buf;
 	aura_buffer_put_u64(dst, ptr);
 }
 
-static struct aura_buffer *dummy_buffer_get(struct aura_buffer *buf)
+static struct aura_buffer *uart_buffer_get(struct aura_buffer *buf)
 {
 	struct aura_buffer *ret = (struct aura_buffer *)(uintptr_t)aura_buffer_get_u64(buf);
 
-	slog(0, SLOG_DEBUG, "dummy: deserializing buf 0x%x", ret);
+	slog(0, SLOG_DEBUG, "uart: deserializing buf 0x%x", ret);
 	return ret;
 }
 
-static struct aura_transport dummy = {
-	.name			  = "dummy",
-	.open			  = dummy_open,
-	.close			  = dummy_close,
-	.handle_event	  = dummy_handle_event,
+static struct aura_transport uart = {
+	.name			  = "uart",
+	.open			  = uart_open,
+	.close			  = uart_close,
+	.handle_event	  = uart_handle_event,
 	.buffer_overhead  = sizeof(struct aura_packet8),
 	.buffer_offset	  = sizeof(struct aura_packet8),
-	.buffer_get		  = dummy_buffer_get,
-	.buffer_put		  = dummy_buffer_put,
+	.buffer_get		  = uart_buffer_get,
+	.buffer_put		  = uart_buffer_put,
 };
-AURA_TRANSPORT(dummy);
+AURA_TRANSPORT(uart);

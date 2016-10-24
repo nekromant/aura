@@ -25,8 +25,7 @@ SET(AURA_TEST_LEAKS no CACHE BOOL "Valgrind for memory leaks during testing (Run
 SET(AURA_TEST_USB_TRANSPORT no CACHE BOOL "Run usb/susb transport module test suite (requires hardware)")
 SET(AURA_TEST_STLINK_TRANSPORT no CACHE BOOL "Run stlink transport module test suite (requires hardware)")
 SET(AURA_TEST_NMC_TRANSPORT no CACHE BOOL "Run Neuromatrix(r) DSP transport module test suite (requires hardware)")
-SET(AURA_TEST_DUMMY yes CACHE BOOL "Run basic test suite on a uart transport (no hw required)")
-SET(AURA_TEST_UART yes CACHE BOOL "Run basic test suite on a uart transport (no hw required)")
+SET(AURA_TEST_DUMMY yes CACHE BOOL "Run basic test suite on a dummy transport (no hw required)")
 SET(AURA_TEST_BINDINGS yes CACHE BOOL "Run basic lua bindings test suite (no hw required)")
 SET(AURA_COVERALLS no CACHE BOOL "Generate coveralls data")
 SET(AURA_TEST_REMOTE no CACHE BOOL "Run testsuite on remote machine")
@@ -83,9 +82,9 @@ endif()
 
 #Add all our transport modules
 aura_add_transport(null       src/transports/transport-null.c)
-aura_add_transport(uart      src/transports/transport-uart.c)
+aura_add_transport(dummy      src/transports/transport-dummy.c)
 aura_add_transport(sysfs-gpio src/transports/transport-sysfs-gpio.c)
-ADD_C_TEST_DIRECTORY(uart uart ${AURA_TEST_UART} ${AURA_TEST_LEAKS})
+ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
 
 #aura_add_transport(serial transport-serial.c)
 
