@@ -1,5 +1,6 @@
 #include "packetizer_serial.h"
 #include "my_debug.h"
+#include <string.h>
 
 #define START_CHAR 'S'
 
@@ -27,6 +28,7 @@ struct aura_packet8 *aura_packed_data(char *data, size_t len)
 				printf("Start state %d %c \n", (int) i, data[i]);
 				if (data[i] == START_CHAR) {
 					packet_state = CONT_STATE;
+					res_packet->start = data[i];
 				}
 				break;
 			case CONT_STATE:
@@ -65,6 +67,17 @@ struct aura_packet8 *aura_packed_data(char *data, size_t len)
 }
 
 
-//char * aura_unpacked_data(struct aura_packet8 *packet, size_t len);
+char * aura_unpacked_data(struct aura_packet8 *packet, size_t len)
+{
+	char * data;
+	data = calloc(sizeof(struct aura_packet8)/sizeof(char), sizeof(char));
+	data[0] = packet->start;
+	data[1] = packet->cont;
+	data[2] = packet->datalen;
+	data[3] = packet->invdatalen;
+	data[4] = packet->crc8;
+	memcpy(data + 5, (char *) packet->data, sizeof(struct aura_packet8)/sizeof(char));
+	return data;
+}
 
 

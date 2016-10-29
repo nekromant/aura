@@ -6,7 +6,9 @@ int main()
 {
 	printf("I'm here!!!\n");
 	
-	struct aura_packet8 * my_packed  = aura_packed_data("S1234567890", 11);
-	struct aura_packet8 * my_packed1 = aura_packed_data("123S1234567890", 11);
-	struct aura_packet8 * my_packed2 = aura_packed_data("123S45678S90", 11);
+	struct aura_packet8 * my_packed  = aura_packed_data("ffS1224567890", 11);
+	printf("my_packed->data %s\n", my_packed->data);
+
+	char * data = aura_unpacked_data(my_packed, my_packed->datalen);
+	printf("data %s\n", data);
 }
