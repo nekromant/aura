@@ -34,6 +34,7 @@ struct aura_packetizer *aura_packetizer_create(struct aura_node *node)
 	pkt->curbuf = NULL;
 	pkt->cont = 0;
 	pkt->copied = 0;
+	pkt->state = STATE_SEARCH_START;
 	return pkt;
 }
 

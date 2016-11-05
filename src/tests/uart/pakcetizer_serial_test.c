@@ -6,6 +6,6 @@ int main()
 {
 	printf("I'm here!!!\n");
 	
-	struct aura_packet10 * my_packed;	
-	aura_unpacked_data(my_packed, 23);
+//	struct aura_packet10 * my_packed;	
+//	aura_unpacked_data(my_packed, 23);
 }

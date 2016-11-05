@@ -14,6 +14,32 @@ enum packetizer_state
 	DATA_STATE
 } packet_state;
 
+struct aura_packetizer *aura_packetizer_create(struct aura_node *node)
+{
+	struct aura_packetizer *pkt = malloc(sizeof(*pkt));
+
+	if (!pkt) {
+		//BUG(node, "packetizer allocation failed");
+		return NULL;
+	}
+	pkt->node = node;
+	pkt->endian = -1; /* Not yet determined */
+	pkt->recvcb = NULL;
+	pkt->curbuf = NULL;
+	pkt->cout = 0;
+	pkt->copied = 0;
+	return pkt;
+}
+
+void aura_packetizer_destroy(struct aura_packetizer *pkt)
+{
+	//if (pkt->curbuf)
+	//	aura_buffer_release(pkt->curbuf);
+	free(pkt);
+}
+
+
+
 struct aura_packet8 *aura_packed_data(char *data, size_t len)
 {
 	printf("aura_packed_data\n");
@@ -63,6 +89,7 @@ struct aura_packet8 *aura_packed_data(char *data, size_t len)
 			default:
 				break;
 		}
+	printf("%s\n", aura_unpacked_data(res_packet, 8));
 	return res_packet;
 }
 

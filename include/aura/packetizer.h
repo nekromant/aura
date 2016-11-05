@@ -16,9 +16,11 @@ struct __attribute__((packed)) aura_packet8  {
 
 struct aura_packetizer {
 	int 			endian;
-	uint8_t			cout;
+	uint8_t			cont;
 	uint8_t			expect_cont;
 	
+	int 			state;
+
 	struct aura_node *	node;
 
 	/* Packetizer callbacks */
@@ -34,6 +36,7 @@ struct aura_packetizer {
 
 	struct aura_buffer *	curbuf;
 
+	int 			copied;
 	struct aura_packet8	headerbuf; /* FixMe: ... */
 };
 

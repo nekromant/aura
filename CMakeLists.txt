@@ -48,11 +48,14 @@ aura_add_source_in_dir(src/core
     eventloop-factory.c timer.c
     retparse.c queue.c
     libevent-helpers.c
+    crc.c
 )
 
 aura_add_source_in_dir(src/allocators/
     ion.c ion_buffer_allocator.c
 )
+
+aura_add_source_in_dir(src/transports/packetizer.c)
 
 # Our dependencies
 # Lua needs some x-tra love
@@ -84,8 +87,12 @@ endif()
 #Add all our transport modules
 aura_add_transport(null       src/transports/transport-null.c)
 aura_add_transport(uart      src/transports/transport-uart.c)
+aura_add_transport(dummy      src/transports/transport-dummy.c src/transports/packetizer.c)
 aura_add_transport(sysfs-gpio src/transports/transport-sysfs-gpio.c)
+
 ADD_C_TEST_DIRECTORY(uart uart ${AURA_TEST_UART} ${AURA_TEST_LEAKS})
+ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
+
 
 #aura_add_transport(serial transport-serial.c)
 
