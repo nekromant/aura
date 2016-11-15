@@ -99,8 +99,9 @@ BIN	include/aura/client.h	15;"	d
 BIN	lua/aura/conf-loader.lua	/^function BIN(v)$/;"	f
 BUF	include/aura/client.h	17;"	d
 BUG	src/core/panic.c	/^int __attribute__((noreturn)) BUG(struct aura_node *node, const char *msg, ...)$/;"	f
+BUILD_DIR	my_paketizer/Makefile	/^BUILD_DIR=.\/build\/$/;"	m
 CB_ARG	src/transports/transport-dummy.c	6;"	d	file:
-CB_ARG	src/transports/transport-uart.c	6;"	d	file:
+CB_ARG	src/transports/transport-uart.c	9;"	d	file:
 CHK	scripts/checkpatch.pl	/^sub CHK {$/;"	s
 CLIENT_H	include/aura/client.h	2;"	d
 CLR_BLUE	src/core/slog.c	33;"	d	file:
@@ -335,8 +336,18 @@ COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	28;
 COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	167;"	d	file:
 COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	208;"	d	file:
 COMPILER_VERSION_TWEAK	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	33;"	d	file:
+CONT_STATE	my_paketizer/packetizer_serial.c	/^	CONT_STATE,$/;"	e	enum:packetizer_state	file:
+CONT_STATE	src/transports/packetizer_serial.c	/^	CONT_STATE,$/;"	e	enum:packetizer_state	file:
+CRC8_STATE	my_paketizer/packetizer_serial.c	/^	CRC8_STATE,$/;"	e	enum:packetizer_state	file:
+CRC8_STATE	src/transports/packetizer_serial.c	/^	CRC8_STATE,$/;"	e	enum:packetizer_state	file:
 CRC_H	include/aura/crc.h	2;"	d
 Cc	scripts/checkpatch.pl	/^	Cc:$/;"	l
+DATALEN_STATE	my_paketizer/packetizer_serial.c	/^	DATALEN_STATE,$/;"	e	enum:packetizer_state	file:
+DATA_STATE	my_paketizer/packetizer_serial.c	/^	DATA_STATE$/;"	e	enum:packetizer_state	file:
+DATA_STATE	src/transports/packetizer_serial.c	/^	DATA_STATE$/;"	e	enum:packetizer_state	file:
+DBG	my_paketizer/my_debug.h	10;"	d
+DBG	my_paketizer/my_debug.h	8;"	d
+DEBUG	my_paketizer/my_debug.h	6;"	d
 DEC	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	439;"	d	file:
 DEC	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	434;"	d	file:
 DECLARE_GETFUNC	src/core/retparse.c	4;"	d	file:
@@ -357,6 +368,7 @@ ID_VOID_MAIN	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	6;"	d	file:
 INIT_HLIST_HEAD	include/aura/list.h	385;"	d
 INIT_HLIST_NODE	include/aura/list.h	386;"	d
 INIT_LIST_HEAD	include/aura/list.h	71;"	d
+INVDATALEN_STATE	my_paketizer/packetizer_serial.c	/^	INVDATALEN_STATE,$/;"	e	enum:packetizer_state	file:
 ION_FLAG_CACHED	include/ion/ion.h	63;"	d
 ION_FLAG_CACHED_NEEDS_SYNC	include/ion/ion.h	67;"	d
 ION_HEAP_CARVEOUT_MASK	include/ion/ion.h	54;"	d
@@ -380,6 +392,7 @@ ION_IOC_SYNC	include/ion/ion.h	190;"	d
 ION_NUM_HEAPS	include/ion/ion.h	/^	ION_NUM_HEAPS = 16,$/;"	e	enum:ion_heap_type
 ION_NUM_HEAP_IDS	include/ion/ion.h	57;"	d
 L	src/lua/bindings.c	/^	lua_State *		L;$/;"	m	struct:laura_node	file:
+LENGTH_STATE	src/transports/packetizer_serial.c	/^	LENGTH_STATE,$/;"	e	enum:packetizer_state	file:
 LIST_HEAD	include/aura/list.h	68;"	d
 LIST_HEAD_INIT	include/aura/list.h	66;"	d
 LIST_POISON1	include/aura/list.h	50;"	d
@@ -388,6 +401,7 @@ LOG_TAG	src/allocators/ion.c	20;"	d	file:
 LUA_LIB	src/lua/bindings.c	1;"	d	file:
 MAGIC	src/transports/transport-nmc.c	13;"	d	file:
 MAXMSG	src/core/slog.c	40;"	d	file:
+MY_DEBUG_H	my_paketizer/my_debug.h	2;"	d
 NEW	lua/aura/class.lua	/^function NEW(name, ...)$/;"	f
 NMC_EVENT_STDIO	src/transports/transport-nmc.c	/^	NMC_EVENT_STDIO=1 << 0,$/;"	e	enum:__anon3	file:
 NMC_EVENT_TRANSPORT	src/transports/transport-nmc.c	/^	NMC_EVENT_TRANSPORT=1 << 1$/;"	e	enum:__anon3	file:
@@ -404,11 +418,14 @@ OBJDIR	test-firmwares/usb-test-fw/Makefile	/^OBJDIR=.$/;"	m
 OPCODE	src/transports/transport-sysfs-gpio.c	157;"	d	file:
 Options	scripts/checkpatch.pl	/^Options:$/;"	l
 PACKETIZER_H	include/aura/packetizer.h	2;"	d
+PACKETIZER_H	include/aura/packetizer_serial.h	2;"	d
+PACKETIZER_SERIAL_H	my_paketizer/packetizer_serial.h	2;"	d
 PACKET_CALL	src/transports/transport-serial.c	/^	PACKET_CALL,$/;"	e	enum:serpacket_type	file:
 PACKET_HELLO	src/transports/transport-serial.c	/^	PACKET_HELLO,$/;"	e	enum:serpacket_type	file:
 PACKET_INFO	src/transports/transport-serial.c	/^	PACKET_INFO,$/;"	e	enum:serpacket_type	file:
 PACKET_PING	src/transports/transport-serial.c	/^	PACKET_PING,$/;"	e	enum:serpacket_type	file:
 PACKET_START	include/aura/packetizer.h	6;"	d
+PACKET_START	include/aura/packetizer_serial.h	6;"	d
 PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	293;"	d	file:
 PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	296;"	d	file:
 PLATFORM_ID	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	299;"	d	file:
@@ -529,6 +546,11 @@ SLOG_WARN	include/aura/slog.h	37;"	d
 SRCDIR	test-firmwares/susb-test-fw/Makefile	/^SRCDIR=antares$/;"	m
 SRCDIR	test-firmwares/usb-test-dummy-fw/Makefile	/^SRCDIR=antares$/;"	m
 SRCDIR	test-firmwares/usb-test-fw/Makefile	/^SRCDIR=antares$/;"	m
+START_CHAR	my_paketizer/my_debug.h	4;"	d
+START_CHAR	my_paketizer/packetizer_serial.c	5;"	d	file:
+START_CHAR	src/transports/packetizer_serial.c	3;"	d	file:
+START_STATE	my_paketizer/packetizer_serial.c	/^	START_STATE = 0,$/;"	e	enum:packetizer_state	file:
+START_STATE	src/transports/packetizer_serial.c	/^	START_STATE = 0,$/;"	e	enum:packetizer_state	file:
 STATE_READ_DATA	src/transports/packetizer.c	/^	STATE_READ_DATA$/;"	e	enum:packetizer_state	file:
 STATE_READ_HEADER	src/transports/packetizer.c	/^	STATE_READ_HEADER,$/;"	e	enum:packetizer_state	file:
 STATE_SEARCH_START	src/transports/packetizer.c	/^	STATE_SEARCH_START=0,$/;"	e	enum:packetizer_state	file:
@@ -707,9 +729,16 @@ aura_node_write	src/core/aura.c	/^void aura_node_write(struct aura_node *node, s
 aura_object	include/aura/aura.h	/^struct aura_object {$/;"	s
 aura_object_migration_failed_cb	src/core/aura.c	/^void aura_object_migration_failed_cb(struct aura_node *						node,$/;"	f
 aura_open	src/core/aura.c	/^struct aura_node *aura_open(const char *name, const char *opts)$/;"	f
+aura_packed_data	my_paketizer/packetizer_serial.c	/^struct aura_packet8 *aura_packed_data(char *data, size_t len)$/;"	f
+aura_packed_data	src/transports/packetizer_serial.c	/^struct aura_packet8 *aura_packed_data(const char *data, size_t len)$/;"	f
+aura_packet10	include/aura/packetizer_serial.h	/^struct __attribute__((packed)) aura_packet10  {$/;"	s
 aura_packet8	include/aura/packetizer.h	/^struct __attribute__((packed)) aura_packet8  {$/;"	s
+aura_packet8	my_paketizer/packetizer_serial.h	/^struct __attribute__((packed)) aura_packet8 {$/;"	s
 aura_packetizer	include/aura/packetizer.h	/^struct aura_packetizer {$/;"	s
+aura_packetizer	my_paketizer/packetizer_serial.h	/^struct aura_packetizer {$/;"	s
+aura_packetizer_create	my_paketizer/packetizer_serial.c	/^struct aura_packetizer *aura_packetizer_create(struct aura_node *node)$/;"	f
 aura_packetizer_create	src/transports/packetizer.c	/^struct aura_packetizer *aura_packetizer_create(struct aura_node *node)$/;"	f
+aura_packetizer_destroy	my_paketizer/packetizer_serial.c	/^void aura_packetizer_destroy(struct aura_packetizer *pkt)$/;"	f
 aura_packetizer_destroy	src/transports/packetizer.c	/^void aura_packetizer_destroy(struct aura_packetizer *pkt)$/;"	f
 aura_packetizer_encapsulate	src/transports/packetizer.c	/^void aura_packetizer_encapsulate(struct aura_packetizer *	pkt,$/;"	f
 aura_packetizer_feed	src/transports/packetizer.c	/^void aura_packetizer_feed(struct aura_packetizer *pkt, const char *data, size_t len)$/;"	f
@@ -757,6 +786,7 @@ aura_transport_register	src/core/transport.c	/^void aura_transport_register(stru
 aura_transport_release	src/core/transport.c	/^void aura_transport_release(const struct aura_transport *tr)$/;"	f
 aura_typeerror	src/lua/bindings.c	/^static int aura_typeerror(lua_State *L, int narg, const char *tname)$/;"	f	file:
 aura_unhandled_evt_cb	src/core/aura.c	/^void aura_unhandled_evt_cb(struct aura_node *						node,$/;"	f
+aura_unpacked_data	my_paketizer/packetizer_serial.c	/^char * aura_unpacked_data(struct aura_packet8 *packet, size_t len)$/;"	f
 aura_wait_status	src/core/aura.c	/^void aura_wait_status(struct aura_node *node, int status)$/;"	f
 average_aggregate	benchmarks/dummy-benchmark.c	/^void average_aggregate(struct aura_node *n, long (*test)(struct aura_node *n), int runs, char *lbl)$/;"	f
 bench	src/transports/transport-bench.c	/^AURA_TRANSPORT(bench);$/;"	v
@@ -813,20 +843,33 @@ cmd	include/ion/ion.h	/^	unsigned int cmd;$/;"	m	struct:ion_custom_data
 cmpfct	lua/aura/dumper.lua	/^  local function cmpfct(a,b)$/;"	f
 cont	include/aura/packetizer.h	/^	uint8_t			cont;$/;"	m	struct:aura_packetizer
 cont	include/aura/packetizer.h	/^	uint8_t cont;$/;"	m	struct:aura_packet8
+cont	include/aura/packetizer_serial.h	/^	uint8_t cont;$/;"	m	struct:aura_packet10
+cont	my_paketizer/packetizer_serial.h	/^	uint8_t cont;$/;"	m	struct:aura_packet8
 container_of	include/aura/list.h	39;"	d
 control_retry_count	src/transports/transport-susb.c	/^	int				control_retry_count;$/;"	m	struct:usb_dev_info	file:
 control_retry_max	src/transports/transport-susb.c	/^	int				control_retry_max;$/;"	m	struct:usb_dev_info	file:
-copied	include/aura/packetizer.h	/^	int			copied;$/;"	m	struct:aura_packetizer
+copbuf	src/transports/packetizer_serial.c	/^static char 	copbuf[];$/;"	v	file:
+copied	include/aura/packetizer.h	/^	int 			copied;$/;"	m	struct:aura_packetizer
+copied	my_paketizer/packetizer_serial.h	/^	uint8_t 		copied;$/;"	m	struct:aura_packetizer
+copied	src/transports/packetizer_serial.c	/^static int 	copied;$/;"	v	file:
 copy 	lua/aura.lua	/^local function copy (t)$/;"	f
 copy_spacing	scripts/checkpatch.pl	/^sub copy_spacing {$/;"	s
 count	src/transports/transport-stlink.c	/^	uint32_t count;$/;"	m	struct:export_table	file:
+cout	my_paketizer/packetizer_serial.h	/^	uint8_t			cout;$/;"	m	struct:aura_packetizer
 crc16	crc.c	/^uint16_t crc16(uint16_t crc, uint8_t const *buffer, size_t len)$/;"	f
+crc16	src/core/crc.c	/^uint16_t crc16(uint16_t crc, uint8_t const *buffer, size_t len)$/;"	f
 crc16_byte	crc.c	/^static inline uint16_t crc16_byte(uint16_t crc, const uint8_t data)$/;"	f	file:
+crc16_byte	src/core/crc.c	/^static inline uint16_t crc16_byte(uint16_t crc, const uint8_t data)$/;"	f	file:
 crc16_table	crc.c	/^uint16_t const crc16_table[256] = {$/;"	v
+crc16_table	src/core/crc.c	/^uint16_t const crc16_table[256] = {$/;"	v
 crc32	src/transports/transport-serial.c	/^	uint32_t crc32;$/;"	m	struct:serpacket	file:
 crc8	crc.c	/^uint8_t crc8(uint8_t crc, uint8_t *data, size_t len)$/;"	f
 crc8	include/aura/packetizer.h	/^	uint8_t crc8;$/;"	m	struct:aura_packet8
+crc8	include/aura/packetizer_serial.h	/^	uint8_t crc8;$/;"	m	struct:aura_packet10
+crc8	my_paketizer/packetizer_serial.h	/^	uint8_t crc8;$/;"	m	struct:aura_packet8
+crc8	src/core/crc.c	/^uint8_t crc8(uint8_t crc, uint8_t *data, size_t len)$/;"	f
 crc8_table	crc.c	/^static uint8_t crc8_table[] = {$/;"	v	file:
+crc8_table	src/core/crc.c	/^static uint8_t crc8_table[] = {$/;"	v	file:
 create	include/aura/buffer_allocator.h	/^    void *(*create)(struct aura_node *node);$/;"	m	struct:aura_buffer_allocator
 create	include/aura/eventloop.h	/^        int  (*create)(struct aura_eventloop *loop);$/;"	m	struct:aura_eventloop_module
 ctl	src/tests/broken/susb-pw-ctl.c	/^void ctl(struct aura_node *node, int out, int reg, int state)$/;"	f
@@ -846,8 +889,10 @@ ctx_statement_block	scripts/checkpatch.pl	/^sub ctx_statement_block {$/;"	s
 ctx_statement_full	scripts/checkpatch.pl	/^sub ctx_statement_full {$/;"	s
 ctx_statement_level	scripts/checkpatch.pl	/^sub ctx_statement_level {$/;"	s
 curbuf	include/aura/packetizer.h	/^	struct aura_buffer *	curbuf;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_buffer
+curbuf	my_paketizer/packetizer_serial.h	/^	struct aura_buffer *	curbuf;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_buffer
 curmagic	src/transports/transport-serial.c	/^	uint16_t	curmagic;$/;"	m	struct:serialdata	file:
 curpacket	src/tests/broken/packetizer8-simple.c	/^static int curpacket;$/;"	v	file:
+curpacket	src/tests/dummy/packetizer8-simple.c	/^static int curpacket;$/;"	v	file:
 current	test-firmwares/susb-test-fw/src/main.c	/^struct cRGB current[2] = { $/;"	v	typeref:struct:cRGB
 current_buffer	src/transports/transport-susb.c	/^	struct aura_buffer *		current_buffer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_buffer	file:
 current_buffer	src/transports/transport-usb.c	/^	struct aura_buffer *		current_buffer;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::aura_buffer	file:
@@ -862,15 +907,20 @@ current_out	src/transports/transport-nmc.c	/^	struct aura_buffer *		current_out;
 current_time	benchmarks/dummy-benchmark.c	/^long current_time(void)$/;"	f
 data	include/aura/aura.h	/^	char *			data;$/;"	m	struct:aura_buffer
 data	include/aura/packetizer.h	/^	char data[];$/;"	m	struct:aura_packet8
+data	include/aura/packetizer_serial.h	/^	char data[];$/;"	m	struct:aura_packet10
+data	my_paketizer/packetizer_serial.h	/^	char data[];$/;"	m	struct:aura_packet8
 data	src/transports/transport-serial.c	/^	char data[];$/;"	m	struct:serpacket	file:
 data	src/transports/transport-serial.c	/^	} data;$/;"	m	struct:serpacket_data	typeref:union:serpacket_data::__anon1	file:
 data	src/transports/transport-usb.c	/^	char		data[];$/;"	m	struct:usb_event_packet	file:
 data_ptr	src/transports/transport-stlink.c	/^	uint32_t data_ptr;$/;"	m	struct:circ_buf	file:
 datalen	include/aura/packetizer.h	/^	uint8_t datalen;$/;"	m	struct:aura_packet8
+datalen	include/aura/packetizer_serial.h	/^	uint8_t datalen;$/;"	m	struct:aura_packet10
+datalen	my_paketizer/packetizer_serial.h	/^	uint8_t datalen;$/;"	m	struct:aura_packet8
 datalen	src/transports/transport-serial.c	/^	uint16_t datalen;$/;"	m	struct:serpacket	file:
 day	include/aura/slog.h	/^    int day;$/;"	m	struct:__anon4
 deferred_inbound	include/aura/eventloop.h	/^        int deferred_inbound;$/;"	m	struct:aura_eventloop
 deparenthesize	scripts/checkpatch.pl	/^sub deparenthesize {$/;"	s
+descr	src/transports/transport-uart.c	/^	int descr;$/;"	m	struct:uart_dev_info	file:
 destroy	include/aura/buffer_allocator.h	/^    void (*destroy)(struct aura_node *node, void *data);$/;"	m	struct:aura_buffer_allocator
 destroy	include/aura/eventloop.h	/^        void (*destroy)(struct aura_eventloop *loop);$/;"	m	struct:aura_eventloop_module
 dev_descr	src/transports/transport-susb.c	/^	struct ncusb_devwatch_data	dev_descr;$/;"	m	struct:usb_dev_info	typeref:struct:usb_dev_info::ncusb_devwatch_data	file:
@@ -911,7 +961,8 @@ dummy_populate_etable	src/transports/transport-null.c	/^static void dummy_popula
 dump	lua/aura/dumper.lua	/^function dump(...)$/;"	f
 dumplua	lua/aura/dumper.lua	/^  function dumplua(value, ident, path)$/;"	f
 eaddr	src/transports/transport-nmc.c	/^	uint32_t			eaddr;$/;"	m	struct:nmc_private	file:
-endian	include/aura/packetizer.h	/^	int			endian;$/;"	m	struct:aura_packetizer
+endian	include/aura/packetizer.h	/^	int 			endian;$/;"	m	struct:aura_packetizer
+endian	my_paketizer/packetizer_serial.h	/^	int 			endian;$/;"	m	struct:aura_packetizer
 entry	include/aura/timer.h	/^	struct list_head entry; \/* For node linked list *\/$/;"	m	struct:aura_timer	typeref:struct:aura_timer::list_head
 ep	src/transports/transport-nmc.c	/^	uint32_t			ep;$/;"	m	struct:nmc_private	file:
 epollfd	src/eventloop/epoll.c	/^	int			epollfd;$/;"	m	struct:aura_epoll_loop	file:
@@ -940,7 +991,9 @@ exitcode	src/tests/dummy/timer-basic.c	/^static int exitcode = -1;$/;"	v	file:
 exitcode	src/tests/uart/timer-basic.c	/^static int exitcode = -1;$/;"	v	file:
 expand_tabs	scripts/checkpatch.pl	/^sub expand_tabs {$/;"	s
 expect_cont	include/aura/packetizer.h	/^	uint8_t			expect_cont;$/;"	m	struct:aura_packetizer
+expect_cont	my_paketizer/packetizer_serial.h	/^	uint8_t			expect_cont;$/;"	m	struct:aura_packetizer
 expected	src/tests/broken/packetizer8-simple.c	/^int expected[] =$/;"	v
+expected	src/tests/dummy/packetizer8-simple.c	/^int expected[] =$/;"	v
 export_header	src/transports/transport-stlink.c	/^struct export_header {$/;"	s	file:
 export_object	src/transports/transport-stlink.c	/^struct export_object {$/;"	s	file:
 export_table	src/transports/transport-stlink.c	/^struct export_table {$/;"	s	file:
@@ -1016,6 +1069,7 @@ hash_show_words	scripts/checkpatch.pl	/^sub hash_show_words {$/;"	s
 hdr	src/transports/transport-nmc.c	/^	struct nmc_aura_header	hdr;$/;"	m	struct:nmc_export_table	typeref:struct:nmc_export_table::nmc_aura_header	file:
 head	src/transports/transport-stlink.c	/^	uint32_t head;$/;"	m	struct:circ_buf	file:
 headerbuf	include/aura/packetizer.h	/^	struct aura_packet8	headerbuf; \/* FixMe: ... *\/$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_packet8
+headerbuf	my_paketizer/packetizer_serial.h	/^	struct aura_packet8	headerbuf; \/* FixMe: ... *\/$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_packet8
 heap_id_mask	include/ion/ion.h	/^	unsigned int heap_id_mask;$/;"	m	struct:ion_allocation_data
 help	scripts/checkpatch.pl	/^sub help {$/;"	s
 hlist_add_after	include/aura/list.h	/^static inline void hlist_add_after(struct hlist_node *n,$/;"	f
@@ -1072,6 +1126,8 @@ init	pw-ctl-serv.lua	/^function init()$/;"	f
 initDocs	doc-index/index.html	/^        function initDocs() {$/;"	f
 init_factory	src/core/eventloop-factory.c	/^static void __attribute__((constructor (102))) init_factory() {$/;"	f	file:
 invdatalen	include/aura/packetizer.h	/^	uint8_t invdatalen;$/;"	m	struct:aura_packet8
+invdatalen	include/aura/packetizer_serial.h	/^	uint8_t invdatalen;$/;"	m	struct:aura_packet10
+invdatalen	my_paketizer/packetizer_serial.h	/^	uint8_t invdatalen;$/;"	m	struct:aura_packet8
 invdatalen	src/transports/transport-serial.c	/^	uint16_t invdatalen;$/;"	m	struct:serpacket	file:
 io_buf_size	src/transports/transport-susb.c	/^	uint16_t			io_buf_size;$/;"	m	struct:usb_dev_info	file:
 io_buf_size	src/transports/transport-usb.c	/^	uint16_t			io_buf_size;$/;"	m	struct:usb_dev_info	file:
@@ -1225,6 +1281,7 @@ main	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^void main() {}$/;"	
 main	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^int main(int argc, char* argv[])$/;"	f
 main	build/CMakeFiles/feature_tests.c	/^int main(int argc, char** argv) { (void)argv; return features[argc]; }$/;"	f
 main	build/CMakeFiles/feature_tests.cxx	/^int main(int argc, char** argv) { (void)argv; return features[argc]; }$/;"	f
+main	my_paketizer/packetizer_serial_test.c	/^int main()$/;"	f
 main	src/lua/lua-test-wrapper.c	/^int main(int argc, char *argv[])$/;"	f
 main	src/tests/broken/packetizer8-simple.c	/^int main() {$/;"	f
 main	src/tests/broken/susb-pw-ctl.c	/^int main(int argc, const char **argv) {$/;"	f
@@ -1237,6 +1294,7 @@ main	src/tests/dummy/buffer-arg.c	/^int main() {$/;"	f
 main	src/tests/dummy/cached-id.c	/^int main() {$/;"	f
 main	src/tests/dummy/call-too-early.c	/^int main() {$/;"	f
 main	src/tests/dummy/open-close.c	/^int main() {$/;"	f
+main	src/tests/dummy/packetizer8-simple.c	/^int main() {$/;"	f
 main	src/tests/dummy/serdes-test.c	/^int main() {$/;"	f
 main	src/tests/dummy/sync-call-by-id.c	/^int main() {$/;"	f
 main	src/tests/dummy/sync-call.c	/^int main() {$/;"	f
@@ -1254,6 +1312,7 @@ main	src/tests/uart/buffer-arg.c	/^int main() {$/;"	f
 main	src/tests/uart/cached-id.c	/^int main() {$/;"	f
 main	src/tests/uart/call-too-early.c	/^int main() {$/;"	f
 main	src/tests/uart/open-close.c	/^int main() {$/;"	f
+main	src/tests/uart/pakcetizer_serial_test.c	/^int main()$/;"	f
 main	src/tests/uart/serdes-test.c	/^int main() {$/;"	f
 main	src/tests/uart/sync-call-by-id.c	/^int main() {$/;"	f
 main	src/tests/uart/sync-call.c	/^int main() {$/;"	f
@@ -1322,6 +1381,7 @@ nmc_private	src/transports/transport-nmc.c	/^struct nmc_private {$/;"	s	file:
 node	include/aura/aura.h	/^	struct aura_node *	node;$/;"	m	struct:aura_pollfds	typeref:struct:aura_pollfds::aura_node
 node	include/aura/packetizer.h	/^	struct aura_node *	node;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_node
 node	include/aura/timer.h	/^	struct aura_node *node;$/;"	m	struct:aura_timer	typeref:struct:aura_timer::aura_node
+node	my_paketizer/packetizer_serial.h	/^	struct aura_node *	node;$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::aura_node
 node	src/lua/bindings.c	/^	struct aura_node *	node;$/;"	m	struct:laura_node	typeref:struct:laura_node::aura_node	file:
 node	src/transports/transport-nmc.c	/^	struct aura_node *		node;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_node	file:
 node	src/transports/transport-stlink.c	/^	struct aura_node *node;$/;"	m	struct:stlink_transport_data	typeref:struct:stlink_transport_data::aura_node	file:
@@ -1361,6 +1421,7 @@ numevt	src/tests/uart/async-by-id.c	/^static int numevt=0;$/;"	v	file:
 numevt	src/tests/uart/async.c	/^static int numevt=0;$/;"	v	file:
 numevt	src/tests/uart/unhandled-evt.c	/^static int numevt=0;$/;"	v	file:
 numfails	src/tests/broken/packetizer8-simple.c	/^static int numfails;$/;"	v	file:
+numfails	src/tests/dummy/packetizer8-simple.c	/^static int numfails;$/;"	v	file:
 numfds	include/aura/aura.h	/^	int				numfds;         \/* Currently available space for descriptors *\/$/;"	m	struct:aura_node
 object	include/aura/aura.h	/^	struct aura_object *	object;$/;"	m	struct:aura_buffer	typeref:struct:aura_buffer::aura_object
 object_is_equal	src/core/export.c	/^static int object_is_equal(struct aura_object *one, struct aura_object *two)$/;"	f	file:
@@ -1373,7 +1434,6 @@ objects	src/transports/transport-stlink.c	/^	uint32_t objects[]; \/* pointers! *
 objs	src/transports/transport-nmc.c	/^	struct nmc_aura_object	objs[];$/;"	m	struct:nmc_export_table	typeref:struct:nmc_export_table::nmc_aura_object	file:
 offsetof	include/aura/list.h	30;"	d
 online_cb_fn	src/transports/transport-dummy.c	/^static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)$/;"	f	file:
-online_cb_fn	src/transports/transport-uart.c	/^static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)$/;"	f	file:
 open	include/aura/aura.h	/^	int (*open)(struct aura_node *node, const char *opts);$/;"	m	struct:aura_transport
 openshit	src/tests/bindings/open-invalid.lua	/^function openshit()$/;"	f
 optbuf	src/transports/transport-usb.c	/^	char *				optbuf;$/;"	m	struct:usb_dev_info	file:
@@ -1383,9 +1443,13 @@ owner	include/aura/aura.h	/^	struct aura_node *	owner;$/;"	m	struct:aura_buffer	
 owner	include/aura/etable.h	/^	struct aura_node *	owner;$/;"	m	struct:aura_export_table	typeref:struct:aura_export_table::aura_node
 packarg	include/aura/packetizer.h	/^	void *			packarg;$/;"	m	struct:aura_packetizer
 packet_packfn	include/aura/packetizer.h	/^	struct aura_buffer *	(*packet_packfn)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::packet_packfn
+packet_state	my_paketizer/packetizer_serial.c	/^} packet_state;$/;"	v	typeref:enum:packetizer_state
+packet_state	src/transports/packetizer_serial.c	/^} packet_state;$/;"	v	typeref:enum:packetizer_state
 packet_unpackfn	include/aura/packetizer.h	/^	struct aura_buffer *	(*packet_unpackfn)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer	typeref:struct:aura_packetizer::packet_unpackfn
 packetizer_dispatch_packet	src/transports/packetizer.c	/^static void packetizer_dispatch_packet(struct aura_packetizer *pkt)$/;"	f	file:
+packetizer_state	my_paketizer/packetizer_serial.c	/^enum packetizer_state $/;"	g	file:
 packetizer_state	src/transports/packetizer.c	/^enum packetizer_state {$/;"	g	file:
+packetizer_state	src/transports/packetizer_serial.c	/^enum packetizer_state $/;"	g	file:
 parse_and_register_exports	src/transports/transport-nmc.c	/^static int parse_and_register_exports(struct nmc_private *pv)$/;"	f	file:
 parse_email	scripts/checkpatch.pl	/^sub parse_email {$/;"	s
 parse_params	src/transports/transport-usb.c	/^static void parse_params(struct usb_dev_info *inf)$/;"	f	file:
@@ -1425,12 +1489,16 @@ qentry	include/aura/aura.h	/^	struct list_head	qentry;$/;"	m	struct:aura_buffer	
 qnxnto	build/CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c	/^char const* qnxnto = "INFO" ":" "qnxnto[]";$/;"	v
 qnxnto	build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp	/^char const* qnxnto = "INFO" ":" "qnxnto[]";$/;"	v
 queue_packet	src/tests/broken/packetizer8-simple.c	/^void queue_packet(struct aura_packetizer *pkt, char *buf, int offset, uint32_t value)$/;"	f
+queue_packet	src/tests/dummy/packetizer8-simple.c	/^void queue_packet(struct aura_packetizer *pkt, char *buf, int offset, uint32_t value)$/;"	f
 randstring	src/transports/transport-bench.c	/^static char *randstring(size_t length)$/;"	f	file:
 raw_line	scripts/checkpatch.pl	/^sub raw_line {$/;"	s
 reading	src/transports/transport-nmc.c	/^	struct aura_buffer *		reading;$/;"	m	struct:nmc_private	typeref:struct:nmc_private::aura_buffer	file:
 recvarg	include/aura/packetizer.h	/^	void *			recvarg;$/;"	m	struct:aura_packetizer
+recvarg	my_paketizer/packetizer_serial.h	/^	void *			recvarg;$/;"	m	struct:aura_packetizer
 recvcb	include/aura/packetizer.h	/^	void			(*recvcb)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer
+recvcb	my_paketizer/packetizer_serial.h	/^	void			(*recvcb)(struct aura_buffer *buf, void *arg);$/;"	m	struct:aura_packetizer
 recvcb	src/tests/broken/packetizer8-simple.c	/^void recvcb(struct aura_buffer *buf, void *arg)$/;"	f
+recvcb	src/tests/dummy/packetizer8-simple.c	/^void recvcb(struct aura_buffer *buf, void *arg)$/;"	f
 refs	src/lua/bindings.c	/^	uint32_t		refs;$/;"	m	struct:laura_node	file:
 reg_seg_handler	src/core/panic.c	/^void __attribute__((constructor(101))) reg_seg_handler()$/;"	f
 registry	include/aura/aura.h	/^	struct list_head		registry;$/;"	m	struct:aura_transport	typeref:struct:aura_transport::list_head
@@ -1473,6 +1541,7 @@ serialdata	src/transports/transport-serial.c	/^struct serialdata {$/;"	s	file:
 serpacket	src/transports/transport-serial.c	/^struct __attribute__((packed)) serpacket  {$/;"	s	file:
 serpacket_data	src/transports/transport-serial.c	/^struct __attribute__((packed)) serpacket_data {$/;"	s	file:
 serpacket_type	src/transports/transport-serial.c	/^enum serpacket_type {$/;"	g	file:
+server	src/transports/transport-uart.c	/^	struct sockaddr_in server;$/;"	m	struct:uart_dev_info	typeref:struct:uart_dev_info::sockaddr_in	file:
 servo_mode	pw-ctl-serv.lua	/^function servo_mode(pin, on)$/;"	f
 setApi	doc-index/index.html	/^        function setApi(api) {$/;"	f
 setVersion	doc-index/index.html	/^        function setVersion(ver) {$/;"	f
@@ -1497,9 +1566,12 @@ slogmut	src/core/slog.c	/^static pthread_mutex_t slogmut = PTHREAD_MUTEX_INITIAL
 slogv	src/core/slog.c	/^void slogv(int level, int flag, const char *msg, va_list args)$/;"	f
 split	lua-guess-lib-install-path.lua	/^function split(inputstr, sep)$/;"	f
 start	include/aura/packetizer.h	/^	uint8_t start;$/;"	m	struct:aura_packet8
+start	include/aura/packetizer_serial.h	/^	uint8_t start;$/;"	m	struct:aura_packet10
+start	my_paketizer/packetizer_serial.h	/^	uint8_t start;$/;"	m	struct:aura_packet8
 start	src/transports/transport-serial.c	/^	uint8_t start;$/;"	m	struct:serpacket	file:
 start_event_sent	include/aura/aura.h	/^	bool				start_event_sent;$/;"	m	struct:aura_node
-state	include/aura/packetizer.h	/^	int			state;$/;"	m	struct:aura_packetizer
+state	include/aura/packetizer.h	/^	int 			state;$/;"	m	struct:aura_packetizer
+state	my_paketizer/packetizer_serial.h	/^	int 			state;$/;"	m	struct:aura_packetizer
 state	src/transports/transport-nmc.c	/^	uint32_t	state;$/;"	m	struct:nmc_aura_syncbuffer	file:
 state	src/transports/transport-susb.c	/^	int				state;$/;"	m	struct:usb_dev_info	file:
 state	src/transports/transport-usb.c	/^	int				state;$/;"	m	struct:usb_dev_info	file:
@@ -1572,7 +1644,6 @@ timer	src/transports/transport-usb.c	/^	struct aura_timer *timer;$/;"	m	struct:u
 timer_cb_fn	src/tests/dummy/timer-basic.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *timer, void *arg)$/;"	f	file:
 timer_cb_fn	src/tests/uart/timer-basic.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *timer, void *arg)$/;"	f	file:
 timer_cb_fn	src/transports/transport-dummy.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)$/;"	f	file:
-timer_cb_fn	src/transports/transport-uart.c	/^static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)$/;"	f	file:
 timer_create	include/aura/eventloop.h	/^        void (*timer_create)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
 timer_destroy	include/aura/eventloop.h	/^        void (*timer_destroy)(struct aura_eventloop *loop, struct aura_timer *tm);$/;"	m	struct:aura_eventloop_module
 timer_dispatch_fn	src/eventloop/libevent.c	/^static void timer_dispatch_fn(int fd, short events, void *arg)$/;"	f	file:
@@ -1604,6 +1675,7 @@ uart	src/transports/transport-uart.c	/^static struct aura_transport uart = {$/;"
 uart_buffer_get	src/transports/transport-uart.c	/^static struct aura_buffer *uart_buffer_get(struct aura_buffer *buf)$/;"	f	file:
 uart_buffer_put	src/transports/transport-uart.c	/^static void uart_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)$/;"	f	file:
 uart_close	src/transports/transport-uart.c	/^static void uart_close(struct aura_node *node)$/;"	f	file:
+uart_dev_info	src/transports/transport-uart.c	/^struct uart_dev_info {$/;"	s	file:
 uart_handle_event	src/transports/transport-uart.c	/^static void uart_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)$/;"	f	file:
 uart_open	src/transports/transport-uart.c	/^static int uart_open(struct aura_node *node, const char *opts)$/;"	f	file:
 uart_populate_etable	src/transports/transport-uart.c	/^static void uart_populate_etable(struct aura_node *node)$/;"	f	file:

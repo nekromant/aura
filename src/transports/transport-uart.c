@@ -2,23 +2,16 @@
 #include <aura/private.h>
 #include <aura/packetizer.h>
 #include <aura/timer.h>
+#include<sys/socket.h> 
+#include<arpa/inet.h> 
+ 
 
 #define CB_ARG (void *) 0xdeadf00d
 
-static void timer_cb_fn(struct aura_node *node, struct aura_timer *tm, void *arg)
-{
-	if (arg != CB_ARG)
-		BUG(NULL, "Unexpected CB arg: %x %x", arg, CB_ARG);
-
-	struct aura_object *o = aura_etable_find(node->tbl, "ping");
-	if (!o)
-		return;
-	struct aura_buffer *buf = aura_buffer_request(node, 32);
-	memset(buf->data, 12, buf->size);
-	buf->object = o;
-	if (buf->object)
-		aura_node_write(node, buf);
-}
+struct uart_dev_info {
+	int descr;
+	struct sockaddr_in server;
+};	
 
 static void uart_populate_etable(struct aura_node *node)
 {
@@ -43,7 +36,6 @@ static void uart_populate_etable(struct aura_node *node)
 	aura_etable_activate(etbl);
 }
 
-
 static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *arg)
 {
 	if (arg != CB_ARG)
@@ -54,23 +46,45 @@ static void online_cb_fn(struct aura_node *node,  struct aura_timer *tm, void *a
 
 static int uart_open(struct aura_node *node, const char *opts)
 {
+	struct uart_dev_info *inf = calloc(1, sizeof(*inf));
+	if (!inf)
+		return -ENOMEM;
+
 	slog(1, SLOG_INFO, "Opening uart transport");
-	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, CB_ARG);
+
+	inf->descr = socket(AF_INET , SOCK_STREAM , 0);
+	if (inf->descr == -1)
+	{
+		slog(1, SLOG_ERROR, "Could not create socket");
+	}
+       	slog(3, SLOG_INFO, "Socket created");
+     
+    	inf->server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    	inf->server.sin_family = AF_INET;
+    	inf->server.sin_port = htons( 8888 );
+ 
+    	if (connect(inf->descr , (struct sockaddr *)&inf->server , sizeof(inf->server)) < 0)
+    	{
+        	slog(1, SLOG_ERROR, "connect failed. Error");
+        	return 1;
+   	}
+     
+    	slog(3, SLOG_INFO, "Connected");
+
+	aura_set_transportdata(node, inf);
 	struct aura_timer *online = aura_timer_create(node, online_cb_fn, CB_ARG);
 	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-	aura_timer_start(tm, AURA_TIMER_PERIODIC, &tv);
 	tv.tv_sec = 0;
 	tv.tv_usec = 1;
 	aura_timer_start(online, AURA_TIMER_FREE, &tv);
+
 	return 0;
 }
 
-
-
 static void uart_close(struct aura_node *node)
 {
+	struct uart_dev_info *inf = aura_get_transportdata(node);
+	close(inf->descr);
 	slog(1, SLOG_INFO, "Closing uart transport");
 }
 
@@ -84,22 +98,33 @@ static void uart_handle_event(struct aura_node *node, enum node_event evt, const
 			break;
 
 		if (buf->object != NULL)
-			printf("s1='%s'\n", buf->object->name);
+			printf("s1='%s'\n", buf->data);
 
 		aura_node_write(node, buf);
 	}
 }
 
-static void uart_buffer_put(struct aura_buffer *dst, struct aura_buffer *buf)
+static void uart_buffer_put(struct aura_node *node, struct aura_buffer *dst, struct aura_buffer *buf)
 {
+	struct uart_dev_info *inf = aura_get_transportdata(node);
+
 	slog(0, SLOG_DEBUG, "uart: serializing buf 0x%x", buf);
-	uint64_t ptr = (uintptr_t)buf;
-	aura_buffer_put_u64(dst, ptr);
+
+        if (send(inf->descr, buf->data, strlen(buf->data) , 0) < 0)
+        {
+            slog(1, SLOG_ERROR, "Send failed");
+        }
 }
 
-static struct aura_buffer *uart_buffer_get(struct aura_buffer *buf)
-{
-	struct aura_buffer *ret = (struct aura_buffer *)(uintptr_t)aura_buffer_get_u64(buf);
+static struct aura_buffer *uart_buffer_get(struct aura_node *node, struct aura_buffer *buf)
+{ 
+	struct uart_dev_info *inf = aura_get_transportdata(node);
+	struct aura_buffer *ret = buf;
+
+	if (recv(inf->descr, ret->data, 2000, 0) < 0)
+        {
+            slog(1, SLOG_ERROR, "Recv failed");
+        }
 
 	slog(0, SLOG_DEBUG, "uart: deserializing buf 0x%x", ret);
 	return ret;
@@ -109,7 +134,7 @@ static struct aura_transport uart = {
 	.name			  = "uart",
 	.open			  = uart_open,
 	.close			  = uart_close,
-	.handle_event	  = uart_handle_event,
+	.handle_event	 	  = uart_handle_event,
 	.buffer_overhead  = sizeof(struct aura_packet8),
 	.buffer_offset	  = sizeof(struct aura_packet8),
 	.buffer_get		  = uart_buffer_get,
