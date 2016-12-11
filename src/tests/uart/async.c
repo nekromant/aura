@@ -39,7 +39,7 @@ int main() {
 	if (ret !=0)
 		return ret;
 
-	ret = aura_start_call(n, "echo_u16_", calldonecb, (void *) ARG, 0x0102);
+	ret = aura_start_call(n, "echo_u16", calldonecb, (void *) ARG, 0x0102);
 	printf("call started with ret %d\n", ret);
 	if (ret !=0)
 		return ret;

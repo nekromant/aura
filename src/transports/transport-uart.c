@@ -50,8 +50,10 @@ static int uart_open(struct aura_node *node, const char *opts)
 	if (!inf)
 		return -ENOMEM;
 
-	slog(1, SLOG_INFO, "Opening uart transport");
 
+	slog(1, SLOG_INFO, "Opening uart transport");
+     
+	//Create socket
 	inf->descr = socket(AF_INET , SOCK_STREAM , 0);
 	if (inf->descr == -1)
 	{
@@ -63,6 +65,7 @@ static int uart_open(struct aura_node *node, const char *opts)
     	inf->server.sin_family = AF_INET;
     	inf->server.sin_port = htons( 8888 );
  
+    	//Connect to remote server
     	if (connect(inf->descr , (struct sockaddr *)&inf->server , sizeof(inf->server)) < 0)
     	{
         	slog(1, SLOG_ERROR, "connect failed. Error");
@@ -91,11 +94,27 @@ static void uart_close(struct aura_node *node)
 static void uart_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
 	struct aura_buffer *buf;
+	struct uart_dev_info *inf = aura_get_transportdata(node);
+	char str[2000] = "";
+
 
 	while (1) {
 		buf = aura_node_read(node);
+	
 		if (!buf)
 			break;
+
+		slog(0, SLOG_DEBUG, "uart: serializing buf 0x%x", strlen(buf->object->name));
+        	if (send(inf->descr, buf->object->name, strlen(buf->object->name) , 0) < 0)
+        	{
+            		slog(1, SLOG_ERROR, "Send failed");
+        	}
+	
+		if(recv(inf->descr, str, 2000 , 0) < 0)
+		{
+			slog(1, SLOG_ERROR, "read failed");
+		}
+		slog(1, SLOG_INFO, str);
 
 		if (buf->object != NULL)
 			printf("s1='%s'\n", buf->data);
