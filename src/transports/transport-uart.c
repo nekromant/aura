@@ -54,7 +54,7 @@ static int uart_open(struct aura_node *node, const char *opts)
 	slog(1, SLOG_INFO, "Opening uart transport");
      
 	//Create socket
-	inf->descr = socket(AF_INET , SOCK_STREAM , 0);
+	inf->descr = socket(AF_INET , SOCK_STREAM, 0);
 	if (inf->descr == -1)
 	{
 		slog(1, SLOG_ERROR, "Could not create socket");
@@ -104,49 +104,30 @@ static void uart_handle_event(struct aura_node *node, enum node_event evt, const
 		if (!buf)
 			break;
 
-		slog(0, SLOG_DEBUG, "uart: serializing buf 0x%x", strlen(buf->object->name));
-        	if (send(inf->descr, buf->object->name, strlen(buf->object->name) , 0) < 0)
+		slog(0, SLOG_DEBUG, "uart: serializing buf data %x len 0x%x", buf->data, aura_buffer_get_length(buf));
+
+        	if (send(inf->descr, buf->data, aura_buffer_get_length(buf), MSG_DONTWAIT) < 0)
         	{
             		slog(1, SLOG_ERROR, "Send failed");
         	}
-	
-		if(recv(inf->descr, str, 2000 , 0) < 0)
+
+	        slog(0, SLOG_DEBUG, "Send done \n");
+		
+		int ret = read(inf->descr, str, 2);
+		slog(1, SLOG_INFO, "read %d bytes", ret);
+
+		if(recv(inf->descr, str, 2 , MSG_DONTWAIT) < 0)
 		{
 			slog(1, SLOG_ERROR, "read failed");
 		}
+
 		slog(1, SLOG_INFO, str);
 
 		if (buf->object != NULL)
-			printf("s1='%s'\n", buf->data);
+			printf("s1='%d'\n", (uint16_t) &buf->data[0]);
 
 		aura_node_write(node, buf);
 	}
-}
-
-static void uart_buffer_put(struct aura_node *node, struct aura_buffer *dst, struct aura_buffer *buf)
-{
-	struct uart_dev_info *inf = aura_get_transportdata(node);
-
-	slog(0, SLOG_DEBUG, "uart: serializing buf 0x%x", buf);
-
-        if (send(inf->descr, buf->data, strlen(buf->data) , 0) < 0)
-        {
-            slog(1, SLOG_ERROR, "Send failed");
-        }
-}
-
-static struct aura_buffer *uart_buffer_get(struct aura_node *node, struct aura_buffer *buf)
-{ 
-	struct uart_dev_info *inf = aura_get_transportdata(node);
-	struct aura_buffer *ret = buf;
-
-	if (recv(inf->descr, ret->data, 2000, 0) < 0)
-        {
-            slog(1, SLOG_ERROR, "Recv failed");
-        }
-
-	slog(0, SLOG_DEBUG, "uart: deserializing buf 0x%x", ret);
-	return ret;
 }
 
 static struct aura_transport uart = {
@@ -156,7 +137,5 @@ static struct aura_transport uart = {
 	.handle_event	 	  = uart_handle_event,
 	.buffer_overhead  = sizeof(struct aura_packet8),
 	.buffer_offset	  = sizeof(struct aura_packet8),
-	.buffer_get		  = uart_buffer_get,
-	.buffer_put		  = uart_buffer_put,
 };
 AURA_TRANSPORT(uart);
