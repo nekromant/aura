@@ -94,7 +94,7 @@ enum usb_requests {
 static void usb_panic_and_reset_state(struct aura_node *node)
 {
 	struct usb_dev_info *inf = aura_get_transportdata(node);
-
+	slog(4, SLOG_DEBUG, "usb: transport failure detected");
 	slog(4, SLOG_DEBUG, "usb: pending transfers: %s %s",
 	     inf->ibusy ? "interrupt " : "",
 	     inf->cbusy ? "control" : "");
@@ -161,10 +161,12 @@ static int check_interrupt(struct libusb_transfer *transfer)
 	inf->ibusy = false;
 
 	if (failing(inf) || (transfer->status != LIBUSB_TRANSFER_COMPLETED)) {
-		usb_panic_and_reset_state(node);
-		ret = -EIO;
+		slog(1, SLOG_ERROR, "Interrupt transfer failed: %s",
+			libusb_strerror(transfer->status));
+		//usb_panic_and_reset_state(node);
+		//ret = -EIO;
 	}
-	return ret;
+	return 0;
 }
 
 static int check_control(struct libusb_transfer *transfer)
@@ -230,7 +232,7 @@ static void cb_parse_object(struct libusb_transfer *transfer)
 
 	name = (char *)libusb_control_transfer_get_data(transfer);
 
-	#if 0
+	#if 1
 	 aura_hexdump("info", name, transfer->actual_length);
 	#endif
 
