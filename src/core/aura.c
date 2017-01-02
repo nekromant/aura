@@ -146,6 +146,7 @@ struct aura_node *aura_open(const char *name, const char *opts)
 	INIT_LIST_HEAD(&node->event_buffers);
 	INIT_LIST_HEAD(&node->buffer_pool);
 	INIT_LIST_HEAD(&node->timer_list);
+	INIT_LIST_HEAD(&node->fd_list);
 
 	node->gc_threshold = 10; /* This should be more than enough */
 
@@ -248,10 +249,6 @@ void aura_close(struct aura_node *node)
 		/* Nuke it ! */
 		aura_etable_destroy(node->tbl);
 	}
-
-	/* Free file descriptors */
-	if (node->fds)
-		free(node->fds);
 
 	free(node);
 	slog(6, SLOG_LIVE, "Transport closed");
@@ -390,15 +387,13 @@ void aura_fd_changed_cb(struct aura_node *node,
 			void (*cb)(const struct aura_pollfds *fd, enum aura_fd_action act, void *arg),
 			void *arg)
 {
-	const struct aura_pollfds *fds;
-	int count = aura_get_pollfds(node, &fds);
-
 	node->fd_changed_arg = arg;
 	node->fd_changed_cb = cb;
 	if (node->fd_changed_cb) {
-		int i;
-		for (i = 0; i < count; i++)
-			node->fd_changed_cb(&fds[i], AURA_FD_ADDED, node->fd_changed_arg);
+			const struct aura_pollfds *pos;
+			list_for_each_entry(pos, &node->fd_list, qentry) {
+				node->fd_changed_cb(pos, AURA_FD_ADDED, node->fd_changed_arg);
+			}
 	}
 }
 
@@ -1028,4 +1023,85 @@ const char *aura_node_call_strerror(int errcode)
 		default:
 			return "Unknown error";
 	}
+}
+
+
+/**
+ * Get a set of descriptors to poll events for this node.
+ * The memory for this struct is allocted on heap via malloc and must be freed
+ * by the caller (unless you want leaks)
+ *
+ * @param node
+ * @param fds
+ * @return
+ */
+int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
+{
+	if (!node->fd_count)
+		return 0;
+	struct aura_pollfds *ret = malloc(sizeof(*ret) * node->fd_count);
+	if (!ret)
+		BUG(node, "malloc() failed!\n");
+	struct aura_pollfds *pos;
+	int i=0;
+
+	list_for_each_entry(pos, &node->fd_list, qentry)
+		ret[i++]=*pos;
+
+	*fds = ret;
+	return node->fd_count;
+}
+
+/**
+ * Add a file descriptor to be polled by the event system.
+ * Events are a bitmask from poll.h
+ *
+ * @param node
+ * @param fd
+ * @param events
+ */
+struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
+{
+	struct aura_pollfds *ap = malloc(sizeof(*ap));
+	if (!ap)
+		BUG(node, "malloc() failed\n");
+
+	ap->fd = fd;
+	ap->events = events;
+	ap->node = node;
+	node->fd_count++;
+
+	list_add_tail(&ap->qentry, &node->fd_list);
+
+	if (node->fd_changed_cb)
+		node->fd_changed_cb(ap, AURA_FD_ADDED, node->fd_changed_arg);
+	return ap;
+}
+
+/**
+ * Remove a descriptor from the list of the descriptors to be polled.
+ *
+ * @param node
+ * @param fd
+ */
+void aura_del_pollfds(struct aura_node *node, int fd)
+{
+	struct aura_pollfds *pos;
+	struct aura_pollfds *ap = NULL;
+	list_for_each_entry(pos, &node->fd_list, qentry) {
+		if (pos->fd == fd) {
+			ap = pos;
+			break;
+		}
+	}
+
+	if (!ap)
+		BUG(node, "Attempted to remove non-existing descriptor");
+
+
+	if (node->fd_changed_cb)
+		node->fd_changed_cb(ap, AURA_FD_REMOVED, node->fd_changed_arg);
+	list_del(&ap->qentry);
+	free(ap);
+	node->fd_count--;
 }

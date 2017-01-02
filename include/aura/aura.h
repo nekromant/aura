@@ -48,6 +48,7 @@ struct aura_pollfds {
 	int			fd;
 	uint32_t		events;
 	void *			eventsysdata; /* Private eventsystem data */
+	struct list_head qentry;
 };
 
 struct aura_object;
@@ -98,9 +99,8 @@ struct aura_node {
 
 
 	/* Event system and polling */
-	int				numfds;         /* Currently available space for descriptors */
-	int				nextfd;         /* Next descriptor to add */
-	struct aura_pollfds *		fds;            /* descriptor and event array */
+	struct list_head		fd_list;     /* list of descriptors owned by this node */
+	int					fd_count;         /* Total count of descriptors this node owns */
 
 	struct aura_eventloop *		loop;           /* eventloop structure */
 	int				evtloop_is_autocreated;

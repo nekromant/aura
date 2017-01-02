@@ -63,7 +63,6 @@ void aura_eventloop_add(struct aura_eventloop *loop, struct aura_node *node)
 void aura_eventloop_del(struct aura_node *node)
 {
 	const struct aura_pollfds *fds;
-	int i, count;
 	struct aura_eventloop *loop = aura_node_eventloop_get(node);
 	struct aura_timer *pos;
 
@@ -85,9 +84,9 @@ void aura_eventloop_del(struct aura_node *node)
 	aura_node_eventloop_set(node, NULL);
 
 	/* Remove all descriptors from epoll, but keep 'em in the node */
-	count = aura_get_pollfds(node, &fds);
-	for (i = 0; i < count; i++)
-		loop->module->fd_action(loop, &fds[i], AURA_FD_REMOVED);
+    list_for_each_entry(fds, &node->fd_list, qentry) {
+		loop->module->fd_action(loop, fds, AURA_FD_REMOVED);
+	}
 
 	/* Remove our fd_changed callback */
 	aura_fd_changed_cb(node, NULL, NULL);
