@@ -56,6 +56,15 @@ static void __attribute__((constructor (102))) init_factory() {
 			aura_eventloop_module_select(evtloop);
 		else
 			aura_eventloop_module_select("libevent");
+
+		/* If for some reason we couldn't select libevent, pick the first one
+		 * that can be used.
+		 */
+	    if (!current_loop_module && !list_empty(&loops))
+			current_loop_module = list_entry(loops.next, struct aura_eventloop_module, linkage);
+
+		/* If we still have no eventloop module, we're screwed */
+
 		if (!current_loop_module)
 			BUG(NULL, "Failed to select default eventloop module, check env variable AURA_USE_EVENTLOOP (%s)", evtloop);
 }
