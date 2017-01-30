@@ -44,15 +44,8 @@ static void libevent_fd_action(
 	struct aura_node *node = ap->node;
 	struct event_base *ebase = aura_eventloop_moduledata_get(loop);
 
-	ap->magic = 0xdeadbeaf;
-	if (ap->eventsysdata) {
-		/* TODO: Error checking */
-		event_del(ap->eventsysdata);
-		event_free(ap->eventsysdata);
-		ap->eventsysdata = NULL;
-	}
-
 	if (action == AURA_FD_ADDED) {
+		ap->magic = 0xdeadbeaf;
 		int ret;
 		ap->eventsysdata = event_new(ebase, ap->fd,
 					     ap->events | EV_PERSIST,
@@ -62,6 +55,16 @@ static void libevent_fd_action(
 		ret = event_add(ap->eventsysdata, NULL);
 		if (0 != ret)
 			BUG(NULL, "evtsys-libevent: Failed to add event to base");
+		slog(4, SLOG_DEBUG, "evtsys-libevent: Created event: %x", ap->eventsysdata);
+	} else if (action == AURA_FD_REMOVED) {
+        slog(4, SLOG_DEBUG, "evtsys-libevent: Removing event: %x", ap->eventsysdata);
+		/* TODO: Error checking */
+		event_del(ap->eventsysdata);
+		event_free(ap->eventsysdata);
+		ap->eventsysdata = NULL;
+		ap->magic = 0;
+	} else {
+		BUG(NULL, "Internal bug: Unknown descriptor action");
 	}
 }
 
@@ -107,7 +110,7 @@ static void timer_dispatch_fn(int fd, short events, void *arg)
 	struct aura_timer *tm = arg;
 
 	aura_timer_dispatch(tm);
-	
+
 }
 
 static void libevent_timer_start(struct aura_eventloop *loop, struct aura_timer *tm)
