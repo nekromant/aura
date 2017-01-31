@@ -27,7 +27,6 @@ struct aura_timer *aura_timer_create(struct aura_node *node, aura_timer_cb_fn ti
 	loop->module->timer_create(loop, tm);
 	aura_timer_update(tm, timer_cb_fn, arg);
 	list_add_tail(&tm->entry, &node->timer_list);
-	slog(0, SLOG_DEBUG, "Create %x", tm);
 	return tm;
 }
 
