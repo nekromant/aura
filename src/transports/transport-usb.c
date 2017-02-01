@@ -359,7 +359,6 @@ static void parse_params(struct usb_dev_info *inf)
 static void device_periodic_poll(struct aura_node *node, struct aura_timer *tm, void *arg)
 {
 	struct usb_dev_info *inf = arg;
-	struct aura_buffer *buf;
 
 	if (inf->state != AUSB_DEVICE_OPERATIONAL) {
 		slog(0, SLOG_WARN, "Timer event arrived in invalid state");
@@ -519,7 +518,7 @@ requeue:
 	inf->current_buffer = NULL;
 }
 
-static void submit_call_write_control(
+static void submit_call_write(
 	struct aura_node *	node,
 	struct aura_buffer *	buf)
 {
@@ -541,30 +540,8 @@ static void submit_call_write_control(
 }
 
 
-static void submit_call_write_bulk(struct aura_node *	node,
-				   struct aura_buffer * buf,
-				   int			epnum)
-{
-	BUG(node, "RPC Over bulk not yet implemented");
-}
-
-static void submit_call_write(struct aura_node *node, struct aura_buffer *buf)
-{
-	/* Do we submit using bulk or control ? */
-	struct usb_dev_info *inf = aura_get_transportdata(node);
-	int epnum = inf->hwinfo.host_to_dev_epnum;
-
-	if (epnum)
-		submit_call_write_bulk(node, buf, epnum);
-	else
-		submit_call_write_control(node, buf);
-}
-
-
-
 static void usb_handle_event(struct aura_node *node, enum node_event evt, const struct aura_pollfds *fd)
 {
-	struct aura_buffer *buf;
 	struct usb_dev_info *inf = aura_get_transportdata(node);
 
 	ncusb_handle_events_nonblock_once(node, inf->ctx, inf->timer);
