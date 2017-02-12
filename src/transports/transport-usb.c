@@ -438,13 +438,20 @@ static void cb_event_readout_done(struct libusb_transfer *transfer)
 		goto panic;
 	}
 
-	if ((transfer->actual_length - LIBUSB_CONTROL_SETUP_SIZE) <
+	/* 
+	ncusb_print_libusb_transfer(transfer);
+	*/
+
+	if ((transfer->actual_length) <
 	    (sizeof(struct usb_event_packet) + o->retlen)) {
 		slog(0, SLOG_ERROR, "usb: short read for evt %d: %d bytes expected %d got",
 		     evt->id, o->retlen + sizeof(struct usb_event_packet),
 		     transfer->actual_length);
 		goto panic;
 	}
+
+	//FixMe: ...
+    memmove(evt, evt->data, transfer->actual_length - sizeof(uint16_t));
 
 	buf->object = o;
 	/* Position the buffer at the start of the responses */
