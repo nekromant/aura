@@ -576,8 +576,13 @@ static int l_node_index(lua_State *L)
 	struct laura_node *lnode = lua_touserdata(L, 1);
 	const char *name = lua_tostring(L, -1);
 	struct aura_object *o;
+	if (!name || !lnode) {
+		lua_pushnil(L);
+		return 1;
+	}
 
 	TRACE();
+
 	/* FixMe: Can this get gc-d by the time we actually use it? */
 	lnode->current_call = name;
 
@@ -586,9 +591,10 @@ static int l_node_index(lua_State *L)
 				  lnode->current_call);
 
 	o = aura_etable_find(lnode->node->tbl, lnode->current_call);
-	if (!o)
-		return luaL_error(L, "Internal aura bug: failed to lookup object: %s",
-				  lnode->current_call);
+	if (!o) {
+		lua_pushnil(L);
+		return 1;
+	}
 
 	if (strcmp("__", name) == 0)
 		lua_pushcfunction(L, laura_do_async_call);
@@ -596,6 +602,7 @@ static int l_node_index(lua_State *L)
 		lua_pushcfunction(L, laura_do_sync_call);
 	else
 		lua_pushnil(L);
+
 	return 1;
 }
 
