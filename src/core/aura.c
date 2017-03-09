@@ -1062,7 +1062,7 @@ int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds)
  */
 struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t events)
 {
-	struct aura_pollfds *ap = malloc(sizeof(*ap));
+	struct aura_pollfds *ap = calloc(1, sizeof(*ap));
 	if (!ap)
 		BUG(node, "malloc() failed\n");
 
