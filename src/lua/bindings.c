@@ -146,6 +146,12 @@ static void aura_do_check_args(lua_State *L, const char *func, int need)
 			   func, need, got);
 }
 
+static void lua_totimeout(lua_State *L, int n, struct timeval *tv)
+{
+	double timeout = lua_tonumber(L, n);
+	tv->tv_sec = floor(timeout);
+	tv->tv_usec = (timeout - tv->tv_sec) * 1000000;
+}
 
 static void lua_setfield_string(lua_State *L, const char *key, const char *value)
 {
@@ -796,10 +802,20 @@ static int l_wait_status(lua_State *L)
 	struct laura_node *lnode;
 
 	TRACE();
+    /* Mandatory arguments: node, status */
+	int status;
 	aura_check_args(L, 2);
 	lnode = lua_fetch_node(L, 1);
-	aura_wait_status(lnode->node, lua_tonumber(L, 2));
-	return 0;
+	/* optional arg - timeout */
+	if (lua_isnumber(L, 3)) {
+		struct timeval tv;
+		lua_totimeout(L, 3, &tv);
+		status = aura_wait_status_timeout(lnode->node, lua_tonumber(L, 2), &tv);
+	} else {
+		status = aura_wait_status(lnode->node, lua_tonumber(L, 2));
+	}
+	lua_pushnumber(L, status);
+	return 1;
 }
 
 static void event_cb(struct aura_node *node, struct aura_buffer *buf, void *arg)
@@ -938,7 +954,7 @@ static int l_eventloop_loopexit(lua_State *L)
 {
 	TRACE();
 	struct laura_eventloop *lloop;
-	double timeout;
+
 	aura_check_args(L, 1);
 	struct timeval tv;
 
@@ -947,10 +963,8 @@ static int l_eventloop_loopexit(lua_State *L)
 
 	lloop = lua_touserdata(L, 1);
 
-	if (lua_gettop(L) == 2) {
-		timeout = lua_tonumber(L, 2);
-		tv.tv_sec = floor(timeout);
-		tv.tv_usec = (timeout - tv.tv_sec) * 1000000;
+	if (lua_isnumber(L,2)) {
+		lua_totimeout(L, 2, &tv);
 	} else {
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
