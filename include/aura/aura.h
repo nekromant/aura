@@ -73,7 +73,6 @@ struct aura_node {
 	bool				need_endian_swap;
 	bool				is_opening;
 	bool				start_event_sent;
-	bool				waiting_for_status;
 	struct aura_buffer *		sync_ret_buf;
 	int				sync_call_result;
 

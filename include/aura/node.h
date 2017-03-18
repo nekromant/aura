@@ -51,7 +51,8 @@ struct aura_pollfds *aura_add_pollfds(struct aura_node *node, int fd, uint32_t e
 void aura_del_pollfds(struct aura_node *node, int fd);
 int aura_get_pollfds(struct aura_node *node, const struct aura_pollfds **fds);
 
-void aura_wait_status(struct aura_node *node, int status);
+int aura_wait_status(struct aura_node *node, int status);
+int aura_wait_status_timeout(struct aura_node *node, int status, struct timeval *timeout);
 
 int aura_get_status(struct aura_node *node);
 void *aura_get_userdata(struct aura_node *node);

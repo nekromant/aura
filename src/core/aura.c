@@ -705,20 +705,52 @@ int aura_start_call(
  * @{
  */
 
+static void wait_status_changed_cb(struct aura_node *node, int status, void *arg)
+{
+	int *waitstatus = arg;
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
+	slog(0, SLOG_INFO, "!!!!!");
+	if (status == *waitstatus) {
+		aura_eventloop_loopexit(loop, NULL);
+	}
+}
+/**
+ * Block until node's status becomes the requested or until the timeout expires
+ * if timeout is NULL there's no timeout
+ *
+ *
+ * @param node
+ * @param status
+ * @return node status after waiting is done
+ */
+int aura_wait_status_timeout(struct aura_node *node, int status, struct timeval *timeout)
+{
+	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
+	/* Save current callbacks/args */
+	void *cb = node->status_changed_cb;
+	void *arg = node->status_changed_arg;
+	aura_status_changed_cb(node, wait_status_changed_cb, &status);
+	if (timeout)
+		aura_eventloop_loopexit(loop, timeout);
+	aura_eventloop_dispatch(loop, 0);
+	/* restore user callback, if any */
+	aura_status_changed_cb(node, cb, arg);
+	return aura_get_status(node);
+}
+
 /**
  * Block until node's status becomes one of the requested
  *
  * @param node
  * @param status
+ * @return The new status of aura_node
  */
-void aura_wait_status(struct aura_node *node, int status)
+int aura_wait_status(struct aura_node *node, int status)
 {
-	struct aura_eventloop *loop = aura_node_eventloop_get_autocreate(node);
-	node->waiting_for_status = true;
-	while (node->status != status)
-		aura_eventloop_dispatch(loop, AURA_EVTLOOP_ONCE);
-	node->waiting_for_status = false;
+	return aura_wait_status_timeout(node, status, NULL);
 }
+
+
 
 
 /**

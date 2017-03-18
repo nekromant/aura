@@ -188,7 +188,7 @@ void aura_eventloop_destroy(struct aura_eventloop *loop)
 
 /**
  * Handle events in the specified loop forever or
- * until someone calls aura_eventloop_break()
+ * until someone calls aura_eventloop_loopexit()
  *
  * @param loop
  */
@@ -200,11 +200,6 @@ void aura_eventloop_dispatch(struct aura_eventloop *loop, int flags)
 		if (!node->start_event_sent) {
 			node->start_event_sent = true;
 			aura_node_dispatch_event(node, NODE_EVENT_STARTED, NULL);
-			/* If we're waiting for a specific status - return now!
-				The node may go online handling the 'started' event
-			*/
-			if (node->waiting_for_status)
-				return;
 		}
 	}
 	loop->module->dispatch(loop, flags);
