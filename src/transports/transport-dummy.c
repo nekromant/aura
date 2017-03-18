@@ -57,7 +57,7 @@ static int dummy_open(struct aura_node *node, const char *opts)
 	slog(1, SLOG_INFO, "Opening dummy transport");
     if (opts && strcmp(opts, "offline")==0) {
 		slog(1, SLOG_INFO, "Dummy transport in offline mode, never going online");
-		return;
+		return 0;
 	}
 	struct aura_timer *tm = aura_timer_create(node, timer_cb_fn, CB_ARG);
 	struct aura_timer *online = aura_timer_create(node, online_cb_fn, CB_ARG);
