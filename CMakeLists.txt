@@ -9,7 +9,7 @@ include(AuraTesting)
 project(aura)
 
 #TODO: Set this from git tag
-set(PROJECT_VERSION   0.1.3)
+set(PROJECT_VERSION   0.1.4)
 set(PROJECT_DOC_VERSION   gitmaster)
 set(AURA_API_VERSION  3)
 
@@ -84,6 +84,8 @@ endif()
 aura_add_transport(null       src/transports/transport-null.c)
 aura_add_transport(dummy      src/transports/transport-dummy.c)
 aura_add_transport(sysfs-gpio src/transports/transport-sysfs-gpio.c)
+aura_add_source(src/transports/transport-dlopen.c)
+
 ADD_C_TEST_DIRECTORY(dummy dummy ${AURA_TEST_DUMMY} ${AURA_TEST_LEAKS})
 
 #aura_add_transport(serial transport-serial.c)
@@ -133,6 +135,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION='\"${PROJECT_VERSION}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_VERSION_GIT='\"${PROJECT_VERSION_GIT}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_BUILD_TAG='\"${PROJECT_BUILD_TAG}\"'")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_BUILD_DATE='\"${AURA_BUILD_DATE}\"'")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DCMAKE_INSTALL_PREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
 
 if(AURA_USE_BUFFER_POOL)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DAURA_USE_BUFFER_POOL")
