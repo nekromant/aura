@@ -10,7 +10,7 @@ static void load_plugin(const char *path)
     slog(4, SLOG_DEBUG, "Loading plugin from: %s", path);
     void *ret = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     if (!ret) {
-        slog(0, SLOG_WARN, "Failed to load dynamic transport plugin: %s", path);
+        slog(0, SLOG_WARN, "Failed to load dynamic transport plugin: %s (%s)", path, dlerror());
     }
     /* That's it. Constructors will do their job */
 }
