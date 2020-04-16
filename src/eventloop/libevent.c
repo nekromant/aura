@@ -1,10 +1,10 @@
 #include <stdlib.h>
+#include <event.h>
 #include <aura/aura.h>
 #include <aura/private.h>
 #include <aura/eventloop.h>
 #include <aura/list.h>
 #include <aura/timer.h>
-#include <event.h>
 
 struct aura_libevent_timer {
 	struct aura_timer	timer;
