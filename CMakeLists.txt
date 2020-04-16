@@ -47,6 +47,7 @@ aura_add_source_in_dir(src/core
     eventloop-factory.c timer.c
     retparse.c queue.c
     libevent-helpers.c
+    utils-linux.c
 )
 
 aura_add_source_in_dir(src/allocators/
